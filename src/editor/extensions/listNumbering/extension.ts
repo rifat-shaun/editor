@@ -67,6 +67,22 @@ export const CustomOrderedList = OrderedList.extend({
         renderHTML: (attrs: Record<string, unknown>) =>
           attrs.restart ? { 'data-list-restart': 'true' } : {},
       },
+      // Transient: a definition inferred from PASTED markers, carried on the
+      // node only until `appendTransaction` promotes it into the doc registry
+      // and clears it. Not rendered to HTML (it never needs to round-trip).
+      pastedDefConfig: {
+        default: null as ListDefinition | null,
+        parseHTML: (el: HTMLElement) => {
+          const raw = el.getAttribute('data-list-def-config');
+          if (!raw) return null;
+          try {
+            return JSON.parse(raw) as ListDefinition;
+          } catch {
+            return null;
+          }
+        },
+        renderHTML: () => ({}),
+      },
     };
   },
 
@@ -260,9 +276,48 @@ function collectUsedDefs(state: EditorState): Record<string, ListDefinition> {
   return used;
 }
 
+/**
+ * Promote any `pastedDefConfig` (a definition inferred from pasted markers) into
+ * the doc registry: register it under a content-hash id, stamp that id onto the
+ * pasted list AND its nested ordered lists, and clear the transient attr. This
+ * is how a pasted list keeps its per-level scheme and numbers continuously.
+ */
+function promotePastedDefs(newState: EditorState): Transaction | null {
+  const tops: { pos: number; node: PMNode; def: ListDefinition }[] = [];
+  newState.doc.descendants((node, pos) => {
+    if (node.type.name === 'orderedList' && node.attrs.pastedDefConfig) {
+      tops.push({ pos, node, def: node.attrs.pastedDefConfig as ListDefinition });
+    }
+    return true;
+  });
+  if (!tops.length) return null;
+
+  const tr = newState.tr;
+  const reg: ListDefRegistry = { ...registryFromDoc(newState) };
+  for (const top of tops) {
+    const id = definitionId(top.def);
+    reg[id] = top.def;
+    const from = top.pos;
+    const to = top.pos + top.node.nodeSize;
+    newState.doc.nodesBetween(from, to, (n, p) => {
+      if (n.type.name === 'orderedList') {
+        tr.setNodeMarkup(p, undefined, { ...n.attrs, listDefId: id, pastedDefConfig: null });
+      }
+      return true;
+    });
+  }
+  tr.setDocAttribute('listDefs', reg);
+  return tr;
+}
+
+function registryFromDoc(state: EditorState): ListDefRegistry {
+  return (state.doc.attrs.listDefs as ListDefRegistry) ?? {};
+}
+
 function listNumberingPlugin(): Plugin {
   return new Plugin({
     key: listNumberingKey,
+    appendTransaction: (_trs, _old, newState) => promotePastedDefs(newState),
     state: {
       init: (_, state) => buildDecorations(state.doc),
       apply: (tr, old) => (tr.docChanged ? buildDecorations(tr.doc) : old),

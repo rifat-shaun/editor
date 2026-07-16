@@ -21,6 +21,8 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Fragment, type Node as PMNode, type Schema } from '@tiptap/pm/model';
+import { inferDefinition } from './listNumbering/inference';
+import type { ListDefinition, NumberStyle } from './listNumbering/model';
 
 /* ----------------------------- Word (MSO) ----------------------------- */
 
@@ -132,6 +134,18 @@ export function transformMsoLists(html: string): string {
     }
     const tree = buildListTree(doc, run);
     if (tree) {
+      // Infer the per-level scheme from the markers and carry it on the list so
+      // the engine reproduces it (numbers, letters, romans, separators, nesting).
+      if (tree.tagName === 'OL') {
+        const levelMarkers = new Map<number, string[]>();
+        for (const p of run) {
+          const lvl = msoLevel(p);
+          const { text } = msoMarker(p);
+          if (!levelMarkers.has(lvl)) levelMarkers.set(lvl, []);
+          levelMarkers.get(lvl)!.push(text);
+        }
+        tree.setAttribute('data-list-def-config', JSON.stringify(inferDefinition(levelMarkers)));
+      }
       run[0]!.parentNode!.insertBefore(tree, run[0]!);
       for (const el of run) el.remove();
     }
@@ -140,15 +154,87 @@ export function transformMsoLists(html: string): string {
   return body.innerHTML;
 }
 
+/* --------------------- real <ol> (web / Google Docs) --------------------- */
+
+/** Map an `<ol type>` / CSS `list-style-type` value to our NumberStyle. */
+function styleFromOlHint(type: string | null, listStyleType: string): NumberStyle | null {
+  const v = (type || listStyleType || '').trim().toLowerCase();
+  if (!v) return null;
+  if (v === '1' || v === 'decimal') return 'decimal';
+  if (v === 'decimal-leading-zero') return 'decimalZero';
+  if (v === 'a' || v === 'lower-alpha' || v === 'lower-latin') return 'lowerAlpha';
+  if (v === 'A' || v === 'upper-alpha' || v === 'upper-latin') return 'upperAlpha';
+  if (v === 'i' || v === 'lower-roman') return 'lowerRoman';
+  if (v === 'I' || v === 'upper-roman') return 'upperRoman';
+  // case-sensitive single letters (type="A"/"I") were lowercased above; re-check raw
+  if (type === 'A') return 'upperAlpha';
+  if (type === 'I') return 'upperRoman';
+  return null;
+}
+
+function inlineListStyleType(el: Element): string {
+  const m = /list-style-type\s*:\s*([a-z-]+)/i.exec(el.getAttribute('style') ?? '');
+  return m ? m[1]! : '';
+}
+
+/**
+ * Infer a definition from a real (already-structured) ordered list by reading
+ * each depth's `type` / `list-style-type`. Native ordered lists always use a
+ * dot separator and never composite, so those are fixed. Returns null when no
+ * explicit style hint is present anywhere (leave it as a plain decimal list).
+ */
+function defFromRealOl(topOl: Element): ListDefinition | null {
+  const def: ListDefinition = [];
+  let cur: Element | null = topOl;
+  let sawHint = false;
+  let depth = 0;
+  while (cur && depth < 9) {
+    const style = styleFromOlHint(cur.getAttribute('type'), inlineListStyleType(cur));
+    if (style) sawHint = true;
+    const start = parseInt(cur.getAttribute('start') ?? '', 10);
+    def.push({
+      style: style ?? 'decimal',
+      separator: 'dot',
+      startAt: Number.isFinite(start) && start > 0 ? start : 1,
+      includeParent: false,
+    });
+    cur = cur.querySelector('li > ol');
+    depth += 1;
+  }
+  return sawHint ? def : null;
+}
+
+/** Annotate top-level real `<ol>`s that carry explicit style hints with a def. */
+function annotateRealOrderedLists(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const body = doc.body;
+  const tops = Array.from(body.querySelectorAll('ol')).filter(
+    (ol) => !ol.parentElement?.closest('ol') && !ol.hasAttribute('data-list-def-config'),
+  );
+  if (!tops.length) return html;
+  let changed = false;
+  for (const ol of tops) {
+    const def = defFromRealOl(ol);
+    if (def) {
+      ol.setAttribute('data-list-def-config', JSON.stringify(def));
+      changed = true;
+    }
+  }
+  return changed ? body.innerHTML : html;
+}
+
 /* ----------------------------- plain text ----------------------------- */
 
-const ORDERED_LINE = /^(\s*)([0-9]{1,3}|[a-z]|[ivxlcdm]+)[.)]\s+(.+)$/i;
+// Captures indent, the token, the separator char, and the content.
+const ORDERED_LINE = /^(\s*)([0-9]{1,3}|[a-z]|[ivxlcdm]+)([.)])\s+(.+)$/i;
 const BULLET_LINE = /^(\s*)[-*•·▪◦]\s+(.+)$/;
 
 /**
  * Convert a plain-text block to a flat list node when it clearly looks like one
  * (≥2 lines, and EVERY non-empty line matches the same family). Returns null
- * otherwise, so ordinary text pastes normally.
+ * otherwise, so ordinary text pastes normally. For an ordered list the marker
+ * scheme is inferred and carried on the node as `pastedDefConfig`, so the
+ * engine reproduces it (e.g. `a) b) c)` becomes a lower-alpha / paren list).
  */
 export function buildListFromText(schema: Schema, text: string): PMNode | null {
   const orderedType = schema.nodes.orderedList;
@@ -161,9 +247,13 @@ export function buildListFromText(schema: Schema, text: string): PMNode | null {
   const nonEmpty = lines.filter((l) => l.trim().length > 0);
   if (nonEmpty.length < 2) return null;
 
+  const markers: string[] = [];
   const parsed = nonEmpty.map((l) => {
     const o = ORDERED_LINE.exec(l);
-    if (o) return { ordered: true, content: o[3]!.trim() };
+    if (o) {
+      markers.push(o[2]! + o[3]!); // token + separator, e.g. "a)"
+      return { ordered: true, content: o[4]!.trim() };
+    }
     const b = BULLET_LINE.exec(l);
     if (b) return { ordered: false, content: b[2]!.trim() };
     return null;
@@ -176,7 +266,9 @@ export function buildListFromText(schema: Schema, text: string): PMNode | null {
   const items = parsed.map((p) =>
     itemType.create(null, paraType.create(null, p!.content ? schema.text(p!.content) : undefined)),
   );
-  return (allOrdered ? orderedType : bulletType).create(null, Fragment.fromArray(items));
+  if (allBullet) return bulletType.create(null, Fragment.fromArray(items));
+  const def = inferDefinition(new Map([[1, markers]]));
+  return orderedType.create({ pastedDefConfig: def }, Fragment.fromArray(items));
 }
 
 /* ------------------------------ extension ------------------------------ */
@@ -188,10 +280,11 @@ export const ListPaste = Extension.create({
       new Plugin({
         key: new PluginKey('listPaste'),
         props: {
-          // Word/Outlook/Word-desktop: rebuild real lists from MSO paragraphs.
+          // Word/Outlook: rebuild real lists from MSO paragraphs; then annotate
+          // any real <ol> with an inferred definition so its scheme is kept.
           transformPastedHTML(html) {
             try {
-              return transformMsoLists(html);
+              return annotateRealOrderedLists(transformMsoLists(html));
             } catch {
               return html; // never let a paste fail because of normalization
             }

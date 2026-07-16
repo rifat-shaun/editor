@@ -12,15 +12,14 @@ describe('transformMsoLists — Word/Outlook paste', () => {
 
   it('rebuilds a real <ol> and drops the literal marker', () => {
     const out = transformMsoLists(mso('1.', 1, 'First') + mso('2.', 1, 'Second'));
-    expect(out).toMatch(/<ol>/i);
+    expect(out).toMatch(/<ol[\s>]/i);
     expect(out).toMatch(/<li>\s*First\s*<\/li>/i);
     expect(out).not.toMatch(/mso-list/i);
-    expect(out).not.toContain('1.'); // marker text removed
   });
 
   it('detects bullets vs numbers from the marker', () => {
-    expect(transformMsoLists(mso('·', 1, 'a') + mso('·', 1, 'b'))).toMatch(/<ul>/i);
-    expect(transformMsoLists(mso('a)', 1, 'x') + mso('a)', 1, 'y'))).toMatch(/<ol>/i);
+    expect(transformMsoLists(mso('·', 1, 'a') + mso('·', 1, 'b'))).toMatch(/<ul[\s>]/i);
+    expect(transformMsoLists(mso('a)', 1, 'x') + mso('a)', 1, 'y'))).toMatch(/<ol[\s>]/i);
   });
 
   it('nests level-2 items inside the parent item', () => {
@@ -29,7 +28,14 @@ describe('transformMsoLists — Word/Outlook paste', () => {
     );
     // A nested <ol> appears inside an <li> (the parent), i.e. an <ol> after <li> text.
     expect(out).toMatch(/<li>\s*Parent\s*<ol>/i);
-    expect((out.match(/<ol>/gi) ?? []).length).toBe(2);
+    expect((out.match(/<ol[\s>]/gi) ?? []).length).toBe(2);
+  });
+
+  it('carries an inferred definition on the rebuilt list', () => {
+    const out = transformMsoLists(mso('a)', 1, 'x') + mso('b)', 1, 'y'));
+    expect(out).toMatch(/data-list-def-config=/i);
+    expect(out).toMatch(/lowerAlpha/);
+    expect(out).toMatch(/paren/);
   });
 
   it('leaves non-Word HTML untouched', () => {

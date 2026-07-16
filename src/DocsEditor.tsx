@@ -20,7 +20,7 @@ function isTypingTarget(el: Element | null): boolean {
 }
 
 function DocsEditorShell({ className }: { className?: string }) {
-  const { editor, ai, zoom } = useEditorState();
+  const { editor, ai } = useEditorState();
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -81,15 +81,14 @@ function DocsEditorShell({ className }: { className?: string }) {
         <div ref={scrollerRef} data-docs-scroll className="relative flex-1 overflow-auto docs-scroll">
           {/* w-max + mx-auto centers the page yet still lets the user scroll
               to its left edge when the viewport is narrower than the content
-              (plain flex justify-center would clip the left, unreachable). */}
+              (plain flex justify-center would clip the left, unreachable).
+              The page frame + multi-page breaks are owned by the Pagination
+              extension (it styles the ProseMirror element as `.pgn-paginated`),
+              so there is no wrapper sheet here and zoom is applied by the
+              engine's transform — see context.tsx. */}
           <div className="mx-auto flex w-max gap-4 px-4 py-6 lg:gap-6 lg:px-8 lg:py-10">
-            <div style={{ zoom: zoom / 100 }} className="shrink-0">
-              <div
-                className="w-[816px] rounded-[2px] bg-white p-8 sm:p-16 lg:p-24"
-                style={{ boxShadow: '0 1px 4px rgba(0,0,0,.12)' }}
-              >
-                <EditorContent editor={editor} />
-              </div>
+            <div className="shrink-0">
+              <EditorContent editor={editor} />
             </div>
             <SuggestionColumn scrollerRef={scrollerRef} />
           </div>

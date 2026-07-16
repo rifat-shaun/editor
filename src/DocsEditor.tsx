@@ -68,6 +68,7 @@ function DocsEditorShell({ className }: { className?: string }) {
   return (
     <div
       ref={rootRef}
+      data-docs-editor-root
       className={['flex h-full min-h-0 w-full flex-col bg-white text-ink', className ?? ''].join(
         ' ',
       )}
@@ -75,7 +76,7 @@ function DocsEditorShell({ className }: { className?: string }) {
       <TopBar />
       <FormattingToolbar />
 
-      <div className="relative flex min-h-0 flex-1 overflow-hidden bg-desk">
+      <div data-docs-body className="relative flex min-h-0 flex-1 overflow-hidden bg-desk">
         <OutlinePanel />
 
         <div ref={scrollerRef} data-docs-scroll className="relative flex-1 overflow-auto docs-scroll">

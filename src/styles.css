@@ -320,9 +320,61 @@ body,
     inset 0 -6px 6px -6px rgba(0, 0, 0, 0.18);
 }
 
+/* ------------------------------------------------------------------ *
+ * Print: only the document content should reach paper — not the editor
+ * chrome (top bar, toolbars, panels, rail, status bar, overlays). The
+ * browser re-flows and paginates the content itself (editor-only pagination
+ * diverges from print — a documented limitation), so we hide our on-screen
+ * page furniture and let it flow with real @page margins.
+ * ------------------------------------------------------------------ */
 @media print {
-  .pgn-gap {
-    background: transparent;
-    box-shadow: none;
+  /* Un-clip the ENTIRE ancestor chain from <html> down to the document. Any
+     one of these with a bounded height + overflow would crop the print to the
+     on-screen viewport (the bug: only the visible area printed). Resetting them
+     all to auto-height / visible / block lets the full document flow and the
+     browser paginate it across pages. */
+  html,
+  body,
+  #root,
+  [data-docs-editor-root],
+  [data-docs-body],
+  [data-docs-scroll],
+  [data-docs-scroll] > div {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  [data-docs-scroll],
+  [data-docs-scroll] > div {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Every chrome region carries this class (see components). */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Drop the on-screen page furniture (fill/gap/header/footer bands). */
+  .pgn-break {
+    display: none !important;
+  }
+
+  /* The document itself: strip the on-screen sheet framing and let it flow. */
+  .docs-page-content {
+    transform: none !important;
+    box-shadow: none !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  @page {
+    margin: 1in;
   }
 }

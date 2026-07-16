@@ -27,7 +27,7 @@ export function AIPromptPopover() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center">
+    <div className="print-hide pointer-events-none fixed inset-0 z-50 flex items-start justify-center">
       <div
         ref={ref}
         role="dialog"

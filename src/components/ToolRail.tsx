@@ -65,7 +65,7 @@ export function ToolRail() {
   };
 
   return (
-    <div className="flex shrink-0">
+    <div className="print-hide flex shrink-0">
       {active && (
         <section
           role="region"

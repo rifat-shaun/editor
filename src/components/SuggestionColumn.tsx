@@ -141,7 +141,7 @@ export function SuggestionColumn({ scrollerRef }: { scrollerRef: RefObject<HTMLE
     if (changed) setTick((t) => t + 1);
   }, [positions]);
 
-  if (!editor) return <div ref={columnRef} className="relative w-[280px] shrink-0" />;
+  if (!editor) return <div ref={columnRef} className="print-hide relative w-[280px] shrink-0" />;
 
   const scroller = scrollerRef.current;
   const viewTop = scrollTop - OVERSCAN;
@@ -155,7 +155,7 @@ export function SuggestionColumn({ scrollerRef }: { scrollerRef: RefObject<HTMLE
   const resolved = ai.counts.accepted + ai.counts.rejected;
 
   return (
-    <div ref={columnRef} className="relative w-[280px] shrink-0">
+    <div ref={columnRef} className="print-hide relative w-[280px] shrink-0">
       {/* Reviewing header (sticky within the scroll viewport) */}
       {reviewing && total > 0 && (
         <div className="sticky top-0 z-20 mb-2 rounded-[10px] border border-primary-border bg-white/95 p-2.5 shadow-sm backdrop-blur">

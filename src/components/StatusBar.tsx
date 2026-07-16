@@ -5,7 +5,7 @@ export function StatusBar() {
   const { wordCount, pageCount, zoom, setZoom } = useEditorState();
 
   return (
-    <footer className="flex h-8 shrink-0 items-center justify-between border-t border-border bg-chrome px-3 text-[11px] text-[#7a848d]">
+    <footer className="print-hide flex h-8 shrink-0 items-center justify-between border-t border-border bg-chrome px-3 text-[11px] text-[#7a848d]">
       <span>
         Page 4 of {Math.max(pageCount, 12)} · {wordCount.toLocaleString()} words · English (US)
       </span>

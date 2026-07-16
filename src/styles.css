@@ -243,3 +243,115 @@ body,
 .docs-rise {
   animation: docs-rise 0.18s ease-out;
 }
+
+/* ------------------------------------------------------------------ *
+ * Pagination (Bar A) — page frame + inter-page bands.
+ * Dimensions come from CSS custom properties the plugin sets per-editor.
+ * The paginated element IS the page column (`.docs-page-content.pgn-paginated`).
+ * ------------------------------------------------------------------ */
+.pgn-paginated {
+  box-sizing: border-box;
+  width: var(--pgn-page-width);
+  margin: 0 auto;
+  /* Horizontal margins are page padding; top/bottom margins + header/footer are
+     drawn by the widget "band" decorations so every page is treated uniformly. */
+  padding: 0 var(--pgn-mr) 0 var(--pgn-ml);
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  transform: scale(var(--pgn-zoom, 1));
+  transform-origin: top center;
+}
+
+/* Empty remainder of the ending page's content area (stays within the
+   horizontal margins, so NOT full-bleed). */
+.pgn-fill {
+  width: 100%;
+}
+
+/* Full-bleed strips: negative horizontal margins cancel the page side padding
+   so bands span the whole page width, margins included. */
+.pgn-band {
+  margin-left: calc(-1 * var(--pgn-ml));
+  margin-right: calc(-1 * var(--pgn-mr));
+  box-sizing: border-box;
+}
+
+.pgn-break {
+  user-select: none;
+}
+
+/* Header / footer live inside the top / bottom margin bands. */
+.pgn-hf {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--pgn-ml);
+  background: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: #8a939b;
+  white-space: pre;
+  overflow: hidden;
+}
+.pgn-hf[data-align='left'] {
+  justify-content: flex-start;
+}
+.pgn-hf[data-align='center'] {
+  justify-content: center;
+}
+.pgn-hf[data-align='right'] {
+  justify-content: flex-end;
+}
+.pgn-header {
+  align-items: flex-end;
+  padding-bottom: 10px;
+}
+.pgn-footer {
+  align-items: flex-start;
+  padding-top: 10px;
+}
+
+/* The inter-page gap: desk-coloured strip with a soft shadow on both adjacent
+   page edges to fake per-page elevation within one continuous element. */
+.pgn-gap {
+  height: var(--pgn-gap);
+  background: var(--pgn-desk, #e8ecef);
+  box-shadow:
+    inset 0 6px 6px -6px rgba(0, 0, 0, 0.18),
+    inset 0 -6px 6px -6px rgba(0, 0, 0, 0.18);
+}
+
+/* ------------------------------------------------------------------ *
+ * Print: use a dedicated, ENGINE-MATCHED layout (`.pgn-print-root`, built on
+ * beforeprint — see plugin.ts). Printed pages then match the editor's page
+ * breaks and carry the running header/footer, instead of the browser
+ * re-flowing the content on its own. The whole live editor is hidden; only the
+ * print root reaches paper. The `@page { size … }` rule is injected per-print
+ * so the sheet matches the chosen page format exactly.
+ * ------------------------------------------------------------------ */
+.pgn-print-root {
+  display: none; /* off-screen; only rendered for print */
+}
+
+@media print {
+  /* Hide EVERYTHING in <body> except the print root (which is appended there).
+     Hiding only the editor left its still-100%-tall mount (#root) occupying a
+     blank leading sheet — this covers the mount, menus/portals, etc. generically. */
+  body > *:not(.pgn-print-root) {
+    display: none !important;
+  }
+  .pgn-print-root {
+    display: block !important;
+  }
+  /* One computed page == one physical sheet. NOTE: do NOT use
+     `break-inside: avoid` here — on a full-sheet-height element it makes the
+     browser think the page can't fit and pushes it to the next sheet, leaving
+     a blank leading page. `break-after` alone gives exactly one sheet per page. */
+  .pgn-print-root .print-page {
+    break-after: page;
+    page-break-after: always;
+  }
+  .pgn-print-root .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}

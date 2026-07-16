@@ -44,10 +44,10 @@ export function OutlinePanel() {
       {/* Scrim: on narrow screens the panel overlays the page. */}
       <div
         onClick={toggleOutline}
-        className="absolute inset-0 z-20 bg-black/20 lg:hidden"
+        className="print-hide absolute inset-0 z-20 bg-black/20 lg:hidden"
         aria-hidden="true"
       />
-      <aside className="absolute inset-y-0 left-0 z-30 flex w-56 shrink-0 flex-col border-r border-border bg-panel shadow-xl lg:relative lg:z-auto lg:shadow-none">
+      <aside className="print-hide absolute inset-y-0 left-0 z-30 flex w-56 shrink-0 flex-col border-r border-border bg-panel shadow-xl lg:relative lg:z-auto lg:shadow-none">
         <div className="flex items-center justify-between px-3 pb-1 pt-3">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted">
             Outline

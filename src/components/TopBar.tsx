@@ -86,7 +86,7 @@ export function TopBar() {
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-[#eceff1] bg-white px-3">
+    <header className="print-hide flex h-14 shrink-0 items-center gap-3 border-b border-[#eceff1] bg-white px-3">
       <ToolButton label="Home" className="text-primary">
         <Icon.appGrid size={19} />
       </ToolButton>

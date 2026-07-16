@@ -7,7 +7,7 @@ export function Toasts() {
   if (ai.phase === 'generating' && ai.generation) {
     const { sectionRef, count } = ai.generation;
     return (
-      <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center">
+      <div className="print-hide pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center">
         <div
           role="status"
           className="docs-rise pointer-events-auto flex items-center gap-3 rounded-xl bg-[#1f2933] px-4 py-2.5 text-white shadow-2xl"
@@ -36,7 +36,7 @@ export function Toasts() {
   if (ai.phase === 'resolved' && ai.summary) {
     const { accepted, rejected } = ai.summary;
     return (
-      <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center">
+      <div className="print-hide pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center">
         <div
           role="status"
           className="docs-rise pointer-events-auto flex items-center gap-3 rounded-xl bg-[#1f2933] px-4 py-2.5 text-white shadow-2xl"

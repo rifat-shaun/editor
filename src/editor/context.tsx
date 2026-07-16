@@ -11,6 +11,7 @@ import {
 import { useEditor } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
 import { buildExtensions } from './extensionsList';
+import { Pagination } from './pagination/extension';
 import { useAiSession, type AiSession } from './useAiSession';
 import type { AiProvider, EditorMode, JSONContent } from '../types';
 
@@ -92,7 +93,18 @@ export function EditorProvider(props: {
   const editor = useEditor({
     editable: initialMode !== 'viewing',
     content: initialContent,
-    extensions: buildExtensions(),
+    extensions: [
+      ...buildExtensions(),
+      // Pagination is a schema-neutral extension (no nodes/marks), so it is
+      // added only to the live editor — buildExtensions() stays clean for
+      // headless position-finding and unit tests.
+      Pagination.configure({
+        pageFormat: 'Letter', // 816×1056 — matches the editor's page width
+        margins: { top: 96, right: 96, bottom: 96, left: 96 },
+        header: { text: props.title, align: 'left' },
+        showPageNumbers: true, // footer renders "n / N" centered
+      }),
+    ],
     editorProps: {
       attributes: {
         class: 'docs-page-content',
@@ -132,6 +144,17 @@ export function EditorProvider(props: {
   useEffect(() => {
     if (editor) editor.setEditable(mode !== 'viewing');
   }, [editor, mode]);
+
+  // Keep the running header in sync with the (renameable) document title.
+  useEffect(() => {
+    editor?.commands.updateHeader({ text: title, align: 'left' });
+  }, [editor, title]);
+
+  // Drive the pagination engine's (transform-based, measurement-safe) zoom
+  // from the editor's zoom state. This is the single zoom mechanism now.
+  useEffect(() => {
+    editor?.commands.setZoom(zoom / 100);
+  }, [editor, zoom]);
 
   useEffect(() => {
     return () => {

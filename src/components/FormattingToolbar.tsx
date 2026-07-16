@@ -170,7 +170,7 @@ export function FormattingToolbar() {
     return () => ro.disconnect();
   }, [recompute, editorReady]);
 
-  if (!editor) return <div className="h-10 border-b border-border bg-chrome" />;
+  if (!editor) return <div className="print-hide h-10 border-b border-border bg-chrome" />;
 
   const chain = () => editor.chain().focus();
   const applyFont = (px: number) => {
@@ -405,7 +405,7 @@ export function FormattingToolbar() {
   return (
     <div
       ref={containerRef}
-      className="flex h-10 shrink-0 items-center gap-0.5 overflow-hidden border-b border-border bg-chrome px-2"
+      className="print-hide flex h-10 shrink-0 items-center gap-0.5 overflow-hidden border-b border-border bg-chrome px-2"
     >
       {visible.map((g, i) => (
         <div key={g.id} className="flex shrink-0 items-center gap-0.5">

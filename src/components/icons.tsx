@@ -246,6 +246,12 @@ export const Icon = {
       <path d="M9 4v16" />
     </Svg>
   ),
+  pageSetup: (p: P) => (
+    <Svg {...p}>
+      <rect x="5" y="3" width="14" height="18" rx="1.5" />
+      <rect x="8" y="6" width="8" height="12" rx="0.5" strokeDasharray="2 2" />
+    </Svg>
+  ),
   more: (p: P) => (
     <Svg {...p}>
       <circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none" />

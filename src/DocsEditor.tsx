@@ -10,6 +10,7 @@ import { StatusBar } from './components/StatusBar';
 import { SuggestionColumn } from './components/SuggestionColumn';
 import { AIPromptPopover } from './components/AIPromptPopover';
 import { FloatingToolbar } from './components/FloatingToolbar';
+import { TableMenu } from './components/TableMenu';
 import { Toasts } from './components/Toasts';
 
 function isTypingTarget(el: Element | null): boolean {
@@ -101,6 +102,7 @@ function DocsEditorShell({ className }: { className?: string }) {
       <StatusBar />
 
       <FloatingToolbar />
+      <TableMenu />
       <AIPromptPopover />
       <Toasts />
     </div>

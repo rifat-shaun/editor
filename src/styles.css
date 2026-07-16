@@ -150,6 +150,461 @@ body,
 }
 
 /* ------------------------------------------------------------------ *
+ * Tables (adapted from prosemirror-tables/style/tables.css, themed to
+ * the editor tokens). Provides: borders, table-layout:fixed + per-column
+ * widths, cell min-width, the .selectedCell highlight, and the
+ * .column-resize-handle. Kept in this shared sheet so it also applies to
+ * the print clone (which carries the .docs-page-content class).
+ * ------------------------------------------------------------------ */
+.docs-page-content .tableWrapper {
+  margin: 16px 0;
+  overflow-x: auto; /* very wide tables scroll horizontally instead of breaking layout */
+}
+
+.docs-page-content table {
+  border-collapse: collapse;
+  table-layout: fixed; /* required so per-column widths (colwidth) drive resizing */
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.docs-page-content table td,
+.docs-page-content table th {
+  position: relative; /* anchors the resize handle + selected-cell overlay */
+  min-width: 48px; /* matches CustomTable cellMinWidth; keeps cells clickable */
+  border: 1px solid #cfd6db;
+  padding: 6px 10px;
+  vertical-align: top;
+  box-sizing: border-box;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* The whole cell is the click target, not just the text. */
+.docs-page-content table td > *,
+.docs-page-content table th > * {
+  margin-bottom: 0;
+}
+
+.docs-page-content table th {
+  font-weight: 700;
+  text-align: left;
+  background: #f2f4f5;
+  color: #1f2933;
+}
+
+/* CellSelection highlight (prosemirror-tables adds .selectedCell). */
+.docs-page-content table .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 116, 144, 0.12); /* primary @ low alpha */
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Column drag-resize handle (shown when the Table is resizable). */
+.docs-page-content table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background: var(--color-primary, #0e7490);
+  pointer-events: none;
+  z-index: 3;
+}
+/* prosemirror-tables toggles this on <body> while dragging a column. */
+.resize-cursor {
+  cursor: col-resize;
+}
+
+/* The resize handle is live-editing chrome — never print it (it can be cloned
+   into the print DOM if present when the snapshot is built). */
+@media print {
+  .column-resize-handle {
+    display: none !important;
+  }
+}
+
+/* ----------------------- Row drag-to-reorder ----------------------- *
+ * Overlay layer + per-row grips rendered in the page's left margin. All
+ * local view state (never in the doc); hidden entirely in print.            */
+.pgn-rowdrag-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* only the handles below opt back in */
+  z-index: 15;
+}
+
+/* Shared handle styling for row + column grips (6-dot drag-indicator icon). */
+.pgn-rowdrag-handle,
+.pgn-coldrag-handle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px; /* ≥ 20px hit target */
+  min-height: 20px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #8a939b; /* text-muted */
+  cursor: grab;
+  pointer-events: auto;
+  opacity: 0; /* fade in via .is-in (100ms) */
+  transition:
+    opacity 0.1s ease,
+    background-color 0.1s ease,
+    color 0.1s ease;
+}
+.pgn-rowdrag-handle.is-in,
+.pgn-coldrag-handle.is-in {
+  opacity: 1;
+}
+.pgn-rowdrag-handle:hover,
+.pgn-coldrag-handle:hover {
+  background: #eef1f3;
+  color: #4a5560; /* text-ui */
+}
+/* While dragging (pointer or keyboard) the picked-up handle turns primary. */
+.pgn-rowdrag-handle.is-dragging,
+.pgn-coldrag-handle.is-dragging {
+  background: #e0f7fa;
+  color: #0e7490;
+  cursor: grabbing;
+  opacity: 1;
+}
+/* A grip on a row/column that straddles a merge: not draggable; click → error. */
+.pgn-rowdrag-handle.is-blocked,
+.pgn-coldrag-handle.is-blocked {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.pgn-rowdrag-handle.is-blocked.is-in,
+.pgn-coldrag-handle.is-blocked.is-in {
+  opacity: 0.55;
+}
+.pgn-rowdrag-handle.is-blocked:hover,
+.pgn-coldrag-handle.is-blocked:hover {
+  background: var(--color-del-bg, #fdecea);
+  color: var(--color-del, #c62828);
+}
+.pgn-rowdrag-handle svg,
+.pgn-coldrag-handle svg {
+  display: block;
+}
+
+/* Horizontal line showing where the row will land. */
+.pgn-rowdrag-indicator {
+  position: absolute;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: #0e7490;
+  pointer-events: none;
+  z-index: 16;
+}
+
+/* Dimmed source row while dragging. */
+.pgn-rowdrag-source > td,
+.pgn-rowdrag-source > th {
+  opacity: 0.4;
+}
+
+/* Floating ghost preview following the pointer. */
+.pgn-rowdrag-ghost {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  opacity: 0.95;
+  table-layout: fixed;
+}
+.pgn-rowdrag-ghost td,
+.pgn-rowdrag-ghost th {
+  border: 1px solid #cfd6db;
+  padding: 6px 10px;
+  font-size: 15px;
+  font-family: var(--font-doc);
+}
+
+/* While dragging, suppress text selection everywhere. */
+body.pgn-row-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* ----------------------- Column drag-to-reorder ----------------------- *
+ * Grips in a gutter ABOVE the table; a vertical drop indicator. Same overlay
+ * approach as rows, on the horizontal axis. Local view state; hidden in print. */
+.pgn-coldrag-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+/* Column handle shares .pgn-*-handle styling above (6-dot icon, fade, states). */
+/* Vertical line showing where the column will land. */
+.pgn-coldrag-indicator {
+  position: absolute;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: #0e7490;
+  pointer-events: none;
+  z-index: 16;
+}
+/* Dimmed source-column cells while dragging. */
+.pgn-coldrag-source {
+  opacity: 0.4;
+}
+/* Floating ghost of the dragged column (cells stacked). */
+.pgn-coldrag-ghost {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  background: #fff;
+  border: 1px solid #cfd6db;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  opacity: 0.95;
+  overflow: hidden;
+}
+.pgn-coldrag-ghost-cell {
+  padding: 6px 10px;
+  border-bottom: 1px solid #e3e7ea;
+  font-family: var(--font-doc);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media print {
+  .pgn-coldrag-layer,
+  .pgn-coldrag-ghost {
+    display: none !important;
+  }
+}
+
+/* ----------------------- Table context menu (right-click) ----------------------- */
+.pgn-tm {
+  width: 232px;
+  background: #fff;
+  border: 1px solid #e3e7ea;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(31, 41, 51, 0.16);
+  padding: 6px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  color: #3d4652;
+}
+/* A little breathing room between items so hover backgrounds don't touch. */
+.pgn-tm-section,
+.pgn-tm-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Sections after the first (and the footer) get a divider + top margin. */
+.pgn-tm-section + .pgn-tm-section,
+.pgn-tm-footer {
+  border-top: 1px solid #f2f4f5;
+  margin-top: 5px;
+}
+.pgn-tm-group {
+  font-size: 10px;
+  font-weight: 600;
+  color: #a3abb2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 10px 3px;
+}
+.pgn-tm-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+}
+.pgn-tm-item:hover,
+.pgn-tm-item:focus {
+  background: #f2f4f5;
+  outline: none;
+}
+.pgn-tm-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pgn-tm-ico {
+  width: 14px;
+  text-align: center;
+  color: #6b7580;
+}
+.pgn-tm-sc {
+  font-size: 10.5px;
+  color: #a3abb2;
+}
+.pgn-tm-item.is-destructive,
+.pgn-tm-item.is-destructive .pgn-tm-ico {
+  color: #c62828;
+}
+.pgn-tm-item.is-destructive .pgn-tm-sc {
+  color: #d9a3a3;
+}
+.pgn-tm-item.is-destructive:hover,
+.pgn-tm-item.is-destructive:focus {
+  background: #fdecea;
+}
+.pgn-tm-item:disabled {
+  color: #c2c9cf;
+  cursor: default;
+}
+.pgn-tm-item:disabled .pgn-tm-ico,
+.pgn-tm-item:disabled .pgn-tm-sc {
+  color: #c2c9cf;
+}
+.pgn-tm-item:disabled:hover {
+  background: transparent;
+}
+/* Toggle switch (Header row / column). */
+.pgn-tm-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 26px;
+  height: 15px;
+  border-radius: 999px;
+  background: #d7dde1;
+  transition: background-color 0.12s;
+}
+.pgn-tm-switch.is-on {
+  background: #0e7490;
+}
+.pgn-tm-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.12s;
+}
+.pgn-tm-switch.is-on .pgn-tm-knob {
+  left: 13px;
+}
+/* Fill swatch row. */
+.pgn-tm-fill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+}
+.pgn-tm-fill > span:first-child {
+  margin-right: 2px;
+}
+.pgn-tm-swatch {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+}
+.pgn-tm-swatch:focus {
+  outline: 2px solid var(--color-primary-border, #a5e8f2);
+  outline-offset: 1px;
+}
+.pgn-tm-swatch.is-selected {
+  border: 2px solid #0e7490;
+}
+.pgn-tm-nofill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #d7dde1;
+  color: #a3abb2;
+  font-size: 11px;
+  line-height: 1;
+}
+@media print {
+  .pgn-tm {
+    display: none !important;
+  }
+}
+
+/* Blocked-row-move error toast (local-only; never touches the document). */
+.pgn-move-error-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 440px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-del, #c62828);
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  font-family: var(--font-ui);
+  animation: docs-rise 0.18s ease-out;
+}
+.pgn-move-error-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-del, #c62828);
+  margin-bottom: 2px;
+}
+.pgn-move-error-msg {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--color-ink, #1f2933);
+}
+.pgn-move-error-close {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-muted, #8a939b);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.pgn-move-error-close:hover {
+  color: var(--color-ink, #1f2933);
+}
+@media print {
+  .pgn-move-error-toast {
+    display: none !important;
+  }
+}
+
+@media print {
+  .pgn-rowdrag-layer,
+  .pgn-rowdrag-ghost {
+    display: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ *
  * Redline marks (tracked changes) — visual only until accepted
  * ------------------------------------------------------------------ */
 .redline-del {

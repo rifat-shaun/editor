@@ -17,7 +17,12 @@ export function FloatingToolbar() {
       editor={editor}
       pluginKey="ai-floating-toolbar"
       shouldShow={({ editor: ed, from, to }) =>
-        mode !== 'viewing' && from !== to && ai.phase === 'idle' && !ed.isActive('deletion')
+        mode !== 'viewing' &&
+        from !== to &&
+        ai.phase === 'idle' &&
+        !ed.isActive('deletion') &&
+        // Inside a table, the dedicated TableMenu takes over (avoid two bubbles).
+        !ed.isActive('table')
       }
       tippyOptions={{ duration: 120, placement: 'top' }}
     >

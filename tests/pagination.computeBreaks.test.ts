@@ -91,3 +91,42 @@ describe('computeBreaks — edge cases', () => {
     }
   });
 });
+
+describe('computeBreaks — margin collapsing', () => {
+  it('collapses adjacent vertical margins to their max (no double-count)', () => {
+    // p(h100, mb16) then h2(h100, mt32, mb14). Flow height =
+    // 100 + max(16,32) + 100 + 14 = 246 (NOT 100+16+100+32+14 = 262).
+    const bs = [
+      { pos: 0, height: 100, marginTop: 0, marginBottom: 16 },
+      { pos: 120, height: 100, marginTop: 32, marginBottom: 14 },
+    ];
+    const r = computeBreaks(bs, 1000);
+    expect(r.pageCount).toBe(1);
+    expect(r.lastPageFiller).toBe(1000 - 246);
+  });
+
+  it('a new page starts with the block’s full top margin', () => {
+    const bs = [
+      { pos: 0, height: 100, marginTop: 0, marginBottom: 16 },
+      { pos: 120, height: 100, marginTop: 32, marginBottom: 14 },
+    ];
+    // contentHeight 200: page1 holds only the first block (used 116); the
+    // second block would make 116 + (16 + 114) = 246 > 200 → break.
+    const r = computeBreaks(bs, 200);
+    expect(r.pageCount).toBe(2);
+    expect(r.breaks[0]!.filler).toBe(200 - 116); // 84
+    // page 2 = the second block as first-on-page: 32 + 100 + 14 = 146.
+    expect(r.lastPageFiller).toBe(200 - 146); // 54
+  });
+
+  it('matches the old behaviour when margins are absent', () => {
+    // Regression guard: with no margins the result is identical to before.
+    const bs = [
+      { pos: 0, height: 400 },
+      { pos: 401, height: 601 },
+    ];
+    const r = computeBreaks(bs, 1000);
+    expect(r.pageCount).toBe(2);
+    expect(r.breaks[0]!.filler).toBe(600);
+  });
+});

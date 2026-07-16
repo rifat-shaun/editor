@@ -176,8 +176,8 @@ export function ToolRail() {
                   Print…
                 </button>
                 <p className="text-[11px] leading-snug text-muted">
-                  Native print uses the browser's own pagination and may differ from the on-screen
-                  page breaks.
+                  Printed pages match the editor's page breaks and include the running header and
+                  page numbers.
                 </p>
               </div>
             )}

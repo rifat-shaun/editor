@@ -6,22 +6,25 @@ import type { EditorView } from '@tiptap/pm/view';
 import type { BlockMetric } from './computeBreaks';
 
 /**
- * Height of a single top-level block, in CSS px, INCLUDING its vertical margins.
+ * Measure a block's border-box height and its vertical margins SEPARATELY.
  *
- * We deliberately use `offsetHeight + marginTop + marginBottom` rather than
- * `offsetTop`-differences: our own pagination widgets (page gaps, header/footer
- * bands) sit between blocks and would corrupt any offset-difference math. This
- * approach is independent of injected decorations.
+ * We report margins separately (rather than folding them into the height) so
+ * `computeBreaks` can apply CSS margin-collapsing correctly: adjacent block
+ * margins collapse to their max, so summing `offsetHeight + mt + mb` per block
+ * would double-count the collapsed gap and make pages run short. Measuring the
+ * box + margins here, and collapsing in the pure module, keeps the editor and
+ * the print renderer pixel-consistent.
  *
- * Tradeoff: adjacent block margins that *collapse* in CSS are counted twice
- * here, so multi-page estimates can run marginally short. At Bar A this is an
- * accepted approximation (documented in the README).
+ * We deliberately avoid `offsetTop`-differences: our own pagination widgets
+ * (gaps, header/footer bands) sit between blocks and would corrupt that math.
  */
-function blockHeight(el: HTMLElement): number {
+function measureBlock(el: HTMLElement): { height: number; marginTop: number; marginBottom: number } {
   const cs = getComputedStyle(el);
-  const mt = parseFloat(cs.marginTop) || 0;
-  const mb = parseFloat(cs.marginBottom) || 0;
-  return el.offsetHeight + mt + mb;
+  return {
+    height: el.offsetHeight,
+    marginTop: parseFloat(cs.marginTop) || 0,
+    marginBottom: parseFloat(cs.marginBottom) || 0,
+  };
 }
 
 /**
@@ -35,8 +38,11 @@ export function measureBlocks(view: EditorView): BlockMetric[] {
     // nodeDOM can return a text node, an element, or null for some node types.
     // Anything we can't measure contributes 0 and will be corrected on the next
     // pass once it has a real box (e.g. an image that finishes loading).
-    const height = dom instanceof HTMLElement ? blockHeight(dom) : 0;
-    metrics.push({ pos: offset, height });
+    if (dom instanceof HTMLElement) {
+      metrics.push({ pos: offset, ...measureBlock(dom) });
+    } else {
+      metrics.push({ pos: offset, height: 0, marginTop: 0, marginBottom: 0 });
+    }
   });
   return metrics;
 }

@@ -14,8 +14,12 @@
 export interface BlockMetric {
   /** ProseMirror position immediately before the block (a block boundary). */
   pos: number;
-  /** Measured layout height in CSS px, margins included (see measure.ts). */
+  /** Border-box layout height in CSS px (offsetHeight — NO margins). */
   height: number;
+  /** Top margin (px). Optional; defaults to 0. */
+  marginTop?: number;
+  /** Bottom margin (px). Optional; defaults to 0. */
+  marginBottom?: number;
 }
 
 export interface PageBreak {
@@ -52,33 +56,43 @@ export function computeBreaks(
   }
 
   const breaks: PageBreak[] = [];
-  let used = 0; // content-area height consumed on the current page
+  let used = 0; // content-area height consumed on the current page (incl. margins)
   let page = 1;
+  let prevMarginBottom = 0; // bottom margin of the previous block ON THIS PAGE
+  let hasBlock = false; // is there already a block on the current page?
 
   for (const block of blocks) {
-    // Break BEFORE this block when it would overflow the current page — but
-    // only if the page already has content (`used > 0`). Never break before the
-    // very first block on a page, otherwise a block taller than the page would
-    // loop forever producing empty pages.
-    //
-    // Off-by-one: use strict `>` so content that fits *exactly* (used + height
-    // === contentHeight) stays on the page rather than spilling to a new one.
-    if (used > 0 && used + block.height > contentHeight) {
-      breaks.push({
-        pos: block.pos,
-        page,
-        filler: Math.max(0, contentHeight - used),
-      });
+    const h = block.height;
+    const mt = block.marginTop ?? 0;
+    const mb = block.marginBottom ?? 0;
+
+    // Vertical space this block ADDS to the current page. Adjacent vertical
+    // margins collapse to their max — since `used` already contains the previous
+    // block's bottom margin, the extra top space is only `max(0, mt - prevMB)`.
+    // The first block on a page contributes its full top margin (it sits below
+    // the header band, which has no margin). `used` always includes the last
+    // block's bottom margin, so the fill lands in exactly the on-screen spot.
+    const add = (hasBlock ? Math.max(0, mt - prevMarginBottom) : mt) + h + mb;
+
+    // Break BEFORE this block when it would overflow — but never before the
+    // first block on a page (else a too-tall block loops forever). Strict `>`
+    // keeps content that fits *exactly* on the page (no off-by-one break).
+    if (hasBlock && used + add > contentHeight) {
+      breaks.push({ pos: block.pos, page, filler: Math.max(0, contentHeight - used) });
       page += 1;
-      used = 0;
+      // This block now starts the new page (first-on-page → full top margin).
+      used = mt + h + mb;
+      prevMarginBottom = mb;
+      continue;
     }
 
-    used += block.height;
+    used += add;
+    prevMarginBottom = mb;
+    hasBlock = true;
 
-    // Tall-block case (Bar A): if this single block alone exceeds the page, it
-    // now sits on its own page with `used > contentHeight`. We do NOT split it;
-    // the *next* iteration will break after it (its filler clamps to 0). The
-    // page simply grows taller than a normal page — the documented overflow.
+    // Tall-block case (Bar A): a single block taller than the page sits on its
+    // own page (used > contentHeight); the next iteration breaks after it (its
+    // filler clamps to 0). We never split it — the documented overflow.
   }
 
   return {

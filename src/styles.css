@@ -321,60 +321,37 @@ body,
 }
 
 /* ------------------------------------------------------------------ *
- * Print: only the document content should reach paper — not the editor
- * chrome (top bar, toolbars, panels, rail, status bar, overlays). The
- * browser re-flows and paginates the content itself (editor-only pagination
- * diverges from print — a documented limitation), so we hide our on-screen
- * page furniture and let it flow with real @page margins.
+ * Print: use a dedicated, ENGINE-MATCHED layout (`.pgn-print-root`, built on
+ * beforeprint — see plugin.ts). Printed pages then match the editor's page
+ * breaks and carry the running header/footer, instead of the browser
+ * re-flowing the content on its own. The whole live editor is hidden; only the
+ * print root reaches paper. The `@page { size … }` rule is injected per-print
+ * so the sheet matches the chosen page format exactly.
  * ------------------------------------------------------------------ */
+.pgn-print-root {
+  display: none; /* off-screen; only rendered for print */
+}
+
 @media print {
-  /* Un-clip the ENTIRE ancestor chain from <html> down to the document. Any
-     one of these with a bounded height + overflow would crop the print to the
-     on-screen viewport (the bug: only the visible area printed). Resetting them
-     all to auto-height / visible / block lets the full document flow and the
-     browser paginate it across pages. */
-  html,
-  body,
-  #root,
-  [data-docs-editor-root],
-  [data-docs-body],
-  [data-docs-scroll],
-  [data-docs-scroll] > div {
+  /* Hide EVERYTHING in <body> except the print root (which is appended there).
+     Hiding only the editor left its still-100%-tall mount (#root) occupying a
+     blank leading sheet — this covers the mount, menus/portals, etc. generically. */
+  body > *:not(.pgn-print-root) {
+    display: none !important;
+  }
+  .pgn-print-root {
     display: block !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    overflow: visible !important;
-    background: #fff !important;
   }
-  [data-docs-scroll],
-  [data-docs-scroll] > div {
-    width: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
+  /* One computed page == one physical sheet. NOTE: do NOT use
+     `break-inside: avoid` here — on a full-sheet-height element it makes the
+     browser think the page can't fit and pushes it to the next sheet, leaving
+     a blank leading page. `break-after` alone gives exactly one sheet per page. */
+  .pgn-print-root .print-page {
+    break-after: page;
+    page-break-after: always;
   }
-
-  /* Every chrome region carries this class (see components). */
-  .print-hide {
-    display: none !important;
-  }
-
-  /* Drop the on-screen page furniture (fill/gap/header/footer bands). */
-  .pgn-break {
-    display: none !important;
-  }
-
-  /* The document itself: strip the on-screen sheet framing and let it flow. */
-  .docs-page-content {
-    transform: none !important;
-    box-shadow: none !important;
-    width: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-  }
-
-  @page {
-    margin: 1in;
+  .pgn-print-root .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
   }
 }

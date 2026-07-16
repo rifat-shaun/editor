@@ -11,6 +11,7 @@ import { measureBlocks, findUnsettledMedia } from './measure';
 import { computeBreaks } from './computeBreaks';
 import { buildDecorations } from './decorations';
 import { toDimensions, normalizeHeaderFooter, type Dimensions, type PaginationOptions } from './config';
+import { buildPrintRoot, pageSizeStyleElement } from './printLayout';
 // NOTE: page-frame CSS lives in the editor's shared styles.css (`.pgn-*`
 // classes), so there is no runtime style injection here.
 
@@ -57,6 +58,11 @@ class PaginationView {
   private ro: ResizeObserver | undefined;
   private lastWidth = -1;
   private mediaSeen = new WeakSet<HTMLElement>();
+  // Dedicated print layout (built on demand — see build/teardownPrint).
+  private printRoot: HTMLElement | null = null;
+  private printStyle: HTMLStyleElement | null = null;
+  private onBeforePrint = () => this.buildPrint();
+  private onAfterPrint = () => this.teardownPrint();
 
   constructor(
     private view: EditorView,
@@ -68,9 +74,31 @@ class PaginationView {
     if (typeof window !== 'undefined') {
       this.setupResizeObserver();
       this.waitForFonts();
+      // Build the engine-matched print DOM just before printing (fires for both
+      // window.print() and ⌘P), and tear it down afterwards.
+      window.addEventListener('beforeprint', this.onBeforePrint);
+      window.addEventListener('afterprint', this.onAfterPrint);
     }
     // Initial pass (also re-runs once fonts settle — see waitForFonts).
     this.schedule(true);
+  }
+
+  /** Build a dedicated, engine-matched print DOM appended to <body>. */
+  private buildPrint(): void {
+    if (typeof document === 'undefined') return;
+    this.teardownPrint(); // idempotent — avoid duplicates on repeated prints
+    const opts = this.getOptions();
+    this.printRoot = buildPrintRoot(this.view, opts);
+    this.printStyle = pageSizeStyleElement(toDimensions(opts));
+    document.body.appendChild(this.printRoot);
+    document.head.appendChild(this.printStyle);
+  }
+
+  private teardownPrint(): void {
+    this.printRoot?.remove();
+    this.printStyle?.remove();
+    this.printRoot = null;
+    this.printStyle = null;
   }
 
   private setupResizeObserver(): void {
@@ -164,6 +192,11 @@ class PaginationView {
     clearTimeout(this.debounceTimer);
     cancelAnimationFrame(this.rafId);
     this.ro?.disconnect();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('beforeprint', this.onBeforePrint);
+      window.removeEventListener('afterprint', this.onAfterPrint);
+    }
+    this.teardownPrint();
     this.storage.recompute = null;
   }
 }

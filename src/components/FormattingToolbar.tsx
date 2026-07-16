@@ -4,6 +4,7 @@ import type { AiScope } from '../types';
 import { Icon } from './icons';
 import { Menu, MenuItem, MenuLabel, Segmented, ToolbarDivider, ToolButton } from './primitives';
 import { TableGridPicker } from './TableGridPicker';
+import { NumberedListMenu } from './NumberedListStylePicker';
 
 const PRESETS: { label: string; instruction: string }[] = [
   { label: 'Shorten', instruction: 'Make this more concise without losing meaning.' },
@@ -353,13 +354,27 @@ export function FormattingToolbar() {
         >
           <Icon.bulletList size={16} />
         </ToolButton>
-        <ToolButton
-          label="Numbered list"
-          active={editor.isActive('orderedList')}
-          onClick={() => chain().toggleOrderedList().run()}
-        >
-          <Icon.orderedList size={16} />
-        </ToolButton>
+        <span className="inline-flex items-center">
+          <ToolButton
+            label="Numbered list"
+            active={editor.isActive('orderedList')}
+            onClick={() => {
+              // Turning a list ON also applies the default preset so it renders
+              // with markers (1. / a. / i., nesting-aware) — matching the
+              // dropdown's default. Turning it OFF just toggles.
+              if (editor.isActive('orderedList')) {
+                chain().toggleOrderedList().run();
+              } else {
+                chain().toggleOrderedList().run();
+                editor.commands.applyListPreset('decimal');
+              }
+            }}
+            className="min-w-7 px-1"
+          >
+            <Icon.orderedList size={16} />
+          </ToolButton>
+          <NumberedListMenu editor={editor} />
+        </span>
         <ToolButton
           label="Checklist"
           active={editor.isActive('taskList')}

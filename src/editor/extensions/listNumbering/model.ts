@@ -1,0 +1,192 @@
+/**
+ * List-numbering data model — the single source of truth shared by the CSS
+ * generator, the DOCX mapping, the customize UI, and the unit tests.
+ *
+ * STORAGE (decided): a Word-style *registry* of numbering definitions lives on
+ * the Document node's `listDefs` attribute (a map keyed by id). Each ordered
+ * list node carries a `listDefId` pointing into it. Because persistence is
+ * ProseMirror JSON (`editor.getJSON()`), both the registry (a doc attr) and the
+ * per-list id (a node attr) serialize and re-hydrate for free — the whole
+ * reason the definition lives in the model and not only in CSS.
+ *
+ * A list node's LEVEL is its ordered-list nesting depth (counting only ordered
+ * ancestors), computed at render time — never stored — so a list nested inside
+ * a bullet list still numbers by ordered depth.
+ */
+
+export type NumberStyle =
+  | 'decimal'
+  | 'decimalZero'
+  | 'lowerAlpha'
+  | 'upperAlpha'
+  | 'lowerRoman'
+  | 'upperRoman';
+
+export type Separator = 'dot' | 'paren' | 'parens'; // a.  a)  (a)
+
+export interface ListLevelConfig {
+  style: NumberStyle;
+  separator: Separator;
+  startAt: number;
+  includeParent: boolean;
+}
+
+/** A numbering definition = per-level configs, index 0 = level 1, up to 9. */
+export type ListDefinition = ListLevelConfig[];
+
+/** The registry stored on the doc: id → definition. */
+export type ListDefRegistry = Record<string, ListDefinition>;
+
+export const MAX_LEVELS = 9;
+
+/* ----------------------------- value → text ----------------------------- */
+
+export function toAlpha(n: number, upper: boolean): string {
+  let s = '';
+  let x = Math.max(1, n);
+  while (x > 0) {
+    const r = (x - 1) % 26;
+    s = String.fromCharCode(97 + r) + s;
+    x = Math.floor((x - 1) / 26);
+  }
+  return upper ? s.toUpperCase() : s;
+}
+
+export function toRoman(n: number, upper: boolean): string {
+  const map: [number, string][] = [
+    [1000, 'm'], [900, 'cm'], [500, 'd'], [400, 'cd'], [100, 'c'], [90, 'xc'],
+    [50, 'l'], [40, 'xl'], [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i'],
+  ];
+  let x = Math.max(1, n);
+  let s = '';
+  for (const [v, sym] of map) {
+    while (x >= v) {
+      s += sym;
+      x -= v;
+    }
+  }
+  return upper ? s.toUpperCase() : s;
+}
+
+/** Render a single counter value in the given style (no separator). */
+export function formatValue(n: number, style: NumberStyle): string {
+  switch (style) {
+    case 'decimal': return String(n);
+    case 'decimalZero': return String(n).padStart(2, '0');
+    case 'lowerAlpha': return toAlpha(n, false);
+    case 'upperAlpha': return toAlpha(n, true);
+    case 'lowerRoman': return toRoman(n, false);
+    case 'upperRoman': return toRoman(n, true);
+  }
+}
+
+/** Apply a separator's decoration to an already-composed number string. */
+export function decorate(body: string, sep: Separator): string {
+  if (sep === 'parens') return `(${body})`;
+  if (sep === 'paren') return `${body})`;
+  return `${body}.`;
+}
+
+/**
+ * The canonical marker string for a level, given the running counts per level.
+ * `counts[k]` is the 1-based number shown at level k+1. This is the SAME logic
+ * the CSS `::before` produces and the DOCX `lvlText` encodes — kept here so the
+ * live preview and the tests exercise exactly what renders.
+ *
+ * Rule (documented): a level marked `includeParent` shows the full chain from
+ * level 1 to this level, joined by ".", then the level's own separator
+ * decoration; otherwise it shows only its own number + separator. The trailing
+ * separator is always applied (so the legal preset renders "1.", "1.1.",
+ * "1.2.1." exactly, and an alpha child renders "1.a.").
+ */
+export function renderMarker(
+  levels: ListDefinition,
+  depth: number, // 1-based
+  counts: number[], // 1-based values per level, counts[0] = level 1's number
+): string {
+  const cfg = levels[depth - 1];
+  if (!cfg) return '';
+  const include = cfg.includeParent && depth > 1;
+  const from = include ? 1 : depth;
+  const parts: string[] = [];
+  for (let k = from; k <= depth; k++) {
+    const lvl = levels[k - 1];
+    if (!lvl) continue;
+    parts.push(formatValue(counts[k - 1] ?? 1, lvl.style));
+  }
+  return decorate(parts.join('.'), cfg.separator);
+}
+
+/** Marker shown standalone using its own startAt (for level-list summaries). */
+export function levelSummary(levels: ListDefinition, depth: number): string {
+  const cfg = levels[depth - 1];
+  if (!cfg) return '';
+  return decorate(formatValue(cfg.startAt, cfg.style), cfg.separator);
+}
+
+/* ------------------------------- presets -------------------------------- */
+
+const L = (
+  style: NumberStyle,
+  separator: Separator = 'dot',
+  includeParent = false,
+  startAt = 1,
+): ListLevelConfig => ({ style, separator, startAt, includeParent });
+
+export interface Preset {
+  id: string;
+  levels: ListDefinition;
+}
+
+/**
+ * The 6 presets from the design grid. Levels 1→2→3 are explicit; deeper levels
+ * are generated by {@link extendDefinition} (Word-style cycling) so nesting
+ * beyond 3 has defined behavior.
+ */
+export const PRESETS: Preset[] = [
+  { id: 'decimal', levels: [L('decimal'), L('lowerAlpha'), L('lowerRoman')] },
+  { id: 'paren', levels: [L('decimal', 'paren'), L('lowerAlpha', 'paren'), L('lowerRoman', 'paren')] },
+  { id: 'legal', levels: [L('decimal', 'dot', true), L('decimal', 'dot', true), L('decimal', 'dot', true)] },
+  { id: 'upperAlpha', levels: [L('upperAlpha'), L('lowerAlpha'), L('lowerRoman')] },
+  { id: 'upperRoman', levels: [L('upperRoman'), L('upperAlpha'), L('lowerRoman')] },
+  { id: 'zero', levels: [L('decimalZero'), L('lowerAlpha'), L('lowerRoman')] },
+];
+
+export function getPreset(id: string): Preset | undefined {
+  return PRESETS.find((p) => p.id === id);
+}
+
+/**
+ * Ensure a definition has at least `n` levels, cycling the last three configs
+ * (keeping the legal preset's parent-inclusion for its deeper levels).
+ */
+export function extendDefinition(def: ListDefinition, n = MAX_LEVELS): ListDefinition {
+  if (def.length >= n) return def.slice(0, n);
+  const out = def.slice();
+  const tail = def.slice(-3);
+  let i = 0;
+  while (out.length < n) {
+    const src = tail[i % tail.length]!;
+    out.push({ ...src });
+    i++;
+  }
+  return out;
+}
+
+/** Default config for a freshly added level, following the 1 / a / i cycle. */
+export function defaultLevelConfig(depth: number): ListLevelConfig {
+  const cycle: NumberStyle[] = ['decimal', 'lowerAlpha', 'lowerRoman'];
+  return L(cycle[(depth - 1) % 3]!);
+}
+
+/* --------------------------- registry helpers --------------------------- */
+
+/** Stable content hash of a definition → registry id (dedupes identical defs). */
+export function definitionId(def: ListDefinition): string {
+  const json = JSON.stringify(def);
+  let h = 0;
+  for (let i = 0; i < json.length; i++) {
+    h = (Math.imul(31, h) + json.charCodeAt(i)) | 0;
+  }
+  return `ld${(h >>> 0).toString(36)}`;
+}

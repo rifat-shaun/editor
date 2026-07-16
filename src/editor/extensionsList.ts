@@ -9,6 +9,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { DeletionMark, InsertionMark } from './extensions/redline';
 import { Spotlight } from './extensions/spotlight';
 import { buildTableExtensions } from './extensions/table';
+import { CustomDocument, CustomOrderedList } from './extensions/listNumbering/extension';
+import { ListPaste } from './extensions/listPaste';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -17,7 +19,11 @@ import { buildTableExtensions } from './extensions/table';
  */
 export function buildExtensions() {
   return [
-    StarterKit.configure({ heading: { levels: [1, 2, 3, 4] } }),
+    // `document` + `orderedList` are replaced by the numbering-engine versions
+    // below (registry attr on the doc; listDefId on ordered lists).
+    StarterKit.configure({ heading: { levels: [1, 2, 3, 4] }, document: false, orderedList: false }),
+    CustomDocument,
+    CustomOrderedList,
     Underline,
     TextStyle,
     Link.configure({ openOnClick: false, autolink: true }),
@@ -26,6 +32,7 @@ export function buildExtensions() {
     TaskItem.configure({ nested: true }),
     Placeholder.configure({ placeholder: 'Start writing your document…' }),
     ...buildTableExtensions(),
+    ListPaste,
     DeletionMark,
     InsertionMark,
     Spotlight,

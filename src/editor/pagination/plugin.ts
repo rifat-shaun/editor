@@ -7,7 +7,7 @@ import { Plugin } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 import { DecorationSet } from '@tiptap/pm/view';
 import { paginationKey, type PaginationPluginState, type RecomputeMeta } from './paginationKey';
-import { measureBlocks, findUnsettledMedia } from './measure';
+import { collectBreakUnits, findUnsettledMedia } from './measure';
 import { computeBreaks } from './computeBreaks';
 import { buildDecorations } from './decorations';
 import { toDimensions, normalizeHeaderFooter, type Dimensions, type PaginationOptions } from './config';
@@ -157,7 +157,7 @@ class PaginationView {
     applyDomStyles(view, dims); // must precede measurement
     this.attachMediaHandlers();
 
-    const blocks = measureBlocks(view);
+    const blocks = collectBreakUnits(view);
     const { breaks, pageCount, lastPageFiller } = computeBreaks(blocks, dims.contentHeight);
     this.storage.pageCount = pageCount;
 

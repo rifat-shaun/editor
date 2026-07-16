@@ -3,6 +3,7 @@ import { useEditorState } from '../editor/context';
 import type { AiScope } from '../types';
 import { Icon } from './icons';
 import { Menu, MenuItem, MenuLabel, Segmented, ToolbarDivider, ToolButton } from './primitives';
+import { TableGridPicker } from './TableGridPicker';
 
 const PRESETS: { label: string; instruction: string }[] = [
   { label: 'Shorten', instruction: 'Make this more concise without losing meaning.' },
@@ -388,9 +389,7 @@ export function FormattingToolbar() {
         >
           <Icon.quote size={16} />
         </ToolButton>
-        <ToolButton label="Insert table">
-          <Icon.table size={16} />
-        </ToolButton>
+        <TableGridPicker editor={editor} />
         <ToolButton label="Insert image">
           <Icon.image size={16} />
         </ToolButton>

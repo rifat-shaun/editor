@@ -8,6 +8,7 @@ import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import { DeletionMark, InsertionMark } from './extensions/redline';
 import { Spotlight } from './extensions/spotlight';
+import { buildTableExtensions } from './extensions/table';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -24,6 +25,7 @@ export function buildExtensions() {
     TaskList,
     TaskItem.configure({ nested: true }),
     Placeholder.configure({ placeholder: 'Start writing your document…' }),
+    ...buildTableExtensions(),
     DeletionMark,
     InsertionMark,
     Spotlight,

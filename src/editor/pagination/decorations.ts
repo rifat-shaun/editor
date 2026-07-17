@@ -99,15 +99,24 @@ export function buildDecorations(
 
   // Between-page transitions.
   for (const br of breaks) {
-    const dom = container([
-      makeFill(br.filler),
+    const bands = [
       makeHF('footer', dims.mb, ctx.footer, br.page, ctx),
       makeGap(),
       makeHF('header', dims.mt, ctx.header, br.page + 1, ctx),
-    ]);
+    ];
+    // A mid-list break widget lands INSIDE the <ol> (before an <li>), so the
+    // full-bleed bands must also cancel the list's left padding (one --docs-list-pad
+    // per nesting level). The fill stays within the list content box — its width
+    // is irrelevant, it only reserves vertical space.
+    if (br.depth > 0) {
+      for (const band of bands) {
+        band.style.marginLeft = `calc(-1 * var(--pgn-ml) - ${br.depth} * var(--docs-list-pad, 26px))`;
+      }
+    }
+    const dom = container([makeFill(br.filler), ...bands]);
     // `side: -1` places the break immediately before the block that starts the
-    // next page. Keyed by page + filler so unchanged breaks reuse their DOM.
-    decos.push(widget(br.pos, dom, -1, `pgn-brk-${br.page}-${Math.round(br.filler)}`));
+    // next page. Keyed by page + filler (+ depth) so unchanged breaks reuse DOM.
+    decos.push(widget(br.pos, dom, -1, `pgn-brk-${br.page}-${br.depth}-${Math.round(br.filler)}`));
   }
 
   // Trailing band = last page's remaining fill + bottom margin (+ optional footer).

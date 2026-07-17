@@ -68,6 +68,13 @@ button:disabled {
   line-height: 1.85;
   color: #1a212b;
   text-wrap: pretty;
+  /* Vertical gap between list items — tunable. Kept small so items are compact
+     and evenly spaced (the source of the old large gap was the paragraph
+     Tiptap nests inside each <li>; see the `li > p` reset below). */
+  --docs-list-item-gap: 4px;
+  /* List left padding (indent). Shared with the pagination engine so a
+     mid-list page-break band can full-bleed past this indent. */
+  --docs-list-pad: 26px;
 }
 
 .docs-page-content:focus {
@@ -124,11 +131,48 @@ button:disabled {
 .docs-page-content ul,
 .docs-page-content ol {
   margin: 0 0 16px;
-  padding-left: 26px;
+  padding-left: var(--docs-list-pad, 26px);
+}
+
+/* Tailwind's preflight resets lists to `list-style: none`. Restore native
+   markers for any list that ISN'T driven by the custom numbering engine, so a
+   plain toggled/pasted list still shows markers. Custom numbered lists carry a
+   `[data-list-def]` and set `list-style: none` themselves (higher specificity),
+   and the task list opts out via its own rule. */
+.docs-page-content ol {
+  list-style-type: decimal;
+}
+.docs-page-content ul {
+  list-style-type: disc;
+}
+.docs-page-content ul ul {
+  list-style-type: circle;
+}
+.docs-page-content ul ul ul {
+  list-style-type: square;
 }
 
 .docs-page-content li {
-  margin-bottom: 4px;
+  margin-bottom: var(--docs-list-item-gap);
+}
+
+/* Native markers (bullets, and plain/def-less ordered lists) scale with the
+   item's own font size via the per-li var the numbering plugin sets. */
+.docs-page-content li::marker {
+  font-size: var(--pgn-marker-size, inherit);
+}
+
+/* Tiptap nests list-item content as `li > p`; the default paragraph margin
+   (0 0 16px) is what made items far apart. Reset it INSIDE list items only, so
+   standalone paragraphs keep their spacing. Inter-item gap now comes solely
+   from `li`'s margin-bottom above. */
+.docs-page-content li > p {
+  margin: 0;
+}
+/* Nested lists align to the same compact item gap instead of the 16px block gap. */
+.docs-page-content li > ol,
+.docs-page-content li > ul {
+  margin: var(--docs-list-item-gap) 0 0;
 }
 
 .docs-page-content blockquote {

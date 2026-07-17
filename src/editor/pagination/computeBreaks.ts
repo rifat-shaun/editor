@@ -20,6 +20,13 @@ export interface BlockMetric {
   marginTop?: number;
   /** Bottom margin (px). Optional; defaults to 0. */
   marginBottom?: number;
+  /**
+   * List-nesting depth of this unit (0 = top-level block, 1 = item of a
+   * top-level list, 2 = item of a nested list, …). Used only so the break
+   * decoration can full-bleed its bands past the list's left padding. Optional;
+   * defaults to 0.
+   */
+  depth?: number;
 }
 
 export interface PageBreak {
@@ -33,6 +40,8 @@ export interface PageBreak {
    * Clamped to 0 (a tall overflowing block yields no filler).
    */
   filler: number;
+  /** List-nesting depth of the unit that starts the next page (see BlockMetric). */
+  depth: number;
 }
 
 export interface ComputeBreaksResult {
@@ -78,7 +87,12 @@ export function computeBreaks(
     // first block on a page (else a too-tall block loops forever). Strict `>`
     // keeps content that fits *exactly* on the page (no off-by-one break).
     if (hasBlock && used + add > contentHeight) {
-      breaks.push({ pos: block.pos, page, filler: Math.max(0, contentHeight - used) });
+      breaks.push({
+        pos: block.pos,
+        page,
+        filler: Math.max(0, contentHeight - used),
+        depth: block.depth ?? 0,
+      });
       page += 1;
       // This block now starts the new page (first-on-page → full top margin).
       used = mt + h + mb;

@@ -10,6 +10,7 @@ import { DeletionMark, InsertionMark } from './extensions/redline';
 import { Spotlight } from './extensions/spotlight';
 import { buildTableExtensions } from './extensions/table';
 import { CustomDocument, CustomOrderedList } from './extensions/listNumbering/extension';
+import { CustomBulletList } from './extensions/bulletList/extension';
 import { ListPaste } from './extensions/listPaste';
 import { FontSize } from './extensions/fontSize';
 
@@ -22,9 +23,15 @@ export function buildExtensions() {
   return [
     // `document` + `orderedList` are replaced by the numbering-engine versions
     // below (registry attr on the doc; listDefId on ordered lists).
-    StarterKit.configure({ heading: { levels: [1, 2, 3, 4] }, document: false, orderedList: false }),
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3, 4] },
+      document: false,
+      orderedList: false,
+      bulletList: false,
+    }),
     CustomDocument,
     CustomOrderedList,
+    CustomBulletList,
     Underline,
     TextStyle,
     FontSize, // adds a font-size attribute to textStyle so pasted sizes survive

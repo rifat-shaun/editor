@@ -87,3 +87,50 @@ export function toDocxNumbering(registry: ListDefRegistry): {
   const nums = abstractNums.map((a, i) => ({ numId: i + 1, abstractNumId: a.id }));
   return { abstractNums, nums };
 }
+
+/* --------------------------- bullets (Word) ---------------------------- *
+ * Word bullets are `<w:lvl>` with `w:numFmt="bullet"` and the glyph as
+ * `w:lvlText`. Native disc/circle/square map to conventional Word bullet chars;
+ * dash/arrow/custom map to their glyph; none → empty. Custom emoji are passed
+ * through best-effort — Word renders them with the run font, which is limited
+ * for pictographic glyphs (flagged in the README).
+ * --------------------------------------------------------------------- */
+import {
+  extendBulletDefinition,
+  markerGlyph,
+  type BulletDefinition,
+  type BulletDefRegistry,
+  type BulletLevelConfig,
+} from '../bulletList/model';
+
+/** The `w:lvlText` glyph Word should show for a bullet level. */
+export function ooxmlBulletText(cfg: BulletLevelConfig): string {
+  switch (cfg.markerStyle) {
+    case 'disc': return '•'; // •
+    case 'circle': return 'o';
+    case 'square': return '▪'; // ▪
+    case 'none': return '';
+    default: return markerGlyph(cfg); // dash / arrow / custom
+  }
+}
+
+export function toBulletAbstractNum(id: string, def: BulletDefinition): OoxmlAbstractNum {
+  const full = extendBulletDefinition(def);
+  const levels: OoxmlLevel[] = full.map((cfg, i) => ({
+    level: i,
+    numFmt: 'bullet',
+    lvlText: ooxmlBulletText(cfg),
+    start: 1,
+  }));
+  return { id, levels };
+}
+
+/** Map the bullet registry → abstractNums + num instances. */
+export function toDocxBulletNumbering(registry: BulletDefRegistry): {
+  abstractNums: OoxmlAbstractNum[];
+  nums: { numId: number; abstractNumId: string }[];
+} {
+  const abstractNums = Object.entries(registry).map(([id, def]) => toBulletAbstractNum(id, def));
+  const nums = abstractNums.map((a, i) => ({ numId: i + 1, abstractNumId: a.id }));
+  return { abstractNums, nums };
+}

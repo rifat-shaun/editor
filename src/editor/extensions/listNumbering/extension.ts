@@ -34,17 +34,25 @@ import {
   type Separator,
 } from './model';
 import { generateRegistryCss } from './counterCss';
+import { generateBulletRegistryCss } from '../bulletList/bulletCss';
+import type { BulletDefinition, BulletDefRegistry } from '../bulletList/model';
 
 /* ----------------------------- doc + node ------------------------------ */
 
 export const CustomDocument = Document.extend({
   addAttributes() {
     return {
-      // The numbering registry (id → definition). Persists via getJSON; not
-      // rendered to DOM (the top node has no attribute host) — JSON is the
-      // configured persistence format, so that is enough for round-trip.
+      // The ordered numbering registry (id → definition). Persists via getJSON;
+      // not rendered to DOM — JSON is the persistence format, enough to round-trip.
       listDefs: { default: {} as ListDefRegistry, rendered: false },
+      // The bullet-marker registry, stored the same way.
+      bulletDefs: { default: {} as BulletDefRegistry, rendered: false },
     };
+  },
+  // The shared list plugin lives on the Document (always present) and renders
+  // BOTH ordered and bullet lists — decorations + the injected <style>.
+  addProseMirrorPlugins() {
+    return [listNumberingPlugin()];
   },
 });
 
@@ -143,10 +151,6 @@ export const CustomOrderedList = OrderedList.extend({
           return true;
         },
     };
-  },
-
-  addProseMirrorPlugins() {
-    return [listNumberingPlugin()];
   },
 });
 
@@ -260,26 +264,51 @@ function itemMarkerSize(li: PMNode): string | null {
   return size;
 }
 
-/** Walk the doc, emitting a node decoration per ordered list with def id + depth. */
+/**
+ * Walk the doc, tagging every ordered list with `data-list-def`/`data-list-level`
+ * and every bullet list with `data-bullet-def`/`data-bullet-level` (each depth
+ * counted within its own list type, so mixed nesting stays correct). Ids inherit
+ * from the nearest assigned ancestor so items indented into a deeper level pick
+ * up the definition automatically.
+ */
 function buildDecorations(doc: PMNode): DecorationSet {
   const decos: Decoration[] = [];
-  const walk = (node: PMNode, pos: number, depth: number, inheritedId: string) => {
+  const walk = (
+    node: PMNode,
+    pos: number,
+    olDepth: number,
+    olId: string,
+    ulDepth: number,
+    ulId: string,
+  ) => {
     let childPos = pos + 1; // first child position (inside `node`)
     node.forEach((child) => {
-      const isOl = child.type.name === 'orderedList';
-      const nextDepth = isOl ? depth + 1 : depth;
-      const nextId = isOl ? (child.attrs.listDefId as string | null) || inheritedId : inheritedId;
+      const name = child.type.name;
+      const isOl = name === 'orderedList';
+      const isUl = name === 'bulletList';
+      const nextOlDepth = isOl ? olDepth + 1 : olDepth;
+      const nextUlDepth = isUl ? ulDepth + 1 : ulDepth;
+      const nextOlId = isOl ? (child.attrs.listDefId as string | null) || olId : olId;
+      const nextUlId = isUl ? (child.attrs.bulletDefId as string | null) || ulId : ulId;
       if (isOl) {
         decos.push(
           Decoration.node(childPos, childPos + child.nodeSize, {
-            'data-list-def': nextId || '',
-            'data-list-level': String(nextDepth),
+            'data-list-def': nextOlId || '',
+            'data-list-level': String(nextOlDepth),
+          }),
+        );
+      }
+      if (isUl) {
+        decos.push(
+          Decoration.node(childPos, childPos + child.nodeSize, {
+            'data-bullet-def': nextUlId || '',
+            'data-bullet-level': String(nextUlDepth),
           }),
         );
       }
       // Marker follows the item's own font size: expose it as a CSS var the
       // marker (::before / ::marker) reads, without changing the content itself.
-      if (child.type.name === 'listItem') {
+      if (name === 'listItem') {
         const size = itemMarkerSize(child);
         if (size) {
           decos.push(
@@ -289,12 +318,26 @@ function buildDecorations(doc: PMNode): DecorationSet {
           );
         }
       }
-      walk(child, childPos, nextDepth, nextId);
+      walk(child, childPos, nextOlDepth, nextOlId, nextUlDepth, nextUlId);
       childPos += child.nodeSize;
     });
   };
-  walk(doc, -1, 0, '');
+  walk(doc, -1, 0, '', 0, '');
   return DecorationSet.create(doc, decos);
+}
+
+/** Bullet definitions actually referenced by bullet-list nodes. */
+function collectUsedBulletDefs(state: EditorState): Record<string, BulletDefinition> {
+  const reg = (state.doc.attrs.bulletDefs as BulletDefRegistry) ?? {};
+  const used: Record<string, BulletDefinition> = {};
+  state.doc.descendants((node) => {
+    if (node.type.name === 'bulletList') {
+      const id = node.attrs.bulletDefId as string | null;
+      if (id && reg[id]) used[id] = reg[id]!;
+    }
+    return true;
+  });
+  return used;
 }
 
 /** Definitions actually referenced by ordered-list nodes (for CSS generation). */
@@ -369,9 +412,11 @@ function listNumberingPlugin(): Plugin {
       let lastSig = '';
       const sync = (state: EditorState) => {
         const used = collectUsedDefs(state);
-        const sig = JSON.stringify(used);
+        const bulletUsed = collectUsedBulletDefs(state);
+        const sig = JSON.stringify(used) + '|' + JSON.stringify(bulletUsed);
         if (sig !== lastSig) {
-          styleEl.textContent = generateRegistryCss(used);
+          styleEl.textContent =
+            generateRegistryCss(used) + '\n' + generateBulletRegistryCss(bulletUsed);
           lastSig = sig;
         }
       };

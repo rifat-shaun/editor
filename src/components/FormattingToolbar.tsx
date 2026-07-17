@@ -5,6 +5,7 @@ import { Icon } from './icons';
 import { Menu, MenuItem, MenuLabel, Segmented, ToolbarDivider, ToolButton } from './primitives';
 import { TableGridPicker } from './TableGridPicker';
 import { NumberedListMenu } from './NumberedListStylePicker';
+import { BulletListMenu } from './BulletListStylePicker';
 
 const PRESETS: { label: string; instruction: string }[] = [
   { label: 'Shorten', instruction: 'Make this more concise without losing meaning.' },
@@ -348,13 +349,26 @@ export function FormattingToolbar() {
     ),
     lists: (
       <>
-        <ToolButton
-          label="Bullet list"
-          active={editor.isActive('bulletList')}
-          onClick={() => chain().toggleBulletList().run()}
-        >
-          <Icon.bulletList size={16} />
-        </ToolButton>
+        <span className="inline-flex items-center">
+          <ToolButton
+            label="Bullet list"
+            active={editor.isActive('bulletList')}
+            onClick={() => {
+              // Turning a bullet list ON applies the default (classic) preset so
+              // markers render consistently with the picker default.
+              if (editor.isActive('bulletList')) {
+                chain().toggleBulletList().run();
+              } else {
+                chain().toggleBulletList().run();
+                editor.commands.applyBulletPreset('classic');
+              }
+            }}
+            className="min-w-7 px-1"
+          >
+            <Icon.bulletList size={16} />
+          </ToolButton>
+          <BulletListMenu editor={editor} />
+        </span>
         <span className="inline-flex items-center">
           <ToolButton
             label="Numbered list"

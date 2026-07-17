@@ -181,12 +181,17 @@ export function defaultLevelConfig(depth: number): ListLevelConfig {
 
 /* --------------------------- registry helpers --------------------------- */
 
-/** Stable content hash of a definition → registry id (dedupes identical defs). */
-export function definitionId(def: ListDefinition): string {
-  const json = JSON.stringify(def);
+/** Stable content hash of any JSON-serializable value (base36). Shared util. */
+export function jsonHash(value: unknown): string {
+  const json = JSON.stringify(value);
   let h = 0;
   for (let i = 0; i < json.length; i++) {
     h = (Math.imul(31, h) + json.charCodeAt(i)) | 0;
   }
-  return `ld${(h >>> 0).toString(36)}`;
+  return (h >>> 0).toString(36);
+}
+
+/** Stable content hash of a definition → registry id (dedupes identical defs). */
+export function definitionId(def: ListDefinition): string {
+  return `ld${jsonHash(def)}`;
 }

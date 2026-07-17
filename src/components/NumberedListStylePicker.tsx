@@ -66,7 +66,7 @@ const PREVIEW_INDENTS = [0, 8, 16, 0];
  * Small shared popover (portal + anchor + dismiss) so surface (A) can
  * be styled to the exact spec without fighting the generic Menu panel.
  * ==================================================================== */
-function AnchoredPopover({
+export function AnchoredPopover({
   anchor,
   open,
   onClose,

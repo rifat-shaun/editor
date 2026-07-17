@@ -119,7 +119,6 @@ function AiEditMenu() {
 export function FormattingToolbar() {
   const { editor, zoom, setZoom, outlineOpen, toggleOutline } = useEditorState();
   useForceRerenderOnSelection();
-  const [fontPx, setFontPx] = useState(16);
   const editorReady = !!editor;
 
   // --- Responsive priority-overflow bookkeeping ---
@@ -175,10 +174,12 @@ export function FormattingToolbar() {
   if (!editor) return <div className="print-hide h-10 border-b border-border bg-chrome" />;
 
   const chain = () => editor.chain().focus();
+  // Reflect the selection's font size (from the textStyle mark), defaulting to
+  // the document base (16). Deriving it means pasted sizes show here too.
+  const fontPx = parseInt(String(editor.getAttributes('textStyle').fontSize ?? ''), 10) || 16;
   const applyFont = (px: number) => {
     const clamped = Math.max(8, Math.min(96, px));
-    setFontPx(clamped);
-    (editor.view.dom as HTMLElement).style.fontSize = `${clamped}px`;
+    chain().setFontSize(`${clamped}px`).run();
   };
 
   const paraValue = editor.isActive('heading', { level: 1 })

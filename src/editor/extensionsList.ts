@@ -11,6 +11,7 @@ import { Spotlight } from './extensions/spotlight';
 import { buildTableExtensions } from './extensions/table';
 import { CustomDocument, CustomOrderedList } from './extensions/listNumbering/extension';
 import { ListPaste } from './extensions/listPaste';
+import { FontSize } from './extensions/fontSize';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -26,6 +27,7 @@ export function buildExtensions() {
     CustomOrderedList,
     Underline,
     TextStyle,
+    FontSize, // adds a font-size attribute to textStyle so pasted sizes survive
     Link.configure({ openOnClick: false, autolink: true }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     TaskList,

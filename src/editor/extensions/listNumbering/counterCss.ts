@@ -72,6 +72,9 @@ export function generateDefinitionCss(id: string, def: ListDefinition): string {
       `${lvlSel}>li::before{` +
         `content:${markerContent(def, d)};` +
         `position:absolute;right:100%;margin-right:.5em;` +
+        // Marker matches the item's own font size (set per-li by the plugin),
+        // falling back to the inherited size when the item isn't resized.
+        `font-size:var(--pgn-marker-size,inherit);` +
         `white-space:nowrap;font-variant-numeric:tabular-nums;` +
         // Ensure the composed marker prints (text, so exact color-adjust is not
         // strictly required, but harmless and future-proof).

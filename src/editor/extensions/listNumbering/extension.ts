@@ -237,6 +237,29 @@ function commitDefinition(
 const listNumberingKey = new PluginKey('list-numbering');
 let styleSeq = 0;
 
+/**
+ * Font size of a list item's OWN first line (its head block's first text run),
+ * ignoring any nested list. Used so the marker matches the content's size.
+ */
+function itemMarkerSize(li: PMNode): string | null {
+  const head = li.firstChild;
+  if (!head || head.type.name === 'orderedList' || head.type.name === 'bulletList') return null;
+  let size: string | null = null;
+  head.descendants((n) => {
+    if (size) return false;
+    if (n.isText) {
+      for (const m of n.marks) {
+        if (m.type.name === 'textStyle' && m.attrs.fontSize) {
+          size = m.attrs.fontSize as string;
+          return false;
+        }
+      }
+    }
+    return true;
+  });
+  return size;
+}
+
 /** Walk the doc, emitting a node decoration per ordered list with def id + depth. */
 function buildDecorations(doc: PMNode): DecorationSet {
   const decos: Decoration[] = [];
@@ -253,6 +276,18 @@ function buildDecorations(doc: PMNode): DecorationSet {
             'data-list-level': String(nextDepth),
           }),
         );
+      }
+      // Marker follows the item's own font size: expose it as a CSS var the
+      // marker (::before / ::marker) reads, without changing the content itself.
+      if (child.type.name === 'listItem') {
+        const size = itemMarkerSize(child);
+        if (size) {
+          decos.push(
+            Decoration.node(childPos, childPos + child.nodeSize, {
+              style: `--pgn-marker-size: ${size}`,
+            }),
+          );
+        }
       }
       walk(child, childPos, nextDepth, nextId);
       childPos += child.nodeSize;

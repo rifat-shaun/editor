@@ -156,6 +156,12 @@ button:disabled {
   margin-bottom: var(--docs-list-item-gap);
 }
 
+/* Native markers (bullets, and plain/def-less ordered lists) scale with the
+   item's own font size via the per-li var the numbering plugin sets. */
+.docs-page-content li::marker {
+  font-size: var(--pgn-marker-size, inherit);
+}
+
 /* Tiptap nests list-item content as `li > p`; the default paragraph margin
    (0 0 16px) is what made items far apart. Reset it INSIDE list items only, so
    standalone paragraphs keep their spacing. Inter-item gap now comes solely

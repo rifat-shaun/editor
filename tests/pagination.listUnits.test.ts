@@ -96,3 +96,62 @@ describe('computeBreaks — depth passthrough for mid-list bands', () => {
     expect(breaks[0]).toMatchObject({ pos: 5, depth: 0 });
   });
 });
+
+describe('manual page break — forced break point', () => {
+  const p = (text: string) => ({ type: 'paragraph', content: [{ type: 'text', text }] });
+  const doc = (...content: object[]) => new Editor({ extensions: buildExtensions(), content: { type: 'doc', content } });
+
+  it('a pageBreak node forces the FOLLOWING unit onto a new page', () => {
+    const ed = doc(p('A'), { type: 'pageBreak' }, p('B'));
+    const units = collectBreakUnits(ed.view);
+    expect(units).toHaveLength(2); // the break itself contributes no unit
+    expect(units[0]!.forced).toBeFalsy();
+    expect(units[1]!.forced).toBe(true);
+    ed.destroy();
+  });
+
+  it('consecutive breaks collapse to one boundary (no empty page)', () => {
+    const ed = doc(p('A'), { type: 'pageBreak' }, { type: 'pageBreak' }, p('B'));
+    const units = collectBreakUnits(ed.view);
+    expect(units).toHaveLength(2);
+    expect(units.filter((u) => u.forced)).toHaveLength(1);
+    ed.destroy();
+  });
+
+  it('a break before a list forces the list onto the new page', () => {
+    const ed = doc(
+      p('A'),
+      { type: 'pageBreak' },
+      { type: 'bulletList', content: [{ type: 'listItem', content: [p('item')] }] },
+    );
+    const units = collectBreakUnits(ed.view);
+    expect(units[units.length - 1]!.forced).toBe(true);
+    ed.destroy();
+  });
+
+  it('a trailing break produces no forced unit (no empty page)', () => {
+    const ed = doc(p('A'), { type: 'pageBreak' });
+    const units = collectBreakUnits(ed.view);
+    expect(units).toHaveLength(1);
+    expect(units.some((u) => u.forced)).toBe(false);
+    ed.destroy();
+  });
+
+  it('computeBreaks starts a new page before a forced unit even if it fits', () => {
+    const units: BlockMetric[] = [
+      { pos: 0, height: 100, depth: 0 },
+      { pos: 5, height: 100, depth: 0, forced: true },
+    ];
+    const { breaks, pageCount } = computeBreaks(units, 800);
+    expect(pageCount).toBe(2);
+    expect(breaks).toHaveLength(1);
+    expect(breaks[0]).toMatchObject({ pos: 5, page: 1 });
+  });
+
+  it('a forced unit already at the top of a page does not add an empty page', () => {
+    const units: BlockMetric[] = [{ pos: 0, height: 100, depth: 0, forced: true }];
+    const { breaks, pageCount } = computeBreaks(units, 800);
+    expect(breaks).toHaveLength(0);
+    expect(pageCount).toBe(1);
+  });
+});

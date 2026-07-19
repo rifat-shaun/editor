@@ -64,7 +64,10 @@ button:disabled {
  * ------------------------------------------------------------------ */
 .docs-page-content {
   font-family: var(--font-doc);
-  font-size: 16px;
+  /* Point-based sizing (Word-like), end-to-end. 12pt = 16px @96dpi, so this
+     renders identically to the old 16px while the toolbar/model/export all
+     speak points. Headings below follow the same pt scale. */
+  font-size: 12pt;
   line-height: 1.85;
   color: #1a212b;
   text-wrap: pretty;
@@ -86,7 +89,7 @@ button:disabled {
 }
 
 .docs-page-content h1 {
-  font-size: 28px;
+  font-size: 21pt; /* 28px */
   line-height: 1.25;
   font-weight: 700;
   text-transform: uppercase;
@@ -96,7 +99,7 @@ button:disabled {
 }
 
 .docs-page-content h2 {
-  font-size: 24px;
+  font-size: 18pt; /* 24px */
   line-height: 1.3;
   font-weight: 700;
   text-transform: uppercase;
@@ -105,14 +108,14 @@ button:disabled {
 }
 
 .docs-page-content h3 {
-  font-size: 20px;
+  font-size: 15pt; /* 20px */
   line-height: 1.4;
   font-weight: 700;
   margin: 24px 0 10px;
 }
 
 .docs-page-content h4 {
-  font-size: 16px;
+  font-size: 12pt; /* 16px */
   line-height: 1.5;
   font-weight: 700;
   margin: 18px 0 8px;
@@ -173,6 +176,33 @@ button:disabled {
 .docs-page-content li > ol,
 .docs-page-content li > ul {
   margin: var(--docs-list-item-gap) 0 0;
+}
+
+/* Authored page break (exports to Word; a visible marker on screen). */
+.docs-page-content .pgn-page-break {
+  position: relative;
+  height: 0;
+  margin: 20px 0;
+  border-top: 2px dashed #c2c9cf;
+  user-select: none;
+}
+.docs-page-content .pgn-page-break-label {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  padding: 0 8px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a939b;
+}
+@media print {
+  .docs-page-content .pgn-page-break {
+    display: none;
+  }
 }
 
 .docs-page-content blockquote {

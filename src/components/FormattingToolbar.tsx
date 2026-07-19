@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useEditorState } from '../editor/context';
 import type { AiScope } from '../types';
+import { fontSizeAtSelection, BASE_FONT_PT } from './fontSizeSelection';
 import { Icon } from './icons';
 import { Menu, MenuItem, MenuLabel, Segmented, ToolbarDivider, ToolButton } from './primitives';
 import { TableGridPicker } from './TableGridPicker';
@@ -175,12 +176,13 @@ export function FormattingToolbar() {
   if (!editor) return <div className="print-hide h-10 border-b border-border bg-chrome" />;
 
   const chain = () => editor.chain().focus();
-  // Reflect the selection's font size (from the textStyle mark), defaulting to
-  // the document base (16). Deriving it means pasted sizes show here too.
-  const fontPx = parseInt(String(editor.getAttributes('textStyle').fontSize ?? ''), 10) || 16;
-  const applyFont = (px: number) => {
-    const clamped = Math.max(8, Math.min(96, px));
-    chain().setFontSize(`${clamped}px`).run();
+  // Font size (POINTS) at the caret/selection: the fontSize mark if set, else the
+  // effective heading/base size; `null` when the selection spans mixed sizes.
+  const fontPt = fontSizeAtSelection(editor);
+  // Points end-to-end: the mark is stored as "<n>pt"; stepping is exact.
+  const applyPt = (pt: number) => {
+    const clamped = Math.max(6, Math.min(72, Math.round(pt)));
+    chain().setFontSize(`${clamped}pt`).run();
   };
 
   const paraValue = editor.isActive('heading', { level: 1 })
@@ -271,11 +273,16 @@ export function FormattingToolbar() {
     ),
     fontsize: (
       <>
-        <ToolButton label="Decrease font size" onClick={() => applyFont(fontPx - 1)}>
+        <ToolButton label="Decrease font size" onClick={() => applyPt((fontPt ?? BASE_FONT_PT) - 1)}>
           <Icon.minus size={15} />
         </ToolButton>
-        <span className="w-7 text-center text-[12px] text-ui">{fontPx}</span>
-        <ToolButton label="Increase font size" onClick={() => applyFont(fontPx + 1)}>
+        <span
+          className="w-7 text-center text-[12px] text-ui"
+          title={fontPt === null ? 'Multiple sizes' : `${fontPt} pt`}
+        >
+          {fontPt === null ? '–' : fontPt}
+        </span>
+        <ToolButton label="Increase font size" onClick={() => applyPt((fontPt ?? BASE_FONT_PT) + 1)}>
           <Icon.plus size={15} />
         </ToolButton>
       </>
@@ -422,6 +429,9 @@ export function FormattingToolbar() {
         <TableGridPicker editor={editor} />
         <ToolButton label="Insert image">
           <Icon.image size={16} />
+        </ToolButton>
+        <ToolButton label="Insert page break" onClick={() => chain().insertPageBreak().run()}>
+          <Icon.pageSetup size={16} />
         </ToolButton>
       </>
     ),

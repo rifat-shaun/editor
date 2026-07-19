@@ -13,6 +13,7 @@ import { CustomDocument, CustomOrderedList } from './extensions/listNumbering/ex
 import { CustomBulletList } from './extensions/bulletList/extension';
 import { ListPaste } from './extensions/listPaste';
 import { FontSize } from './extensions/fontSize';
+import { PageBreak } from './extensions/pageBreak';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -41,6 +42,7 @@ export function buildExtensions() {
     TaskItem.configure({ nested: true }),
     Placeholder.configure({ placeholder: 'Start writing your document…' }),
     ...buildTableExtensions(),
+    PageBreak,
     ListPaste,
     DeletionMark,
     InsertionMark,

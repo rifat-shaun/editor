@@ -178,26 +178,20 @@ button:disabled {
   margin: var(--docs-list-item-gap) 0 0;
 }
 
-/* Authored page break (exports to Word; a visible marker on screen). */
+/* Authored page break — the pagination engine turns this into a real forced
+   page break (page frame + gap). The node itself is an invisible, zero-height
+   marker in the flow (no dashed separator); only a selection outline shows it. */
 .docs-page-content .pgn-page-break {
-  position: relative;
   height: 0;
-  margin: 20px 0;
-  border-top: 2px dashed #c2c9cf;
+  margin: 0;
+  padding: 0;
   user-select: none;
 }
-.docs-page-content .pgn-page-break-label {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #ffffff;
-  padding: 0 8px;
-  font-family: var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #8a939b;
+.docs-page-content .pgn-page-break.ProseMirror-selectednode {
+  height: 2px;
+  margin: 2px 0;
+  background: var(--color-primary, #0e7490);
+  border-radius: 1px;
 }
 @media print {
   .docs-page-content .pgn-page-break {

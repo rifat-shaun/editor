@@ -172,8 +172,22 @@ function emitListItem(
 export function collectBreakUnits(view: EditorView): BlockMetric[] {
   const out: BlockMetric[] = [];
   let pos = 0;
+  let forceNext = false; // an authored page-break node was just seen
   view.state.doc.forEach((node) => {
+    if (node.type.name === 'pageBreak') {
+      // The break itself contributes no unit/height; it forces the FOLLOWING
+      // content onto a new page. Consecutive breaks collapse (one boundary, no
+      // empty page); a trailing break has no following unit, so no empty page.
+      forceNext = true;
+      pos += node.nodeSize;
+      return;
+    }
+    const before = out.length;
     emitNode(view, node, pos, out, 0, false);
+    if (forceNext && out.length > before) {
+      out[before]!.forced = true; // first unit this node produced starts the page
+      forceNext = false;
+    }
     pos += node.nodeSize;
   });
   return out;

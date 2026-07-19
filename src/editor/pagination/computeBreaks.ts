@@ -27,6 +27,11 @@ export interface BlockMetric {
    * defaults to 0.
    */
   depth?: number;
+  /**
+   * A FORCED break must occur before this unit (an authored page-break node
+   * precedes it): it always starts a new page regardless of remaining height.
+   */
+  forced?: boolean;
 }
 
 export interface PageBreak {
@@ -83,10 +88,12 @@ export function computeBreaks(
     // block's bottom margin, so the fill lands in exactly the on-screen spot.
     const add = (hasBlock ? Math.max(0, mt - prevMarginBottom) : mt) + h + mb;
 
-    // Break BEFORE this block when it would overflow — but never before the
-    // first block on a page (else a too-tall block loops forever). Strict `>`
-    // keeps content that fits *exactly* on the page (no off-by-one break).
-    if (hasBlock && used + add > contentHeight) {
+    // Break BEFORE this block when a page break is FORCED (authored page-break
+    // node) or when it would overflow — but never before the first block on a
+    // page: that avoids an empty band from a break at the top / consecutive
+    // breaks, and stops a too-tall block from looping. Strict `>` keeps content
+    // that fits *exactly* on the page (no off-by-one break).
+    if (hasBlock && (block.forced || used + add > contentHeight)) {
       breaks.push({
         pos: block.pos,
         page,

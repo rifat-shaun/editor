@@ -4,6 +4,46 @@ import type { EditorMode } from '../types';
 import { Icon } from './icons';
 import { Menu, MenuItem, ToolButton } from './primitives';
 
+function DownloadWord() {
+  const { editor, title } = useEditorState();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+  if (!editor) return null;
+
+  const run = async () => {
+    setBusy(true);
+    setError(false);
+    try {
+      // Lazy-load docx-js so it isn't in the main bundle.
+      const { downloadDocx } = await import('../editor/export/docx');
+      await downloadDocx(editor, title || 'Document', { includeHeaderFooter: true });
+    } catch (err) {
+      console.error('DOCX export failed', err);
+      setError(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      title={error ? 'Export failed — click to retry' : 'Download as Word (.docx)'}
+      onClick={run}
+      className={[
+        'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-semibold disabled:opacity-60',
+        error
+          ? 'border-[#e6a4a0] bg-[#fdecea] text-[#c62828]'
+          : 'border-border text-ui hover:bg-[#f2f4f5]',
+      ].join(' ')}
+    >
+      {busy ? <Icon.spinner size={14} /> : error ? <Icon.stop size={14} /> : <Icon.exportIcon size={14} />}
+      {busy ? 'Exporting…' : error ? 'Retry export' : 'Word'}
+    </button>
+  );
+}
+
 const MENU_ROW = ['File', 'Edit', 'View', 'Insert', 'Format', 'Tools', 'Help'];
 
 const MODE_LABEL: Record<EditorMode, string> = {
@@ -146,6 +186,7 @@ export function TopBar() {
           <Icon.comment size={16} />2
         </button>
         <ModePill />
+        <DownloadWord />
         <button
           type="button"
           className="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-4 text-[12px] font-semibold text-white hover:brightness-110"

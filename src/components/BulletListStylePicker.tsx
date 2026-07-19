@@ -4,6 +4,7 @@ import type { Editor } from '@tiptap/core';
 import { useDismissable } from '../hooks/useDismissable';
 import { Icon } from './icons';
 import { AnchoredPopover } from './NumberedListStylePicker';
+import { Select } from './Select';
 import {
   BULLET_PRESETS,
   defaultBulletLevelConfig,
@@ -331,18 +332,13 @@ function CustomizeDialog({
           <div style={{ flex: 1, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 11 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={LABEL_STYLE}>Marker style</div>
-              <select
-                aria-label="Marker style"
+              <Select
+                variant="form"
+                ariaLabel="Marker style"
                 value={cfg.markerStyle}
-                onChange={(e) => patch({ markerStyle: e.target.value as MarkerStyle })}
-                style={input}
-              >
-                {MARKER_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => patch({ markerStyle: v as MarkerStyle })}
+                options={MARKER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              />
             </div>
 
             {cfg.markerStyle === 'custom' && (
@@ -372,17 +368,19 @@ function CustomizeDialog({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={LABEL_STYLE}>Size</div>
-                <select
-                  aria-label="Marker size"
+                <Select
+                  variant="form"
+                  ariaLabel="Marker size"
+                  className="w-24"
                   value={cfg.size ?? ''}
-                  onChange={(e) => patch({ size: e.target.value || null })}
-                  style={{ ...input, width: 96 }}
-                >
-                  <option value="">Default</option>
-                  <option value="0.8em">Small</option>
-                  <option value="1.2em">Large</option>
-                  <option value="1.5em">X-Large</option>
-                </select>
+                  onChange={(v) => patch({ size: v || null })}
+                  options={[
+                    { value: '', label: 'Default' },
+                    { value: '0.8em', label: 'Small' },
+                    { value: '1.2em', label: 'Large' },
+                    { value: '1.5em', label: 'X-Large' },
+                  ]}
+                />
               </div>
             </div>
 

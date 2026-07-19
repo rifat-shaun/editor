@@ -84,6 +84,23 @@ button:disabled {
   outline: none;
 }
 
+/* One selection color for the editor. The ACTIVE selection uses the browser's
+   NATIVE selection (full line-height, contiguous across lines — no gaps). The
+   blurred (inactive) selection is a decoration that fills the full line-height
+   the same way, so the two states look identical. */
+.docs-page-content {
+  --docs-selection: rgba(14, 116, 144, 0.22);
+}
+.docs-page-content ::selection {
+  background: var(--docs-selection);
+}
+.docs-page-content ::-moz-selection {
+  background: var(--docs-selection);
+}
+.docs-page-content .pm-inactive-selection {
+  background: var(--docs-selection);
+}
+
 .docs-page-content > *:first-child {
   margin-top: 0;
 }

@@ -14,6 +14,7 @@ import { CustomBulletList } from './extensions/bulletList/extension';
 import { ListPaste } from './extensions/listPaste';
 import { FontSize } from './extensions/fontSize';
 import { PageBreak } from './extensions/pageBreak';
+import { SelectionHighlight } from './extensions/selectionHighlight';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -43,6 +44,7 @@ export function buildExtensions() {
     Placeholder.configure({ placeholder: 'Start writing your document…' }),
     ...buildTableExtensions(),
     PageBreak,
+    SelectionHighlight,
     ListPaste,
     DeletionMark,
     InsertionMark,

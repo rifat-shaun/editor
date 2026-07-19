@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom';
 import type { Editor } from '@tiptap/core';
 import { useDismissable } from '../hooks/useDismissable';
 import { Icon } from './icons';
+import { Select } from './Select';
 import {
   defaultLevelConfig,
   extendDefinition,
@@ -641,27 +642,13 @@ function CustomizeDialog({
             {/* Number style */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={LABEL_STYLE}>Number style</div>
-              <select
-                aria-label="Number style"
+              <Select
+                variant="form"
+                ariaLabel="Number style"
                 value={cfg.style}
-                onChange={(e) => patch({ style: e.target.value as NumberStyle })}
-                style={{
-                  width: '100%',
-                  height: 34,
-                  padding: '0 10px',
-                  borderRadius: 7,
-                  border: '1px solid #d7dde1',
-                  background: '#ffffff',
-                  fontSize: 12.5,
-                  color: '#1f2933',
-                }}
-              >
-                {NUMBER_STYLE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => patch({ style: v as NumberStyle })}
+                options={NUMBER_STYLE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              />
             </div>
 
             {/* Separator + Start at */}

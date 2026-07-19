@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useEditorState } from '../editor/context';
 import type { AiScope } from '../types';
 import { fontSizeAtSelection, BASE_FONT_PT } from './fontSizeSelection';
@@ -7,6 +7,28 @@ import { Menu, MenuItem, MenuLabel, Segmented, ToolbarDivider, ToolButton } from
 import { TableGridPicker } from './TableGridPicker';
 import { NumberedListMenu } from './NumberedListStylePicker';
 import { BulletListMenu } from './BulletListStylePicker';
+import { Select, type SelectOption } from './Select';
+
+const PARA_OPTIONS: SelectOption[] = [
+  { value: 'body', label: 'Body text' },
+  { value: 'h1', label: 'Title' },
+  { value: 'h2', label: 'Heading 2' },
+  { value: 'h3', label: 'Heading 3' },
+  { value: 'h4', label: 'Heading 4' },
+];
+const PARA_STYLE: Record<string, CSSProperties> = {
+  body: { fontSize: 13 },
+  h1: { fontSize: 19, fontWeight: 700 },
+  h2: { fontSize: 16, fontWeight: 700 },
+  h3: { fontSize: 14, fontWeight: 700 },
+  h4: { fontSize: 13, fontWeight: 700 },
+};
+const FONT_FAMILIES = [
+  'Georgia', 'Times New Roman', 'Arial', 'Helvetica', 'Calibri', 'Cambria',
+  'Garamond', 'Verdana', 'Tahoma', 'Courier New', 'system-ui',
+];
+const ZOOM_LEVELS = [50, 75, 90, 100, 125, 150, 200];
+const FONT_SIZES_PT = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72, 96];
 
 const PRESETS: { label: string; instruction: string }[] = [
   { label: 'Shorten', instruction: 'Make this more concise without losing meaning.' },
@@ -122,6 +144,7 @@ export function FormattingToolbar() {
   const { editor, zoom, setZoom, outlineOpen, toggleOutline } = useEditorState();
   useForceRerenderOnSelection();
   const editorReady = !!editor;
+  const [fontFamily, setFontFamily] = useState('Georgia');
 
   // --- Responsive priority-overflow bookkeeping ---
   const containerRef = useRef<HTMLDivElement>(null);
@@ -200,8 +223,33 @@ export function FormattingToolbar() {
     else chain().toggleHeading({ level: Number(v[1]) as 1 | 2 | 3 | 4 }).run();
   };
 
-  const selectCls =
-    'h-8 rounded-[5px] bg-transparent px-1 text-[12px] text-ui hover:bg-[#eef1f3]';
+  const applyFontFamily = (f: string) => {
+    setFontFamily(f);
+    (editor.view.dom as HTMLElement).style.fontFamily = f;
+  };
+
+  const applyZoom = (v: string) => {
+    if (v === 'fit-width' || v === 'fit-page') {
+      const dom = editor.view.dom as HTMLElement;
+      const avail = (dom.parentElement?.clientWidth ?? 800) - 32;
+      const pageW = parseFloat(getComputedStyle(dom).getPropertyValue('--pgn-page-width')) || 816;
+      let z = Math.floor((avail / pageW) * 100);
+      if (v === 'fit-page') {
+        const availH = window.innerHeight - 160;
+        z = Math.min(z, Math.floor((availH / 1056) * 100)); // ~Letter page height
+      }
+      setZoom(Math.max(50, Math.min(200, z)));
+    } else {
+      setZoom(Number(v));
+    }
+  };
+
+  // Font family from the whole-editor DOM style (family isn't a per-run mark);
+  // recently-used (current) pinned on top.
+  const fontOptions: SelectOption[] = [
+    { value: fontFamily, label: fontFamily, group: 'Recently used' },
+    ...FONT_FAMILIES.filter((f) => f !== fontFamily).map((f) => ({ value: f, label: f, group: 'Fonts' })),
+  ];
 
   const nodeById: Record<string, ReactNode> = {
     outline: (
@@ -230,58 +278,56 @@ export function FormattingToolbar() {
       </>
     ),
     zoom: (
-      <select
-        aria-label="Zoom"
-        value={zoom}
-        onChange={(e) => setZoom(Number(e.target.value))}
-        className={selectCls}
-      >
-        {[50, 75, 90, 100, 125, 150, 200].map((z) => (
-          <option key={z} value={z}>
-            {z}%
-          </option>
-        ))}
-      </select>
+      <Select
+        ariaLabel="Zoom"
+        className="min-w-[68px]"
+        value={String(zoom)}
+        onChange={applyZoom}
+        options={[
+          ...ZOOM_LEVELS.map((z) => ({ value: String(z), label: `${z}%` })),
+          { value: 'fit-width', label: 'Fit width', group: 'Fit' },
+          { value: 'fit-page', label: 'Fit page', group: 'Fit' },
+        ]}
+        renderTriggerLabel={(o) => (o ? o.label : `${zoom}%`)}
+      />
     ),
     para: (
-      <select
-        aria-label="Paragraph style"
+      <Select
+        ariaLabel="Paragraph style"
+        className="min-w-[104px]"
         value={paraValue}
-        onChange={(e) => setPara(e.target.value)}
-        className={selectCls}
-      >
-        <option value="body">Body text</option>
-        <option value="h1">Title</option>
-        <option value="h2">Heading 2</option>
-        <option value="h3">Heading 3</option>
-        <option value="h4">Heading 4</option>
-      </select>
+        onChange={setPara}
+        options={PARA_OPTIONS}
+        renderOption={(o) => <span style={PARA_STYLE[o.value]}>{o.label}</span>}
+      />
     ),
     font: (
-      <select
-        aria-label="Font"
-        defaultValue="Georgia"
-        onChange={(e) => ((editor.view.dom as HTMLElement).style.fontFamily = e.target.value)}
-        className={selectCls}
-      >
-        {['Georgia', 'Times New Roman', 'Arial', 'system-ui'].map((f) => (
-          <option key={f} value={f}>
-            {f}
-          </option>
-        ))}
-      </select>
+      <Select
+        ariaLabel="Font"
+        className="min-w-[116px]"
+        value={fontFamily}
+        onChange={applyFontFamily}
+        options={fontOptions}
+        searchPlaceholder="Search fonts…"
+        renderOption={(o) => (
+          <span style={{ fontFamily: o.value }}>{o.label}</span>
+        )}
+      />
     ),
     fontsize: (
       <>
         <ToolButton label="Decrease font size" onClick={() => applyPt((fontPt ?? BASE_FONT_PT) - 1)}>
           <Icon.minus size={15} />
         </ToolButton>
-        <span
-          className="w-7 text-center text-[12px] text-ui"
-          title={fontPt === null ? 'Multiple sizes' : `${fontPt} pt`}
-        >
-          {fontPt === null ? '–' : fontPt}
-        </span>
+        <Select
+          ariaLabel="Font size"
+          className="w-[52px]"
+          value={fontPt === null ? null : String(fontPt)}
+          onChange={(v) => applyPt(Number(v))}
+          editable={{ onCommit: (raw) => raw && applyPt(Number(raw)) }}
+          placeholder="–"
+          options={FONT_SIZES_PT.map((s) => ({ value: String(s), label: String(s) }))}
+        />
         <ToolButton label="Increase font size" onClick={() => applyPt((fontPt ?? BASE_FONT_PT) + 1)}>
           <Icon.plus size={15} />
         </ToolButton>

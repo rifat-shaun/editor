@@ -26,7 +26,7 @@
 
   --font-ui:
     system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-doc: Georgia, 'Times New Roman', serif;
+  --font-doc: 'Times New Roman', Georgia, serif;
 }
 
 /* UI chrome uses system-ui throughout. */
@@ -68,7 +68,11 @@ button:disabled {
      renders identically to the old 16px while the toolbar/model/export all
      speak points. Headings below follow the same pt scale. */
   font-size: 12pt;
-  line-height: 1.85;
+  /* Base line height matches MS Word's default (1.15 — the Word 2007–2010
+     Normal style, also Google Docs' default). Blocks with no explicit
+     lineHeight attr inherit this; the DOCX export pins the same 1.15 on Word's
+     default style so a round-trip looks identical. */
+  line-height: 1.15;
   color: #1a212b;
   text-wrap: pretty;
   /* Vertical gap between list items — tunable. Kept small so items are compact

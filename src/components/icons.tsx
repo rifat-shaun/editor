@@ -133,6 +133,11 @@ export const Icon = {
       <path d="M4 6h16M4 12h16M4 18h16" />
     </Svg>
   ),
+  lineHeight: (p: P) => (
+    <Svg {...p}>
+      <path d="M10 6h11M10 12h11M10 18h11M4 4v16M4 4l-2 2.5M4 4l2 2.5M4 20l-2-2.5M4 20l2-2.5" />
+    </Svg>
+  ),
   bulletList: (p: P) => (
     <Svg {...p}>
       <path d="M8 6h12M8 12h12M8 18h12" />

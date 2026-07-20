@@ -30,6 +30,7 @@ import {
   type BulletDefinition,
 } from '../../extensions/bulletList/model';
 import { orderedLevels, bulletLevels } from './numbering';
+import { lineHeightToSpacing, spacePtToTwips } from './lineSpacing';
 import { fontSizeToHalfPoints, pxToTwip, toHex } from './units';
 import { DEFAULT_FONT_THEME, resolveWordFont, type DocxFontTheme } from './fontTheme';
 
@@ -172,6 +173,23 @@ function alignmentFor(attrs: Record<string, unknown> | undefined) {
   }
 }
 
+/**
+ * Word paragraph `spacing` for a block's line height + space-before/after
+ * attrs, or undefined when none are set. Per-node before/after (twips) override
+ * the style-level default; line height maps to line/lineRule.
+ */
+function spacingFor(attrs: Record<string, unknown> | undefined) {
+  const line = lineHeightToSpacing(attrs?.lineHeight as string | undefined);
+  const before = spacePtToTwips(attrs?.spaceBefore as string | undefined);
+  const after = spacePtToTwips(attrs?.spaceAfter as string | undefined);
+  if (!line && before == null && after == null) return undefined;
+  return {
+    ...(line ?? {}),
+    ...(before != null ? { before } : {}),
+    ...(after != null ? { after } : {}),
+  };
+}
+
 /* -------------------------------- lists --------------------------------- */
 
 function orderedDefFor(node: PMNode, ctx: ExportContext): ListDefinition {
@@ -239,6 +257,7 @@ function convertListItem(
         new Paragraph({
           children,
           alignment: alignmentFor(block.attrs),
+          spacing: spacingFor(block.attrs),
           // Task items aren't Word-numbered; ordinary list items number their
           // FIRST paragraph only (extra paragraphs are indented continuations).
           numbering: checked === null && first ? { reference: ref, level: depth } : undefined,
@@ -349,7 +368,9 @@ export type BlockElement = Paragraph | Table;
 export type NodeConverter = (node: PMNode, ctx: ExportContext) => BlockElement[];
 
 export const NODE_CONVERTERS: Record<string, NodeConverter> = {
-  paragraph: (n, ctx) => [new Paragraph({ children: convertInline(n.content, ctx), alignment: alignmentFor(n.attrs) })],
+  paragraph: (n, ctx) => [
+    new Paragraph({ children: convertInline(n.content, ctx), alignment: alignmentFor(n.attrs), spacing: spacingFor(n.attrs) }),
+  ],
   heading: (n, ctx) => {
     const level = Math.min(Math.max((n.attrs?.level as number) || 1, 1), 6);
     // The editor centers h1 via CSS (not a textAlign attr), so default h1 to
@@ -365,6 +386,7 @@ export const NODE_CONVERTERS: Record<string, NodeConverter> = {
         heading: HEADING_LEVELS[level - 1],
         children: convertInline(n.content, ctx),
         alignment,
+        spacing: spacingFor(n.attrs),
       }),
     ];
   },
@@ -377,6 +399,7 @@ export const NODE_CONVERTERS: Record<string, NodeConverter> = {
               style: 'Quote',
               indent: { left: 720 },
               border: { left: { style: BorderStyle.SINGLE, size: 18, space: 12, color: 'A5E8F2' } },
+              spacing: spacingFor(child.attrs),
             }),
           ]
         : NODE_CONVERTERS[child.type]?.(child, ctx) ?? [],

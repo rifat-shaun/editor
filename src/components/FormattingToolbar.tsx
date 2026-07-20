@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProp
 import { useEditorState } from '../editor/context';
 import type { AiScope } from '../types';
 import { fontSizeAtSelection, BASE_FONT_PT } from './fontSizeSelection';
+import { LineSpacingMenu } from './LineSpacingMenu';
 import { Icon } from './icons';
 import { Menu, MenuItem, MenuLabel, Segmented, ToolbarDivider, ToolButton } from './primitives';
 import { TableGridPicker } from './TableGridPicker';
@@ -24,7 +25,7 @@ const PARA_STYLE: Record<string, CSSProperties> = {
   h4: { fontSize: 13, fontWeight: 700 },
 };
 const FONT_FAMILIES = [
-  'Georgia', 'Times New Roman', 'Arial', 'Helvetica', 'Calibri', 'Cambria',
+  'Times New Roman', 'Georgia', 'Arial', 'Helvetica', 'Calibri', 'Cambria',
   'Garamond', 'Verdana', 'Tahoma', 'Courier New', 'system-ui',
 ];
 const ZOOM_LEVELS = [50, 75, 90, 100, 125, 150, 200];
@@ -50,6 +51,7 @@ const GROUP_META: { id: string; keep: number }[] = [
   { id: 'fontsize', keep: 45 },
   { id: 'format', keep: 88 },
   { id: 'align', keep: 65 },
+  { id: 'lineheight', keep: 40 },
   { id: 'lists', keep: 70 },
   { id: 'insert', keep: 50 },
 ];
@@ -144,7 +146,7 @@ export function FormattingToolbar() {
   const { editor, zoom, setZoom, outlineOpen, toggleOutline } = useEditorState();
   useForceRerenderOnSelection();
   const editorReady = !!editor;
-  const [fontFamily, setFontFamily] = useState('Georgia');
+  const [fontFamily, setFontFamily] = useState('Times New Roman');
 
   // --- Responsive priority-overflow bookkeeping ---
   const containerRef = useRef<HTMLDivElement>(null);
@@ -400,6 +402,7 @@ export function FormattingToolbar() {
         </ToolButton>
       </>
     ),
+    lineheight: <LineSpacingMenu editor={editor} />,
     lists: (
       <>
         <span className="inline-flex items-center">

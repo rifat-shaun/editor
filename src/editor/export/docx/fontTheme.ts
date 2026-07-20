@@ -33,14 +33,15 @@ export interface DocxFontTheme {
   cssFontToWord: Record<string, string>;
 }
 
-/** Mirrors styles.css: Georgia body @16px, bold Georgia headings, Courier code. */
+/** Mirrors styles.css: Times New Roman body @12pt, bold TNR headings, Courier code. */
 export const DEFAULT_FONT_THEME: DocxFontTheme = {
-  bodyFont: 'Georgia',
-  headingFont: 'Georgia',
+  bodyFont: 'Times New Roman',
+  headingFont: 'Times New Roman',
   monoFont: 'Courier New',
   bodySizePt: 12, // mirrors .docs-page-content font-size (12pt = 16px)
   textColor: '1A212B',
-  lineHeight: 1.85,
+  lineHeight: 1.15, // mirrors .docs-page-content base (MS Word default) → 276/AUTO
+
   paraAfterPx: 16,
   headings: {
     1: { sizePt: 21, bold: true }, // 28px
@@ -63,7 +64,7 @@ export const DEFAULT_FONT_THEME: DocxFontTheme = {
     'segoe ui': 'Segoe UI',
     roboto: 'Arial', // web font not in Word → substitute
     inter: 'Calibri', // web font not in Word → substitute
-    serif: 'Georgia',
+    serif: 'Times New Roman',
     'sans-serif': 'Arial',
     monospace: 'Courier New',
     'courier new': 'Courier New',

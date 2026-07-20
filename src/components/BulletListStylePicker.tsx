@@ -387,7 +387,7 @@ function CustomizeDialog({
             {/* Live preview */}
             <div style={{ background: '#f7f9fa', border: '1px solid #eceff1', borderRadius: 8, padding: '10px 12px' }}>
               <div style={{ ...LABEL_STYLE, marginBottom: 6 }}>Preview</div>
-              <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 13.5, color: '#1f2933', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <div style={{ fontFamily: "'Times New Roman', Georgia, serif", fontSize: 13.5, color: '#1f2933', display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {[0, 1, 2].map((d) => {
                   const lc = draft[d] ?? draft[draft.length - 1]!;
                   const isActive = active === d;

@@ -689,7 +689,7 @@ function CustomizeDialog({
               <div style={{ ...LABEL_STYLE, marginBottom: 6 }}>Preview</div>
               <div
                 style={{
-                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontFamily: "'Times New Roman', Georgia, serif",
                   fontSize: 13.5,
                   color: '#1f2933',
                   display: 'flex',

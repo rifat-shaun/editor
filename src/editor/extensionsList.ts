@@ -13,6 +13,8 @@ import { CustomDocument, CustomOrderedList } from './extensions/listNumbering/ex
 import { CustomBulletList } from './extensions/bulletList/extension';
 import { ListPaste } from './extensions/listPaste';
 import { FontSize } from './extensions/fontSize';
+import { LineHeight } from './extensions/lineHeight';
+import { ParagraphSpacing } from './extensions/paragraphSpacing';
 import { PageBreak } from './extensions/pageBreak';
 import { SelectionHighlight } from './extensions/selectionHighlight';
 
@@ -37,6 +39,8 @@ export function buildExtensions() {
     Underline,
     TextStyle,
     FontSize, // adds a font-size attribute to textStyle so pasted sizes survive
+    LineHeight, // block-level line-height attr on paragraph/heading (unitless)
+    ParagraphSpacing, // block-level space before/after (margin-top/bottom, pt)
     Link.configure({ openOnClick: false, autolink: true }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     TaskList,

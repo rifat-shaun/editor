@@ -59,7 +59,7 @@ source of truth (mirror it if `styles.css` changes):
   number = Word number = same physical size. The only px that appears is in
   **imported** content (pasted Word/web); those `"…px"` marks are treated as
   visual-parity (px × 0.75 → pt). One helper, one code path — no drift.
-- **Body**: Georgia @ 12pt (16px). **Headings**: Georgia bold — h1 21pt, h2 18pt,
+- **Body**: Times New Roman @ 12pt (16px). **Headings**: Times New Roman bold — h1 21pt, h2 18pt,
   h3 15pt, h4 12pt. **Code**: Courier New. These set the docx default run + the
   `Heading1..6` styles, so unstyled text matches the editor.
 - **Font choice**: the toolbar Font `<select>` sets a whole-editor DOM style
@@ -93,8 +93,10 @@ source of truth (mirror it if `styles.css` changes):
   sub-branch. Homogeneous trees (incl. composite `1.a.i`) are exact.
 - **Absent editor features** (not gaps — the schema has no such marks): text
   highlight, super/subscript, and text color aren't in the editor, so they aren't
-  exported. Paragraph spacing/indent aren't per-node attributes; spacing is set
-  at the style level to match the editor (line-height 1.85, 16px after).
+  exported. Indent isn't a per-node attribute; the default line spacing is set
+  at the style level to match the editor's base (line-height 1.15 = MS Word's
+  default, 16px after). An explicit per-block `lineHeight` attr overrides it
+  inline (see `lineSpacing.ts`).
 
 ## Numbering restart / continue
 

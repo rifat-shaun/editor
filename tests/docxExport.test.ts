@@ -97,10 +97,10 @@ describe('font theme', () => {
 
   it('document default run + heading styles use the theme fonts/sizes', async () => {
     const { styles } = await pack({ type: 'doc', content: [p('x')] });
-    // Default run: Georgia @ 24 half-points (12pt), body color.
-    expect(styles).toMatch(/<w:rFonts[^>]*w:ascii="Georgia"/);
+    // Default run: Times New Roman @ 24 half-points (12pt), body color.
+    expect(styles).toMatch(/<w:rFonts[^>]*w:ascii="Times New Roman"/);
     expect(styles).toMatch(/w:sz w:val="24"/);
-    // Heading 1: Georgia, 42 half-points (21pt), bold.
+    // Heading 1: Times New Roman, 42 half-points (21pt), bold.
     expect(styles).toMatch(/w:styleId="Heading1"[\s\S]*?w:sz w:val="42"/);
   });
 
@@ -362,5 +362,69 @@ describe('full pipeline → OOXML parts', () => {
     const { numbering } = await pack(doc);
     expect(numbering).toMatch(/w:numFmt w:val="bullet"/);
     expect(numbering).toMatch(/w:val="→"/);
+  });
+});
+
+/* ------------------------------ line spacing ------------------------------ */
+
+describe('line-height → Word line spacing (integration)', () => {
+  it('emits AUTO spacing for a unitless multiplier on a paragraph', async () => {
+    const doc = {
+      type: 'doc',
+      content: [{ type: 'paragraph', attrs: { lineHeight: '1.5' }, content: [{ type: 'text', text: 'spaced' }] }],
+    };
+    const { document } = await pack(doc);
+    expect(document).toMatch(/w:spacing[^>]*w:line="360"[^>]*w:lineRule="auto"/);
+  });
+
+  it('emits AUTO spacing on a heading and EXACT for a px value', async () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2, lineHeight: '2' }, content: [{ type: 'text', text: 'H' }] },
+        { type: 'paragraph', attrs: { lineHeight: '24px' }, content: [{ type: 'text', text: 'exact' }] },
+      ],
+    };
+    const { document } = await pack(doc);
+    expect(document).toMatch(/w:line="480"[^>]*w:lineRule="auto"/);
+    expect(document).toMatch(/w:line="360"[^>]*w:lineRule="exact"/);
+  });
+
+  it('omits spacing when no line height is set', async () => {
+    const { document } = await pack({ type: 'doc', content: [p('plain')] });
+    expect(document).not.toMatch(/w:lineRule/);
+  });
+
+  it('emits paragraph space before/after as twips (12pt → 240)', async () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { spaceBefore: '12pt', spaceAfter: '6pt' },
+          content: [{ type: 'text', text: 'spaced' }],
+        },
+      ],
+    };
+    const { document } = await pack(doc);
+    expect(document).toMatch(/w:spacing[^>]*w:before="240"/);
+    expect(document).toMatch(/w:spacing[^>]*w:after="120"/);
+  });
+
+  it('merges line height + space before/after on one paragraph', async () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { lineHeight: '1.5', spaceBefore: '18pt', spaceAfter: '0pt' },
+          content: [{ type: 'text', text: 'x' }],
+        },
+      ],
+    };
+    const { document } = await pack(doc);
+    expect(document).toMatch(/w:before="360"/); // 18pt
+    expect(document).toMatch(/w:after="0"/);
+    expect(document).toMatch(/w:line="360"[^>]*w:lineRule="auto"/); // 1.5
   });
 });

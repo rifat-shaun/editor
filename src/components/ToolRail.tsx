@@ -3,6 +3,7 @@ import { useEditorState } from '../editor/context';
 import { Icon, type IconName } from './icons';
 import { PageSetupPanel } from './PageSetupPanel';
 import { ExportPanelBody } from './ExportPanel';
+import { TextField } from './TextField';
 
 type PanelKey = 'pageSetup' | 'comments' | 'find' | 'history' | 'export' | 'share';
 
@@ -75,11 +76,7 @@ export function ToolRail() {
               </p>
             )}
             {active === 'find' && (
-              <input
-                type="text"
-                placeholder="Find in document…"
-                className="w-full rounded-md border border-border px-2.5 py-1.5 text-[13px] outline-none focus:border-primary-border"
-              />
+              <TextField type="search" aria-label="Find in document" placeholder="Find in document…" />
             )}
             {active === 'share' && (
               <p className="text-[12px] text-muted">Use the Share button in the top bar.</p>

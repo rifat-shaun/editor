@@ -3,6 +3,7 @@ import { useEditorState } from '../editor/context';
 import type { EditorMode } from '../types';
 import { Icon } from './icons';
 import { Menu, MenuItem, ToolButton } from './primitives';
+import { TextField } from './TextField';
 import { MenuBar } from '../menus/MenuBar';
 import { MENUS } from '../menus/menuData';
 
@@ -133,7 +134,7 @@ export function TopBar() {
       <div className="flex min-w-0 flex-col justify-center">
         <div className="flex items-center gap-2">
           {editing ? (
-            <input
+            <TextField
               ref={inputRef}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -145,7 +146,8 @@ export function TopBar() {
                   setEditing(false);
                 }
               }}
-              className="w-64 rounded border border-primary-border px-1 text-[14px] font-semibold text-ink outline-none"
+              className="w-64"
+              inputClassName="font-semibold text-ink"
               aria-label="Document title"
             />
           ) : (

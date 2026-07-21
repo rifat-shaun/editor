@@ -5,6 +5,7 @@ import { useDismissable } from '../hooks/useDismissable';
 import { Icon } from './icons';
 import { AnchoredPopover } from './NumberedListStylePicker';
 import { Select } from './Select';
+import { TextField } from './TextField';
 import {
   BULLET_PRESETS,
   defaultBulletLevelConfig,
@@ -227,17 +228,6 @@ function CustomizeDialog({
 
   const previewText = ['Overview', 'Key details', 'Sub-point'];
 
-  const input: CSSProperties = {
-    width: '100%',
-    height: 34,
-    padding: '0 10px',
-    borderRadius: 7,
-    border: '1px solid var(--ui-border-strong)',
-    background: 'var(--ui-surface)',
-    fontSize: 12.5,
-    color: 'var(--color-ink)',
-  };
-
   return createPortal(
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center"
@@ -344,13 +334,15 @@ function CustomizeDialog({
             {cfg.markerStyle === 'custom' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={LABEL_STYLE}>Custom marker</div>
-                <input
+                <TextField
                   aria-label="Custom marker"
                   value={cfg.customMarker ?? ''}
                   maxLength={2}
                   placeholder="e.g. → ▪ ✓"
                   onChange={(e) => patch({ customMarker: e.target.value })}
-                  style={{ ...input, width: 90, textAlign: 'center' }}
+                  fullWidth={false}
+                  className="w-[90px]"
+                  inputClassName="text-center"
                 />
               </div>
             )}

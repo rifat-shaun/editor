@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom';
 import type { Editor } from '@tiptap/core';
 import { useDismissable } from '../hooks/useDismissable';
 import { Select } from '../components/Select';
+import { TextField } from '../components/TextField';
 import {
   type PageSetup,
   type MarginPresetKey,
@@ -325,24 +326,11 @@ function NumberField({
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <span style={{ fontSize: 10.5, color: error ? 'var(--ui-danger)' : 'var(--color-muted)' }}>{label}</span>
-      <input
-        type="text"
+      <TextField
         inputMode="decimal"
         value={value}
-        aria-invalid={error || undefined}
+        error={error}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          border: `1px solid ${error ? 'var(--ui-danger-border)' : 'var(--ui-border-strong)'}`,
-          borderRadius: 6,
-          padding: '6px 9px',
-          fontSize: 12.5,
-          color: 'var(--color-ink)',
-          fontFamily: FONT,
-          outline: 'none',
-          background: error ? 'var(--ui-danger-field)' : 'var(--ui-surface)',
-          width: '100%',
-          boxSizing: 'border-box',
-        }}
       />
     </label>
   );

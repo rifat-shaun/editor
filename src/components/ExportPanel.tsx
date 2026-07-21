@@ -12,6 +12,7 @@ import { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useEditorState } from '../editor/context';
 import { Icon } from './icons';
 import { serialize, downloadFile } from '../editor/serialize';
+import { TextField } from './TextField';
 
 type FormatId = 'pdf' | 'docx' | 'md' | 'txt';
 
@@ -40,21 +41,10 @@ const LABEL: CSSProperties = {
   letterSpacing: '.05em',
 };
 
-function slugify(title: string): string {
-  // Collapse every run of non-alphanumerics (spaces, punctuation, em-dashes, ×…)
-  // into a single dash; keep unicode letters/digits so non-Latin titles survive.
-  const s = title
-    .trim()
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 120)
-    .replace(/-+$/, '');
-  return s || 'document';
-}
 function stripIllegal(name: string): string {
   return name.replace(/[\\/:*?"<>|]+/g, '').trim();
 }
+
 function formatBytes(n: number): string {
   if (n < 1024) return `~${n} B`;
   if (n < 1024 * 1024) return `~${Math.round(n / 1024)} KB`;
@@ -64,7 +54,7 @@ function formatBytes(n: number): string {
 export function ExportPanelBody() {
   const { editor, title } = useEditorState();
   const [format, setFormat] = useState<FormatId>('pdf');
-  const [filename, setFilename] = useState(() => slugify(title));
+  const [filename, setFilename] = useState(title || 'Untitled');
   const [done, setDone] = useState(false);
   const doneTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -97,7 +87,7 @@ export function ExportPanelBody() {
   };
 
   const download = () => {
-    const name = stripIllegal(filename) || slugify(title);
+    const name = stripIllegal(filename) || title || 'Untitled';
     switch (format) {
       case 'pdf':
         window.print(); // browser "Save as PDF"
@@ -184,19 +174,13 @@ export function ExportPanelBody() {
             <span style={LABEL}>File name</span>
             <span style={{ fontSize: 10.5, color: 'var(--ui-faint)' }}>{formatBytes(estimate)}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'stretch', border: '1px solid var(--ui-border-strong)', borderRadius: 7, overflow: 'hidden' }}>
-            <input
-              type="text"
-              aria-label="File name"
-              value={filename}
-              onChange={(e) => setFilename(e.target.value)}
-              onBlur={() => setFilename((n) => stripIllegal(n) || slugify(title))}
-              style={{ flex: 1, minWidth: 0, padding: '7px 10px', fontSize: 12, color: 'var(--color-ink)', background: 'var(--ui-surface)', border: 'none', outline: 'none', font: 'inherit' }}
-            />
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '7px 9px', fontSize: 12, color: 'var(--color-muted)', background: 'var(--color-chrome)', borderLeft: '1px solid var(--ui-divider)' }}>
-              .{def.ext}
-            </span>
-          </div>
+          <TextField
+            aria-label="File name"
+            value={filename}
+            onChange={(e) => setFilename(e.target.value)}
+            onBlur={() => setFilename((n) => stripIllegal(n) || title || 'Untitled')}
+            suffix={`.${def.ext}`}
+          />
         </div>
       </div>
 

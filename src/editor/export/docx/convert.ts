@@ -190,6 +190,21 @@ function spacingFor(attrs: Record<string, unknown> | undefined) {
   };
 }
 
+/** Word paragraph `indent` (twips) for a block's indent attrs, or undefined.
+ *  1px = 15 twips; first-line >0 → firstLine, <0 → hanging. */
+function indentFor(attrs: Record<string, unknown> | undefined) {
+  const toTw = (v: unknown) => Math.round((typeof v === 'number' ? v : 0) * 15);
+  const left = toTw(attrs?.indentLeft);
+  const right = toTw(attrs?.indentRight);
+  const first = (attrs?.indentFirstLine as number) || 0;
+  if (!left && !right && !first) return undefined;
+  return {
+    ...(left ? { left } : {}),
+    ...(right ? { right } : {}),
+    ...(first > 0 ? { firstLine: toTw(first) } : first < 0 ? { hanging: toTw(-first) } : {}),
+  };
+}
+
 /* -------------------------------- lists --------------------------------- */
 
 function orderedDefFor(node: PMNode, ctx: ExportContext): ListDefinition {
@@ -369,7 +384,7 @@ export type NodeConverter = (node: PMNode, ctx: ExportContext) => BlockElement[]
 
 export const NODE_CONVERTERS: Record<string, NodeConverter> = {
   paragraph: (n, ctx) => [
-    new Paragraph({ children: convertInline(n.content, ctx), alignment: alignmentFor(n.attrs), spacing: spacingFor(n.attrs) }),
+    new Paragraph({ children: convertInline(n.content, ctx), alignment: alignmentFor(n.attrs), spacing: spacingFor(n.attrs), indent: indentFor(n.attrs) }),
   ],
   heading: (n, ctx) => {
     const level = Math.min(Math.max((n.attrs?.level as number) || 1, 1), 6);
@@ -387,6 +402,7 @@ export const NODE_CONVERTERS: Record<string, NodeConverter> = {
         children: convertInline(n.content, ctx),
         alignment,
         spacing: spacingFor(n.attrs),
+        indent: indentFor(n.attrs),
       }),
     ];
   },

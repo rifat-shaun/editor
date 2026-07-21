@@ -427,4 +427,19 @@ describe('line-height → Word line spacing (integration)', () => {
     expect(document).toMatch(/w:after="0"/);
     expect(document).toMatch(/w:line="360"[^>]*w:lineRule="auto"/); // 1.5
   });
+
+  it('emits paragraph indent as twips (1px = 15tw); signed first-line → firstLine/hanging', async () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', attrs: { indentLeft: 96, indentRight: 48, indentFirstLine: 48 }, content: [{ type: 'text', text: 'a' }] },
+        { type: 'paragraph', attrs: { indentLeft: 96, indentFirstLine: -48 }, content: [{ type: 'text', text: 'b' }] },
+      ],
+    };
+    const { document } = await pack(doc);
+    expect(document).toMatch(/w:ind[^>]*w:left="1440"/); // 96px → 1in
+    expect(document).toMatch(/w:ind[^>]*w:right="720"/);
+    expect(document).toMatch(/w:ind[^>]*w:firstLine="720"/); // +48px
+    expect(document).toMatch(/w:ind[^>]*w:hanging="720"/); // -48px
+  });
 });

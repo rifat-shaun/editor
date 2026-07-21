@@ -104,7 +104,8 @@ export const COMMANDS: Record<string, Command> = {
   'view.mode.suggesting': { run: ({ ui }) => ui.setMode('suggesting'), isChecked: ({ ui }) => ui.mode === 'suggesting' },
   'view.mode.viewing': { run: ({ ui }) => ui.setMode('viewing'), isChecked: ({ ui }) => ui.mode === 'viewing' },
   'view.showOutline': { run: ({ ui }) => ui.toggleOutline(), isChecked: ({ ui }) => ui.outlineOpen },
-  'view.showRuler': {}, 'view.showNonPrinting': {}, 'view.showSuggestedEdits': {}, // unbuilt toggles
+  'view.showRuler': { run: ({ ui }) => ui.toggleRuler(), isChecked: ({ ui }) => ui.showRuler },
+  'view.showNonPrinting': {}, 'view.showSuggestedEdits': {}, // unbuilt toggles
   'view.zoom.50': { run: ({ ui }) => ui.setZoom(50), isChecked: ({ ui }) => ui.zoom === 50 },
   'view.zoom.75': { run: ({ ui }) => ui.setZoom(75), isChecked: ({ ui }) => ui.zoom === 75 },
   'view.zoom.100': { run: ({ ui }) => ui.setZoom(100), isChecked: ({ ui }) => ui.zoom === 100 },
@@ -150,7 +151,8 @@ export const COMMANDS: Record<string, Command> = {
   'align.center': { run: ({ editor }) => chain(editor).setTextAlign('center').run(), isChecked: ({ editor }) => editor.isActive({ textAlign: 'center' }) },
   'align.right': { run: ({ editor }) => chain(editor).setTextAlign('right').run(), isChecked: ({ editor }) => editor.isActive({ textAlign: 'right' }) },
   'align.justify': { run: ({ editor }) => chain(editor).setTextAlign('justify').run(), isChecked: ({ editor }) => editor.isActive({ textAlign: 'justify' }) },
-  'align.indent': {}, 'align.outdent': {}, // not built
+  'align.indent': { run: ({ editor }) => editor.chain().focus().indentMore().run() },
+  'align.outdent': { run: ({ editor }) => editor.chain().focus().indentLess().run() },
   'spacing.line.1': { run: ({ editor }) => chain(editor).setLineHeight('1').run(), isChecked: ({ editor }) => lineHeightAtSelection(editor) === '1' },
   'spacing.line.1.15': { run: ({ editor }) => chain(editor).setLineHeight('1.15').run(), isChecked: ({ editor }) => lineHeightAtSelection(editor) === '1.15' },
   'spacing.line.1.5': { run: ({ editor }) => chain(editor).setLineHeight('1.5').run(), isChecked: ({ editor }) => lineHeightAtSelection(editor) === '1.5' },

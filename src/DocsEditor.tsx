@@ -5,6 +5,7 @@ import type { DocsEditorProps } from './types';
 import { TopBar } from './components/TopBar';
 import { FormattingToolbar } from './components/FormattingToolbar';
 import { OutlinePanel } from './components/OutlinePanel';
+import { Ruler } from './components/Ruler';
 import { ToolRail } from './components/ToolRail';
 import { StatusBar } from './components/StatusBar';
 import { SuggestionColumn } from './components/SuggestionColumn';
@@ -80,19 +81,22 @@ function DocsEditorShell({ className }: { className?: string }) {
       <div data-docs-body className="relative flex min-h-0 flex-1 overflow-hidden bg-desk">
         <OutlinePanel />
 
-        <div ref={scrollerRef} data-docs-scroll className="relative flex-1 overflow-auto docs-scroll">
-          {/* w-max + mx-auto centers the page yet still lets the user scroll
-              to its left edge when the viewport is narrower than the content
-              (plain flex justify-center would clip the left, unreachable).
-              The page frame + multi-page breaks are owned by the Pagination
-              extension (it styles the ProseMirror element as `.pgn-paginated`),
-              so there is no wrapper sheet here and zoom is applied by the
-              engine's transform — see context.tsx. */}
-          <div className="mx-auto flex w-max gap-4 px-4 py-6 lg:gap-6 lg:px-8 lg:py-10">
-            <div className="shrink-0">
-              <EditorContent editor={editor} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Ruler scrollerRef={scrollerRef} />
+          <div ref={scrollerRef} data-docs-scroll className="relative flex-1 overflow-auto docs-scroll">
+            {/* w-max + mx-auto centers the page yet still lets the user scroll
+                to its left edge when the viewport is narrower than the content
+                (plain flex justify-center would clip the left, unreachable).
+                The page frame + multi-page breaks are owned by the Pagination
+                extension (it styles the ProseMirror element as `.pgn-paginated`),
+                so there is no wrapper sheet here and zoom is applied by the
+                engine's transform — see context.tsx. */}
+            <div className="mx-auto flex w-max gap-4 px-4 py-3 lg:gap-6 lg:px-8 lg:py-6">
+              <div className="shrink-0">
+                <EditorContent editor={editor} />
+              </div>
+              <SuggestionColumn scrollerRef={scrollerRef} />
             </div>
-            <SuggestionColumn scrollerRef={scrollerRef} />
           </div>
         </div>
 

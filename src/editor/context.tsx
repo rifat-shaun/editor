@@ -14,6 +14,26 @@ import { buildExtensions } from './extensionsList';
 import { Pagination } from './pagination/extension';
 import { useAiSession, type AiSession } from './useAiSession';
 import type { AiProvider, EditorMode, JSONContent } from '../types';
+import type { RulerUnit } from '../components/rulerUnits';
+
+/** Persisted ruler preferences (first localStorage use — guarded for SSR/tests). */
+const RULER_VISIBLE_KEY = 'docs-editor:ruler-visible';
+const RULER_UNIT_KEY = 'docs-editor:ruler-unit';
+function readPref<T>(key: string, fallback: T, parse: (raw: string) => T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw == null ? fallback : parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+function writePref(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* ignore (private mode / SSR) */
+  }
+}
 
 export interface OutlineItem {
   id: string;
@@ -37,6 +57,11 @@ export interface EditorStateValue {
   toggleOutline(): void;
   zoom: number;
   setZoom(zoom: number): void;
+  /** Word-style ruler: visibility (View → Show ruler) + measurement unit. */
+  showRuler: boolean;
+  toggleRuler(): void;
+  rulerUnit: RulerUnit;
+  setRulerUnit(unit: RulerUnit): void;
   ai: AiSession;
 }
 
@@ -67,6 +92,10 @@ export function EditorProvider(props: {
   const [mode, setMode] = useState<EditorMode>(initialMode);
   const [title, setTitleState] = useState(props.title);
   const [zoom, setZoom] = useState(100);
+  const [showRuler, setShowRuler] = useState(() => readPref(RULER_VISIBLE_KEY, false, (r) => r === 'true'));
+  const [rulerUnit, setRulerUnitState] = useState<RulerUnit>(() =>
+    readPref<RulerUnit>(RULER_UNIT_KEY, 'in', (r) => (r === 'cm' ? 'cm' : 'in')),
+  );
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [docVersion, setDocVersion] = useState(0);
   const [outlineOpen, setOutlineOpen] = useState(
@@ -84,6 +113,18 @@ export function EditorProvider(props: {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  const toggleRuler = () => {
+    setShowRuler((v) => {
+      const next = !v;
+      writePref(RULER_VISIBLE_KEY, String(next));
+      return next;
+    });
+  };
+  const setRulerUnit = (unit: RulerUnit) => {
+    setRulerUnitState(unit);
+    writePref(RULER_UNIT_KEY, unit);
+  };
 
   const toggleOutline = () => {
     outlineUserSet.current = true;
@@ -211,11 +252,15 @@ export function EditorProvider(props: {
       toggleOutline,
       zoom,
       setZoom,
+      showRuler,
+      toggleRuler,
+      rulerUnit,
+      setRulerUnit,
       ai,
     }),
-    // setTitle / toggleOutline intentionally excluded to avoid churn.
+    // setTitle / toggleOutline / toggleRuler intentionally excluded to avoid churn.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editor, mode, title, wordCount, charCount, pageCount, savedAt, outline, outlineOpen, zoom, ai],
+    [editor, mode, title, wordCount, charCount, pageCount, savedAt, outline, outlineOpen, zoom, showRuler, rulerUnit, ai],
   );
 
   return <EditorContext.Provider value={value}>{props.children}</EditorContext.Provider>;

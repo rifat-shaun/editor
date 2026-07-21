@@ -11,10 +11,12 @@ interface RailItem {
   key: PanelKey;
   icon: IconName;
   label: string;
+  /** Panel that performs edits → disabled in view mode. */
+  edits?: boolean;
 }
 
 const ITEMS: RailItem[] = [
-  { key: 'pageSetup', icon: 'pageSetup', label: 'Page setup' },
+  { key: 'pageSetup', icon: 'pageSetup', label: 'Page setup', edits: true },
   { key: 'comments', icon: 'comment', label: 'Comments' },
   { key: 'find', icon: 'find', label: 'Find & replace' },
   { key: 'history', icon: 'history', label: 'Version history' },
@@ -23,8 +25,14 @@ const ITEMS: RailItem[] = [
 ];
 
 export function ToolRail() {
-  const { editor } = useEditorState();
+  const { editor, mode } = useEditorState();
+  const viewing = mode === 'viewing';
   const [active, setActive] = useState<PanelKey | null>(null);
+
+  // Close an edit-only panel (e.g. Page setup) when switching to view mode.
+  useEffect(() => {
+    if (viewing && active && ITEMS.find((i) => i.key === active)?.edits) setActive(null);
+  }, [viewing, active]);
 
   // Escape closes the open panel.
   useEffect(() => {
@@ -90,17 +98,23 @@ export function ToolRail() {
         {ITEMS.map((it) => {
           const IconCmp = Icon[it.icon];
           const isActive = active === it.key;
+          const disabled = viewing && !!it.edits; // no page-geometry edits in view mode
           return (
             <button
               key={it.key}
               type="button"
-              title={it.label}
+              title={disabled ? `${it.label} (view mode)` : it.label}
               aria-label={it.label}
               aria-expanded={isActive}
+              disabled={disabled}
               onClick={() => setActive((cur) => (cur === it.key ? null : it.key))}
               className={[
                 'flex h-9 w-9 items-center justify-center rounded-md transition-colors',
-                isActive ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-[var(--ui-hover)] hover:text-ui',
+                disabled
+                  ? 'cursor-not-allowed text-[var(--ui-disabled)]'
+                  : isActive
+                    ? 'bg-primary-soft text-primary'
+                    : 'text-muted hover:bg-[var(--ui-hover)] hover:text-ui',
               ].join(' ')}
             >
               <IconCmp size={18} />

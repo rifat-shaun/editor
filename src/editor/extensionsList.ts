@@ -18,6 +18,7 @@ import { PageSetupBridge } from './extensions/pageSetupBridge';
 import { NonPrinting } from './extensions/nonPrinting';
 import { PageBreak } from './extensions/pageBreak';
 import { SelectionHighlight } from './extensions/selectionHighlight';
+import { ReadOnlyGuard } from './extensions/readOnlyGuard';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -58,6 +59,7 @@ export function buildExtensions() {
     ...buildTableExtensions(),
     PageBreak,
     SelectionHighlight,
+    ReadOnlyGuard, // view mode: block programmatic doc mutations (toolbar/⌘B/menu)
     ListPaste,
   ];
 }

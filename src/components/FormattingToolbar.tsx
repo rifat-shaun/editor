@@ -71,7 +71,8 @@ function useForceRerenderOnSelection() {
 }
 
 export function FormattingToolbar() {
-  const { editor, zoom, setZoom, outlineOpen, toggleOutline } = useEditorState();
+  const { editor, mode, zoom, setZoom, outlineOpen, toggleOutline } = useEditorState();
+  const viewing = mode === 'viewing';
   useForceRerenderOnSelection();
   const editorReady = !!editor;
   const [fontFamily, setFontFamily] = useState('Times New Roman');
@@ -127,6 +128,9 @@ export function FormattingToolbar() {
   }, [recompute, editorReady]);
 
   if (!editor) return <div className="print-hide h-10 border-b border-border bg-chrome" />;
+  // View mode is read-only → hide the formatting toolbar entirely (zoom lives in
+  // the status bar; the outline toggle lives in the View menu).
+  if (viewing) return null;
 
   const chain = () => editor.chain().focus();
   // Font size (POINTS) at the caret/selection: the fontSize mark if set, else the

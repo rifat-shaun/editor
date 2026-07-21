@@ -194,9 +194,30 @@ export function getCommand(id: string): Command | undefined {
   return COMMANDS[id];
 }
 
+// Command id namespaces whose actions mutate the document — disabled in view
+// mode. `edit.` and `file.` are mixed (copy / select-all / print / download are
+// read-only), so those are listed explicitly rather than by prefix.
+const EDIT_PREFIXES = ['format.', 'style.', 'align.', 'spacing.', 'list.', 'table.', 'insert.'];
+const EDIT_IDS = new Set([
+  'edit.undo',
+  'edit.redo',
+  'edit.cut',
+  'edit.paste',
+  'edit.pasteNoFormat',
+  'file.rename',
+  'file.pageSetup',
+]);
+
+/** True when a command edits the document (so it's disabled in view mode). */
+export function commandEditsDoc(id: string): boolean {
+  return EDIT_IDS.has(id) || EDIT_PREFIXES.some((p) => id.startsWith(p));
+}
+
 /** Whether an item id should render enabled. */
 export function isItemEnabled(id: string, ctx: CmdCtx): boolean {
   const cmd = COMMANDS[id];
   if (!cmd || !cmd.run) return false;
+  // View mode is read-only: every document-editing command is disabled.
+  if (ctx.ui.mode === 'viewing' && commandEditsDoc(id)) return false;
   return cmd.isEnabled ? cmd.isEnabled(ctx) : true;
 }

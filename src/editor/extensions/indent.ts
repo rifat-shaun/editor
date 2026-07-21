@@ -106,6 +106,12 @@ export const Indent = Extension.create({
       },
     ];
   },
+  addKeyboardShortcuts() {
+    return {
+      'Mod-]': () => this.editor.commands.indentMore(),
+      'Mod-[': () => this.editor.commands.indentLess(),
+    };
+  },
   addCommands() {
     return {
       setParagraphIndent:

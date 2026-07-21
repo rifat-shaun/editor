@@ -7,7 +7,7 @@ export function StatusBar() {
   return (
     <footer className="print-hide flex h-8 shrink-0 items-center justify-between border-t border-border bg-chrome px-3 text-[11px] text-[#7a848d]">
       <span>
-        Page 4 of {Math.max(pageCount, 12)} · {wordCount.toLocaleString()} words · English (US)
+        {pageCount.toLocaleString()} {pageCount === 1 ? 'page' : 'pages'} · {wordCount.toLocaleString()} words · English (US)
       </span>
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">

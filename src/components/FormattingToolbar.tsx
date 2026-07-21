@@ -50,7 +50,7 @@ const GROUP_META: { id: string; keep: number }[] = [
   { id: 'font', keep: 40 },
   { id: 'fontsize', keep: 45 },
   { id: 'format', keep: 88 },
-  { id: 'align', keep: 65 },
+  { id: 'align', keep: 90 },
   { id: 'lineheight', keep: 40 },
   { id: 'lists', keep: 70 },
   { id: 'insert', keep: 50 },
@@ -400,6 +400,12 @@ export function FormattingToolbar() {
         >
           <Icon.alignJustify size={16} />
         </ToolButton>
+        <ToolButton label="Decrease indent (⌘[)" onClick={() => chain().indentLess().run()}>
+          <Icon.indentDecrease size={16} />
+        </ToolButton>
+        <ToolButton label="Increase indent (⌘])" onClick={() => chain().indentMore().run()}>
+          <Icon.indentIncrease size={16} />
+        </ToolButton>
       </>
     ),
     lineheight: <LineSpacingMenu editor={editor} />,
@@ -480,7 +486,7 @@ export function FormattingToolbar() {
           <Icon.image size={16} />
         </ToolButton>
         <ToolButton label="Insert page break" onClick={() => chain().insertPageBreak().run()}>
-          <Icon.pageSetup size={16} />
+          <Icon.pageBreak size={16} />
         </ToolButton>
       </>
     ),

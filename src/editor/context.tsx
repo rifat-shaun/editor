@@ -92,6 +92,7 @@ export function EditorProvider(props: {
   const [mode, setMode] = useState<EditorMode>(initialMode);
   const [title, setTitleState] = useState(props.title);
   const [zoom, setZoom] = useState(100);
+  const [pageCount, setPageCount] = useState(1); // real count from the pagination engine
   const [showRuler, setShowRuler] = useState(() => readPref(RULER_VISIBLE_KEY, false, (r) => r === 'true'));
   const [rulerUnit, setRulerUnitState] = useState<RulerUnit>(() =>
     readPref<RulerUnit>(RULER_UNIT_KEY, 'in', (r) => (r === 'cm' ? 'cm' : 'in')),
@@ -175,6 +176,10 @@ export function EditorProvider(props: {
     const handler = ({ transaction }: { transaction: import('@tiptap/pm/state').Transaction }) => {
       aiRef.current.onTransaction(transaction);
       if (transaction.docChanged) setDocVersion((v) => v + 1);
+      // The pagination engine writes the real page count to its storage on every
+      // (debounced) recompute, which also fires a transaction — pick it up here.
+      const pc = (editor.storage.pagination as { pageCount?: number } | undefined)?.pageCount;
+      if (typeof pc === 'number') setPageCount((prev) => (prev === pc ? prev : pc));
     };
     editor.on('transaction', handler);
     return () => {
@@ -210,7 +215,10 @@ export function EditorProvider(props: {
 
   const { wordCount, charCount, outline } = useMemo(() => {
     if (!editor) return { wordCount: 0, charCount: 0, outline: [] as OutlineItem[] };
-    const text = editor.state.doc.textContent;
+    // `doc.textContent` concatenates blocks with no separator (merging the last
+    // word of one block with the first of the next), so count words from
+    // `getText()` which joins blocks with newlines. Characters count inline
+    // text (with spaces), excluding block breaks.
     const items: OutlineItem[] = [];
     editor.state.doc.descendants((node, pos) => {
       if (node.type.name === 'heading') {
@@ -226,15 +234,13 @@ export function EditorProvider(props: {
       return true;
     });
     return {
-      wordCount: text.match(WORDS)?.length ?? 0,
-      charCount: text.length,
+      wordCount: editor.getText().match(WORDS)?.length ?? 0,
+      charCount: editor.state.doc.textContent.length,
       outline: items,
     };
     // Recompute whenever the document mutates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, docVersion]);
-
-  const pageCount = Math.max(1, Math.ceil(wordCount / 500));
 
   const value = useMemo<EditorStateValue>(
     () => ({

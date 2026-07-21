@@ -105,6 +105,50 @@ button:disabled {
   background: var(--docs-selection);
 }
 
+/* ------------------------------------------------------------------ *
+ * Non-printing characters (View → Show non-printing characters).
+ * VIEW-ONLY: decorations + this root class. Never content/export; hidden
+ * in print (see the @media print rule below). Subtle gray, non-selectable.
+ * ------------------------------------------------------------------ */
+.docs-show-formatting :is(p, h1, h2, h3, h4, h5, h6)::after {
+  content: '¶';
+  color: #c2c9cf;
+  font-weight: 400;
+  margin-left: 1px;
+  user-select: none;
+  pointer-events: none;
+}
+.npc-sp,
+.npc-nbsp,
+.npc-tab {
+  position: relative;
+}
+.npc-sp::before,
+.npc-nbsp::before,
+.npc-tab::before {
+  position: absolute;
+  inset: 0;
+  text-align: center;
+  color: #c2c9cf;
+  pointer-events: none;
+  user-select: none;
+}
+.npc-sp::before {
+  content: '·';
+}
+.npc-nbsp::before {
+  content: '°';
+}
+.npc-tab::before {
+  content: '→';
+  text-align: left;
+}
+.npc-break {
+  color: #c2c9cf;
+  pointer-events: none;
+  user-select: none;
+}
+
 .docs-page-content > *:first-child {
   margin-top: 0;
 }
@@ -217,6 +261,17 @@ button:disabled {
 @media print {
   .docs-page-content .pgn-page-break {
     display: none;
+  }
+  /* Non-printing characters must never print (the print layout clones the live
+     DOM, so hide the glyphs explicitly). */
+  .docs-show-formatting :is(p, h1, h2, h3, h4, h5, h6)::after {
+    content: none !important;
+  }
+  .npc-sp::before,
+  .npc-nbsp::before,
+  .npc-tab::before,
+  .npc-break {
+    display: none !important;
   }
 }
 

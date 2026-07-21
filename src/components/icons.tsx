@@ -22,6 +22,27 @@ function Svg({ size = 16, children, ...rest }: P & { children: React.ReactNode }
   );
 }
 
+/** 16-grid wrapper for the unified toolbar icon set (design 24a). Base stroke
+ *  1.3; fill-only shapes set stroke="none", stroked details override strokeWidth. */
+function Svg16({ size = 16, children, ...rest }: P & { children: React.ReactNode }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...rest}
+    >
+      {children}
+    </svg>
+  );
+}
+
 export const Icon = {
   appGrid: (p: P) => (
     <Svg {...p}>
@@ -84,103 +105,120 @@ export const Icon = {
     </Svg>
   ),
   bold: (p: P) => (
-    <Svg {...p}>
-      <path d="M7 5h6a3.5 3.5 0 0 1 0 7H7z" />
-      <path d="M7 12h7a3.5 3.5 0 0 1 0 7H7z" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M5 3h3.6a2.35 2.35 0 010 4.7H5V3zM5 7.7h4.3a2.65 2.65 0 010 5.3H5V7.7z" strokeWidth={1.4} />
+    </Svg16>
   ),
   italic: (p: P) => (
-    <Svg {...p}>
-      <path d="M10 5h8M6 19h8M14 5l-4 14" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M6.8 3h5M4.2 13h5M9.7 3l-3.4 10" />
+    </Svg16>
   ),
   underline: (p: P) => (
-    <Svg {...p}>
-      <path d="M7 4v7a5 5 0 0 0 10 0V4" />
-      <path d="M5 21h14" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M4.5 3v4.3a3.5 3.5 0 007 0V3M3.5 13h9" />
+    </Svg16>
   ),
   strike: (p: P) => (
-    <Svg {...p}>
-      <path d="M5 12h14" />
-      <path d="M8 7a4 3 0 0 1 8 0M8 16a4 3 0 0 0 8 0" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M11.5 4.5c-.5-1-1.8-1.5-3.5-1.5-2.1 0-3.3.9-3.3 2.2 0 1 .7 1.6 2.1 2M4.5 11.5c.5 1 1.8 1.5 3.5 1.5 2.1 0 3.3-.9 3.3-2.2 0-.45-.1-.8-.35-1.1M3 8h10" />
+    </Svg16>
   ),
   textColor: (p: P) => (
-    <Svg {...p}>
-      <path d="M7 16L11 6l4 10" />
-      <path d="M8.5 12.5h5" />
-      <path d="M5 20h14" strokeWidth={3} />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M4 10.8L8 2.5l4 8.3M5.3 8.3h5.4" />
+      <path d="M3.5 13.5h9" strokeWidth={1.8} />
+    </Svg16>
   ),
   alignLeft: (p: P) => (
-    <Svg {...p}>
-      <path d="M4 6h16M4 12h10M4 18h14" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M2 3h12M2 6.3h8M2 9.7h12M2 13h8" strokeWidth={1.4} />
+    </Svg16>
   ),
   alignCenter: (p: P) => (
-    <Svg {...p}>
-      <path d="M4 6h16M7 12h10M5 18h14" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M2 3h12M4 6.3h8M2 9.7h12M4 13h8" strokeWidth={1.4} />
+    </Svg16>
   ),
   alignRight: (p: P) => (
-    <Svg {...p}>
-      <path d="M4 6h16M10 12h10M6 18h14" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M2 3h12M6 6.3h8M2 9.7h12M6 13h8" strokeWidth={1.4} />
+    </Svg16>
   ),
   alignJustify: (p: P) => (
-    <Svg {...p}>
-      <path d="M4 6h16M4 12h16M4 18h16" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M2 3h12M2 6.3h12M2 9.7h12M2 13h12" strokeWidth={1.4} />
+    </Svg16>
+  ),
+  indentDecrease: (p: P) => (
+    <Svg16 {...p}>
+      <path d="M2 2.5h12M2 13.5h12M8.5 6.2h5.5M8.5 9.8h5.5" />
+      <path d="M5.5 5.5L3 8l2.5 2.5" />
+    </Svg16>
+  ),
+  indentIncrease: (p: P) => (
+    <Svg16 {...p}>
+      <path d="M2 2.5h12M2 13.5h12M8.5 6.2h5.5M8.5 9.8h5.5" />
+      <path d="M3 5.5L5.5 8 3 10.5" />
+    </Svg16>
   ),
   lineHeight: (p: P) => (
-    <Svg {...p}>
-      <path d="M10 6h11M10 12h11M10 18h11M4 4v16M4 4l-2 2.5M4 4l2 2.5M4 20l-2-2.5M4 20l2-2.5" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M3.5 2.5v11M3.5 2.5L1.8 4.2M3.5 2.5l1.7 1.7M3.5 13.5l-1.7-1.7M3.5 13.5l1.7-1.7" />
+      <path d="M7.5 3.5h7M7.5 6.8h7M7.5 10.1h7M7.5 13.4h7" />
+    </Svg16>
   ),
   bulletList: (p: P) => (
-    <Svg {...p}>
-      <path d="M8 6h12M8 12h12M8 18h12" />
-      <circle cx="4" cy="6" r="1" fill="currentColor" />
-      <circle cx="4" cy="12" r="1" fill="currentColor" />
-      <circle cx="4" cy="18" r="1" fill="currentColor" />
-    </Svg>
+    <Svg16 {...p}>
+      <circle cx="3" cy="3.5" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="3" cy="8" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="3" cy="12.5" r="1.1" fill="currentColor" stroke="none" />
+      <path d="M6.5 3.5h7.5M6.5 8h7.5M6.5 12.5h7.5" />
+    </Svg16>
   ),
   orderedList: (p: P) => (
-    <Svg {...p}>
-      <path d="M9 6h11M9 12h11M9 18h11" />
-      <path d="M4 5v3M3.5 5.2L4 5M3.5 12h1.2L3.5 14h1.4M3.5 16.5h1.3v3.5H3.6" strokeWidth={1.3} />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M2.2 2.6l1.2-.8v3.4M2 9.2c0-.8.6-1.3 1.3-1.3.7 0 1.2.5 1.2 1.1 0 .5-.3.9-.8 1.3l-1.7 1.4h2.7" strokeWidth={1.1} />
+      <path d="M6.5 3.5h7.5M6.5 8h7.5M6.5 12.5h7.5" />
+    </Svg16>
   ),
   checklist: (p: P) => (
-    <Svg {...p}>
-      <path d="M10 6h10M10 12h10M10 18h10" />
-      <path d="M3 6l1.4 1.4L7 4.8M3 16.5l1.4 1.4L7 15.3" strokeWidth={1.5} />
-    </Svg>
+    <Svg16 {...p}>
+      <rect x="1.5" y="1.8" width="4.4" height="4.4" rx="1" strokeWidth={1.2} />
+      <path d="M2.8 3.9l.9.9 1.5-1.7" strokeWidth={1.1} />
+      <rect x="1.5" y="9.4" width="4.4" height="4.4" rx="1" strokeWidth={1.2} />
+      <path d="M8.5 4h5.5M8.5 11.6h5.5" />
+    </Svg16>
   ),
   link: (p: P) => (
-    <Svg {...p}>
-      <path d="M10 13a4 4 0 0 0 5.7.3l2.6-2.6a4 4 0 0 0-5.7-5.7l-1.3 1.3" />
-      <path d="M14 11a4 4 0 0 0-5.7-.3l-2.6 2.6a4 4 0 0 0 5.7 5.7l1.3-1.3" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M6.8 9.2a3 3 0 004.3.2l1.8-1.8a3 3 0 10-4.3-4.3l-1 1" />
+      <path d="M9.2 6.8a3 3 0 00-4.3-.2L3.1 8.4a3 3 0 104.3 4.3l1-1" />
+    </Svg16>
   ),
   quote: (p: P) => (
-    <Svg {...p}>
-      <path d="M7 7H4v6h5V7l-2 4M17 7h-3v6h5V7l-2 4" />
-    </Svg>
+    <Svg16 {...p}>
+      <path d="M3 9.5a4.5 4.5 0 013-4.2M3 9.5A2.2 2.2 0 105.2 11.7 2.2 2.2 0 003 9.5zM9.5 9.5a4.5 4.5 0 013-4.2M9.5 9.5a2.2 2.2 0 102.2 2.2 2.2 2.2 0 00-2.2-2.2z" strokeWidth={1.2} />
+    </Svg16>
   ),
   table: (p: P) => (
-    <Svg {...p}>
-      <rect x="3" y="4" width="18" height="16" rx="1.5" />
-      <path d="M3 10h18M3 15h18M9 4v16M15 4v16" />
-    </Svg>
+    <Svg16 {...p}>
+      <rect x="2" y="2" width="12" height="12" rx="1.5" />
+      <path d="M2 6h12M6.7 6v8M11.3 6v8" />
+    </Svg16>
   ),
   image: (p: P) => (
-    <Svg {...p}>
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <circle cx="8.5" cy="9.5" r="1.5" />
-      <path d="M4 18l5-5 4 4 3-3 4 4" />
-    </Svg>
+    <Svg16 {...p}>
+      <rect x="2" y="2" width="12" height="12" rx="1.5" />
+      <circle cx="5.6" cy="6" r="1.2" strokeWidth={1.1} />
+      <path d="M2.5 12.3l3.5-3.5 2.6 2.5 2.4-2.3 2.5 2.4" />
+    </Svg16>
+  ),
+  pageBreak: (p: P) => (
+    <Svg16 {...p}>
+      <path d="M3.5 5.5V3.5A1.5 1.5 0 015 2h6a1.5 1.5 0 011.5 1.5v2M12.5 10.5v2A1.5 1.5 0 0111 14H5a1.5 1.5 0 01-1.5-1.5v-2" />
+      <path d="M2 8h1.8M5.4 8h1.8M8.8 8h1.8M12.2 8H14" />
+    </Svg16>
   ),
   find: (p: P) => (
     <Svg {...p}>

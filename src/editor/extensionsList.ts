@@ -17,6 +17,7 @@ import { LineHeight } from './extensions/lineHeight';
 import { ParagraphSpacing } from './extensions/paragraphSpacing';
 import { Indent } from './extensions/indent';
 import { PageSetupBridge } from './extensions/pageSetupBridge';
+import { NonPrinting } from './extensions/nonPrinting';
 import { PageBreak } from './extensions/pageBreak';
 import { SelectionHighlight } from './extensions/selectionHighlight';
 
@@ -44,6 +45,7 @@ export function buildExtensions() {
     LineHeight, // block-level line-height attr on paragraph/heading (unitless)
     ParagraphSpacing, // block-level space before/after (margin-top/bottom, pt)
     Indent, // paragraph indents (left/right/first-line) — ruler + Align&indent
+    NonPrinting, // view-only formatting marks (¶ · → ↵) — View menu toggle
     PageSetupBridge, // doc-attr page geometry → syncs the pagination engine
     Link.configure({ openOnClick: false, autolink: true }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),

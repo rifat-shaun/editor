@@ -13,6 +13,7 @@ import type { Editor } from '@tiptap/core';
 import type { EditorStateValue } from '../editor/context';
 import { lineHeightAtSelection } from '../components/lineHeightSelection';
 import { downloadAs } from '../editor/serialize';
+import { isNonPrintingEnabled } from '../editor/extensions/nonPrinting';
 
 /** Host-provided UI actions that live outside the editor/context. */
 export interface CmdServices {
@@ -105,7 +106,11 @@ export const COMMANDS: Record<string, Command> = {
   'view.mode.viewing': { run: ({ ui }) => ui.setMode('viewing'), isChecked: ({ ui }) => ui.mode === 'viewing' },
   'view.showOutline': { run: ({ ui }) => ui.toggleOutline(), isChecked: ({ ui }) => ui.outlineOpen },
   'view.showRuler': { run: ({ ui }) => ui.toggleRuler(), isChecked: ({ ui }) => ui.showRuler },
-  'view.showNonPrinting': {}, 'view.showSuggestedEdits': {}, // unbuilt toggles
+  'view.showNonPrinting': {
+    run: ({ editor }) => editor.commands.toggleNonPrinting(),
+    isChecked: ({ editor }) => isNonPrintingEnabled(editor),
+  },
+  'view.showSuggestedEdits': {}, // unbuilt toggle
   'view.zoom.50': { run: ({ ui }) => ui.setZoom(50), isChecked: ({ ui }) => ui.zoom === 50 },
   'view.zoom.75': { run: ({ ui }) => ui.setZoom(75), isChecked: ({ ui }) => ui.zoom === 75 },
   'view.zoom.100': { run: ({ ui }) => ui.setZoom(100), isChecked: ({ ui }) => ui.zoom === 100 },

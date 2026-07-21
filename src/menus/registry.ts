@@ -129,10 +129,8 @@ export const COMMANDS: Record<string, Command> = {
   'insert.image.upload': {}, 'insert.image.byUrl': {}, // image node not built
   'insert.table': { run: ({ editor }) => chain(editor).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
   'insert.link': {
-    run: ({ editor }) => {
-      const url = window.prompt('Link URL');
-      if (url) chain(editor).setLink({ href: url }).run();
-    },
+    // Opens the custom link popover (insert or edit, decided by selection).
+    run: ({ editor }) => editor.view.dom.dispatchEvent(new CustomEvent('docs:open-link', { bubbles: true })),
   },
   'insert.hr': { run: ({ editor }) => chain(editor).setHorizontalRule().run() },
   'insert.variable': {}, 'insert.comment': {}, // unbuilt

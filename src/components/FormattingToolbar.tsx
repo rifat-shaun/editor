@@ -394,11 +394,7 @@ export function FormattingToolbar() {
         <ToolButton
           label="Insert link"
           active={editor.isActive('link')}
-          onClick={() => {
-            const url = window.prompt('Link URL');
-            if (url) chain().setLink({ href: url }).run();
-            else chain().unsetLink().run();
-          }}
+          onClick={() => editor.view.dom.dispatchEvent(new CustomEvent('docs:open-link', { bubbles: true }))}
         >
           <Icon.link size={16} />
         </ToolButton>

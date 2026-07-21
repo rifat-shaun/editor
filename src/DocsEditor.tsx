@@ -9,6 +9,7 @@ import { Ruler } from './components/Ruler';
 import { ToolRail } from './components/ToolRail';
 import { StatusBar } from './components/StatusBar';
 import { TableMenu } from './components/TableMenu';
+import { LinkLayer } from './components/LinkLayer';
 
 function DocsEditorShell({ className }: { className?: string }) {
   const { editor } = useEditorState();
@@ -49,6 +50,7 @@ function DocsEditorShell({ className }: { className?: string }) {
 
       <StatusBar />
       <TableMenu />
+      <LinkLayer />
     </div>
   );
 }

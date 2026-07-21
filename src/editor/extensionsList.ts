@@ -1,6 +1,6 @@
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
+import { LinkKit } from './extensions/link';
 import TextAlign from '@tiptap/extension-text-align';
 import TextStyle from '@tiptap/extension-text-style';
 import TaskList from '@tiptap/extension-task-list';
@@ -45,7 +45,12 @@ export function buildExtensions() {
     Indent, // paragraph indents (left/right/first-line) — ruler + Align&indent
     NonPrinting, // view-only formatting marks (¶ · → ↵) — View menu toggle
     PageSetupBridge, // doc-attr page geometry → syncs the pagination engine
-    Link.configure({ openOnClick: false, autolink: true }),
+    LinkKit.configure({
+      openOnClick: false, // clicks place the caret + show the hover card, never navigate
+      autolink: true, // type a URL + space → auto-links
+      linkOnPaste: true, // paste a URL over a selection → links it
+      HTMLAttributes: { rel: 'noopener', target: '_blank' },
+    }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     TaskList,
     TaskItem.configure({ nested: true }),

@@ -31,7 +31,7 @@ import {
 import { DRAG_DOTS_VERTICAL_SVG } from '../../components/dragDots';
 
 const HANDLE_W = 20; // ≥ 20px hit target
-const HANDLE_GAP = 6;
+const HANDLE_GAP = 1; // sit the handle right up against the table (small visual gap)
 const AUTOSCROLL_EDGE = 48; // px from the scroller edge that triggers autoscroll
 const AUTOSCROLL_STEP = 12;
 
@@ -57,6 +57,7 @@ function findTableAt($pos: ResolvedPos): { pos: number } | null {
 
 class RowReorderView {
   private scroller: HTMLElement | null;
+  private listenerHost: HTMLElement; // where the hover listeners currently live
   private layer: HTMLElement;
   private handles: HTMLElement[] = [];
   private indicator: HTMLElement;
@@ -99,14 +100,51 @@ class RowReorderView {
     // content (absolute children of a scroller scroll with it).
     (this.scroller ?? view.dom.parentElement)?.appendChild(this.layer);
 
-    const host = this.scroller ?? view.dom;
-    host.addEventListener('mousemove', this.onScrollerMove);
-    host.addEventListener('mouseleave', this.onScrollerLeave);
+    // Bootstrap the hover listeners on view.dom (always present). They're
+    // upgraded to the scroller by ensureListeners() once it's resolvable — the
+    // scroller is the common ancestor of BOTH the page and the handle layer, so
+    // moving the pointer from a cell onto a handle no longer fires a mouseleave
+    // (which previously hid the handles the instant you reached for them).
+    this.listenerHost = view.dom;
+    this.listenerHost.addEventListener('mousemove', this.onScrollerMove);
+    this.listenerHost.addEventListener('mouseleave', this.onScrollerLeave);
+  }
+
+  /** Upgrade the hover listeners onto the scroller once it's in the DOM. */
+  private ensureListeners(): void {
+    const s = this.resolveScroller();
+    if (s && s !== this.listenerHost) {
+      this.listenerHost.removeEventListener('mousemove', this.onScrollerMove);
+      this.listenerHost.removeEventListener('mouseleave', this.onScrollerLeave);
+      s.addEventListener('mousemove', this.onScrollerMove);
+      s.addEventListener('mouseleave', this.onScrollerLeave);
+      this.listenerHost = s;
+    }
+  }
+
+  /**
+   * Resolve (and cache) the scroll container. Done lazily rather than once in
+   * the constructor because the plugin view is created before the editor DOM is
+   * mounted into the scrolling layout — at construction `closest()` returns null,
+   * which left handles positioned in raw viewport coordinates (misaligned, and
+   * shifting whenever the layout changed, e.g. toggling the outline).
+   */
+  private resolveScroller(): HTMLElement | null {
+    if (!this.scroller || !this.scroller.isConnected) {
+      this.scroller = this.view.dom.closest('[data-docs-scroll]') as HTMLElement | null;
+    }
+    return this.scroller;
+  }
+
+  /** Keep the handle layer parented to the scroller so it scrolls with content. */
+  private ensureLayerHost(): void {
+    const host = this.resolveScroller() ?? this.view.dom.parentElement;
+    if (host && this.layer.parentElement !== host) host.appendChild(this.layer);
   }
 
   /* ----- geometry: viewport rect → scroller-content coordinates ----- */
   private toContent(r: DOMRect): Rect {
-    const s = this.scroller;
+    const s = this.resolveScroller();
     const base = s ? s.getBoundingClientRect() : ({ top: 0, left: 0 } as DOMRect);
     const sl = s?.scrollLeft ?? 0;
     const st = s?.scrollTop ?? 0;
@@ -128,6 +166,7 @@ class RowReorderView {
 
   /* ---------------------------- hover ---------------------------- */
   private handleHover(e: MouseEvent) {
+    this.ensureListeners(); // upgrade to the scroller once mounted
     if (this.drag || this.kbd) return; // a drag (pointer or keyboard) owns the handles
     if (!this.view.editable) return this.hideHandles(); // hidden in viewing mode
     let tablePos = this.tableUnderPointer(e.clientX, e.clientY);
@@ -167,6 +206,7 @@ class RowReorderView {
     if (!table || table.type.spec.tableRole !== 'table' || !tableDom) return this.hideHandles();
 
     this.clearHandles();
+    this.ensureLayerHost(); // (re)attach to the scroller now the DOM is mounted
     this.shownTablePos = tablePos;
 
     const pinned = headerRowCount(table);
@@ -492,9 +532,8 @@ class RowReorderView {
     this.endDrag(false);
     this.kbd = null;
     dismissTableMoveError();
-    const host = this.scroller ?? this.view.dom;
-    host.removeEventListener('mousemove', this.onScrollerMove);
-    host.removeEventListener('mouseleave', this.onScrollerLeave);
+    this.listenerHost.removeEventListener('mousemove', this.onScrollerMove);
+    this.listenerHost.removeEventListener('mouseleave', this.onScrollerLeave);
     document.body.classList.remove('pgn-row-dragging');
     this.layer.remove();
   }

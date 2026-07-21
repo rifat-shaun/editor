@@ -367,9 +367,18 @@ button:disabled {
   font-style: italic;
 }
 
+/* Applied link: teal text + a SOLID light-teal underline (deliberately distinct
+   from a variable token's dotted underline). Clicks never navigate (openOnClick
+   is off) — they place the caret and reveal the hover card. */
 .docs-page-content a {
-  color: var(--color-primary);
-  text-decoration: underline;
+  color: #0e7490;
+  text-decoration: none;
+  border-bottom: 1px solid #7ecfdd;
+  cursor: pointer;
+}
+/* Teal tint over the range the link popover is currently editing. */
+.docs-page-content .link-target-highlight {
+  background: #f2fcfd;
 }
 
 /* Task list (checklist) rendering */
@@ -629,14 +638,14 @@ body.pgn-row-dragging {
 /* ----------------------- Table context menu (right-click) ----------------------- */
 .pgn-tm {
   width: 232px;
-  background: #fff;
-  border: 1px solid #e3e7ea;
+  background: var(--ui-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   box-shadow: 0 8px 28px rgba(31, 41, 51, 0.16);
   padding: 6px;
   font-family: var(--font-ui);
   font-size: 12.5px;
-  color: #3d4652;
+  color: var(--ui-text);
 }
 /* A little breathing room between items so hover backgrounds don't touch. */
 .pgn-tm-section,
@@ -648,13 +657,13 @@ body.pgn-row-dragging {
 /* Sections after the first (and the footer) get a divider + top margin. */
 .pgn-tm-section + .pgn-tm-section,
 .pgn-tm-footer {
-  border-top: 1px solid #f2f4f5;
+  border-top: 1px solid var(--ui-divider);
   margin-top: 5px;
 }
 .pgn-tm-group {
   font-size: 10px;
   font-weight: 600;
-  color: #a3abb2;
+  color: var(--ui-faint);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 6px 10px 3px;
@@ -677,7 +686,7 @@ body.pgn-row-dragging {
 }
 .pgn-tm-item:hover,
 .pgn-tm-item:focus {
-  background: #f2f4f5;
+  background: var(--ui-hover);
   outline: none;
 }
 .pgn-tm-label {
@@ -688,30 +697,30 @@ body.pgn-row-dragging {
 .pgn-tm-ico {
   width: 14px;
   text-align: center;
-  color: #6b7580;
+  color: var(--ui-text-soft);
 }
 .pgn-tm-sc {
   font-size: 10.5px;
-  color: #a3abb2;
+  color: var(--ui-faint);
 }
 .pgn-tm-item.is-destructive,
 .pgn-tm-item.is-destructive .pgn-tm-ico {
-  color: #c62828;
+  color: var(--ui-danger);
 }
 .pgn-tm-item.is-destructive .pgn-tm-sc {
-  color: #d9a3a3;
+  color: var(--ui-danger-border);
 }
 .pgn-tm-item.is-destructive:hover,
 .pgn-tm-item.is-destructive:focus {
-  background: #fdecea;
+  background: var(--ui-danger-bg);
 }
 .pgn-tm-item:disabled {
-  color: #c2c9cf;
+  color: var(--ui-disabled);
   cursor: default;
 }
 .pgn-tm-item:disabled .pgn-tm-ico,
 .pgn-tm-item:disabled .pgn-tm-sc {
-  color: #c2c9cf;
+  color: var(--ui-disabled);
 }
 .pgn-tm-item:disabled:hover {
   background: transparent;
@@ -723,11 +732,11 @@ body.pgn-row-dragging {
   width: 26px;
   height: 15px;
   border-radius: 999px;
-  background: #d7dde1;
+  background: var(--ui-border-strong);
   transition: background-color 0.12s;
 }
 .pgn-tm-switch.is-on {
-  background: #0e7490;
+  background: var(--color-primary);
 }
 .pgn-tm-knob {
   position: absolute;
@@ -766,15 +775,15 @@ body.pgn-row-dragging {
   outline-offset: 1px;
 }
 .pgn-tm-swatch.is-selected {
-  border: 2px solid #0e7490;
+  border: 2px solid var(--color-primary);
 }
 .pgn-tm-nofill {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px solid #d7dde1;
-  color: #a3abb2;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border-strong);
+  color: var(--ui-faint);
   font-size: 11px;
   line-height: 1;
 }
@@ -799,7 +808,7 @@ body.pgn-row-dragging {
   border: 1px solid var(--ui-danger);
   border-left-width: 4px;
   border-radius: 10px;
-  background: #fff;
+  background: var(--ui-surface);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
   font-family: var(--font-ui);
   animation: docs-rise 0.18s ease-out;

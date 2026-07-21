@@ -99,7 +99,7 @@ export function Ruler({ scrollerRef }: { scrollerRef: RefObject<HTMLDivElement |
   return (
     <div
       ref={containerRef}
-      className="print-hide relative shrink-0 border-b border-border bg-[var(--ui-surface-2)]"
+      className="print-hide relative shrink-0 border-b border-border bg-(--ui-surface-2)"
       style={{ height: H }}
       role="group"
       aria-label="Ruler"

@@ -233,6 +233,12 @@ export const Icon = {
       <path d="M12 8v4l3 2" />
     </Svg>
   ),
+  download: (p: P) => (
+    <Svg {...p}>
+      <path d="M12 4v10M8 10l4 4 4-4" />
+      <path d="M5 20h14" />
+    </Svg>
+  ),
   exportIcon: (p: P) => (
     <Svg {...p}>
       <path d="M12 15V4M8 8l4-4 4 4" />

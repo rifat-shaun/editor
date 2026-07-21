@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useEditorState } from '../editor/context';
 import { Icon, type IconName } from './icons';
 import { PageSetupPanel } from './PageSetupPanel';
+import { ExportPanelBody } from './ExportPanel';
 
 type PanelKey = 'pageSetup' | 'comments' | 'find' | 'history' | 'export' | 'share';
 
@@ -59,26 +60,13 @@ export function ToolRail() {
           {active === 'pageSetup' && editor ? (
             // Owns the full panel height: scrollable body + a fixed footer.
             <PageSetupPanel editor={editor} />
+          ) : active === 'export' && editor ? (
+            // Owns the full panel height: scrollable body + a fixed footer.
+            <ExportPanelBody />
           ) : (
           <div className="flex-1 overflow-y-auto p-3 docs-scroll">
             {active === 'history' && (
               <p className="text-[12px] text-muted">No versions yet.</p>
-            )}
-
-            {active === 'export' && (
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="rounded-md bg-primary px-3 py-2 text-[12px] font-semibold text-white hover:brightness-110"
-                >
-                  Print…
-                </button>
-                <p className="text-[11px] leading-snug text-muted">
-                  Printed pages match the editor's page breaks and include the running header and
-                  page numbers.
-                </p>
-              </div>
             )}
 
             {active === 'comments' && (

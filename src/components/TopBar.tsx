@@ -3,6 +3,8 @@ import { useEditorState } from '../editor/context';
 import type { EditorMode } from '../types';
 import { Icon } from './icons';
 import { Menu, MenuItem, ToolButton } from './primitives';
+import { MenuBar } from '../menus/MenuBar';
+import { MENUS } from '../menus/menuData';
 
 function DownloadWord() {
   const { editor, title } = useEditorState();
@@ -43,8 +45,6 @@ function DownloadWord() {
     </button>
   );
 }
-
-const MENU_ROW = ['File', 'Edit', 'View', 'Insert', 'Format', 'Tools', 'Help'];
 
 const MODE_LABEL: Record<EditorMode, string> = {
   editing: '✎ Editing',
@@ -169,13 +169,7 @@ export function TopBar() {
             {relativeTime(savedAt)}
           </span>
         </div>
-        <nav className="flex items-center gap-3 px-1 text-[12px] text-[#4a5560]">
-          {MENU_ROW.map((m) => (
-            <button key={m} type="button" className="rounded px-0.5 hover:text-ink">
-              {m}
-            </button>
-          ))}
-        </nav>
+        <MenuBar menus={MENUS} onRename={() => setEditing(true)} />
       </div>
 
       <div className="ml-auto flex items-center gap-2.5">

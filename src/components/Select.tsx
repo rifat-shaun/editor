@@ -342,7 +342,7 @@ export function Select(props: SelectProps) {
       {open && rect &&
         createPortal(
           <>
-            <div className="fixed inset-0 z-[59]" aria-hidden="true" onClick={() => setOpen(false)} />
+            <div className="fixed inset-0 z-[89]" aria-hidden="true" onClick={() => setOpen(false)} />
             <div
               ref={menuRef}
               id={id}
@@ -357,7 +357,9 @@ export function Select(props: SelectProps) {
                 [flipUp ? 'bottom' : 'top']: flipUp
                   ? Math.round(window.innerHeight - rect.top + 4)
                   : Math.round(rect.bottom + 4),
-                zIndex: 60,
+                // Above modal scrims (dialogs use z-70/80) so Selects inside a
+                // dialog remain clickable.
+                zIndex: 90,
                 minWidth: Math.round(minWidth ?? rect.width),
                 maxHeight: 320,
                 overflowY: 'auto',

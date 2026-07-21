@@ -47,6 +47,10 @@ export const CustomDocument = Document.extend({
       listDefs: { default: {} as ListDefRegistry, rendered: false },
       // The bullet-marker registry, stored the same way.
       bulletDefs: { default: {} as BulletDefRegistry, rendered: false },
+      // Page geometry (orientation / paper / margins) from the Page setup
+      // dialog. null → use the pagination extension's configured defaults.
+      // Persists via getJSON; a bridge syncs it to the pagination engine.
+      pageSetup: { default: null, rendered: false },
     };
   },
   // The shared list plugin lives on the Document (always present) and renders

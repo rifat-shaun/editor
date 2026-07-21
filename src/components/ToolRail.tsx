@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useEditorState } from '../editor/context';
-import type { Margins, PageFormatName } from '../editor/pagination/config';
-import { PAGE_FORMATS } from '../editor/pagination/config';
 import { Icon, type IconName } from './icons';
-import { Segmented } from './primitives';
+import { PageSetupPanel } from './PageSetupPanel';
 
 type PanelKey = 'pageSetup' | 'comments' | 'find' | 'history' | 'export' | 'share';
 
@@ -22,26 +20,9 @@ const ITEMS: RailItem[] = [
   { key: 'share', icon: 'share', label: 'Share' },
 ];
 
-// Predefined margin presets (CSS px). Mirrors a word-processor's margin menu.
-const MARGIN_PRESETS: Record<string, Margins> = {
-  Normal: { top: 96, right: 96, bottom: 96, left: 96 },
-  Narrow: { top: 48, right: 48, bottom: 48, left: 48 },
-  Moderate: { top: 96, right: 72, bottom: 96, left: 72 },
-  Wide: { top: 96, right: 144, bottom: 96, left: 144 },
-};
-
-const FORMAT_LABEL: Record<PageFormatName, string> = {
-  Letter: 'Letter · 8.5×11″',
-  A4: 'A4 · 210×297mm',
-  Legal: 'Legal · 8.5×14″',
-};
-
 export function ToolRail() {
   const { editor, ai } = useEditorState();
   const [active, setActive] = useState<PanelKey | null>(null);
-  // Local UI state mirrors the values the editor was configured with.
-  const [format, setFormat] = useState<PageFormatName>('Letter');
-  const [marginKey, setMarginKey] = useState<string>('Normal');
 
   const aiActive = ai.phase === 'reviewing' || ai.phase === 'generating';
 
@@ -54,15 +35,6 @@ export function ToolRail() {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [active]);
-
-  const applyFormat = (f: PageFormatName) => {
-    setFormat(f);
-    editor?.commands.setPageFormat(f);
-  };
-  const applyMargin = (k: string) => {
-    setMarginKey(k);
-    editor?.commands.updateMargins(MARGIN_PRESETS[k]!);
-  };
 
   return (
     <div className="print-hide flex shrink-0">
@@ -86,69 +58,11 @@ export function ToolRail() {
             </button>
           </header>
 
+          {active === 'pageSetup' && editor ? (
+            // Owns the full panel height: scrollable body + a fixed footer.
+            <PageSetupPanel editor={editor} />
+          ) : (
           <div className="flex-1 overflow-y-auto p-3 docs-scroll">
-            {active === 'pageSetup' && (
-              <div className="flex flex-col gap-4">
-                <div>
-                  <p className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted">
-                    Page format
-                  </p>
-                  <Segmented<PageFormatName>
-                    label="Page format"
-                    value={format}
-                    onChange={applyFormat}
-                    options={[
-                      { value: 'Letter', label: 'Letter' },
-                      { value: 'A4', label: 'A4' },
-                      { value: 'Legal', label: 'Legal' },
-                    ]}
-                  />
-                  <p className="mt-1.5 text-[11px] text-muted">
-                    {FORMAT_LABEL[format]} · {PAGE_FORMATS[format].width}×{PAGE_FORMATS[format].height}
-                    px
-                  </p>
-                </div>
-
-                <div>
-                  <p className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted">
-                    Margins
-                  </p>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {Object.keys(MARGIN_PRESETS).map((k) => {
-                      const m = MARGIN_PRESETS[k]!;
-                      const activePreset = marginKey === k;
-                      return (
-                        <button
-                          key={k}
-                          type="button"
-                          aria-pressed={activePreset}
-                          onClick={() => applyMargin(k)}
-                          className={[
-                            'rounded-md border px-2 py-2 text-left transition-colors',
-                            activePreset
-                              ? 'border-primary-border bg-primary-soft'
-                              : 'border-border hover:bg-[#eef1f3]',
-                          ].join(' ')}
-                        >
-                          <span
-                            className={[
-                              'block text-[12px] font-semibold',
-                              activePreset ? 'text-primary' : 'text-ui',
-                            ].join(' ')}
-                          >
-                            {k}
-                          </span>
-                          <span className="text-[10.5px] text-muted">
-                            {m.top}·{m.right}·{m.bottom}·{m.left}px
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {active === 'history' && (
               <div className="flex flex-col gap-1.5">
                 {ai.versions.length === 0 ? (
@@ -198,6 +112,7 @@ export function ToolRail() {
               <p className="text-[12px] text-muted">Use the Share button in the top bar.</p>
             )}
           </div>
+          )}
         </section>
       )}
 

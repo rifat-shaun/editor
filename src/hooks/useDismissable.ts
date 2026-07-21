@@ -41,7 +41,11 @@ export function useDismissable<T extends HTMLElement>(
     };
 
     const onPointer = (e: PointerEvent) => {
-      if (el && !el.contains(e.target as Node)) onDismissRef.current();
+      const target = e.target as Element | null;
+      // A Select/menu opened from inside this popover portals its options to
+      // document.body (outside `el`); don't treat clicking them as "outside".
+      if (target?.closest?.('[role="listbox"]')) return;
+      if (el && !el.contains(target as Node)) onDismissRef.current();
     };
 
     document.addEventListener('keydown', onKey, true);

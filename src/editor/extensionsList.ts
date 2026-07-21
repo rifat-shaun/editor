@@ -15,6 +15,7 @@ import { ListPaste } from './extensions/listPaste';
 import { FontSize } from './extensions/fontSize';
 import { LineHeight } from './extensions/lineHeight';
 import { ParagraphSpacing } from './extensions/paragraphSpacing';
+import { PageSetupBridge } from './extensions/pageSetupBridge';
 import { PageBreak } from './extensions/pageBreak';
 import { SelectionHighlight } from './extensions/selectionHighlight';
 
@@ -41,6 +42,7 @@ export function buildExtensions() {
     FontSize, // adds a font-size attribute to textStyle so pasted sizes survive
     LineHeight, // block-level line-height attr on paragraph/heading (unitless)
     ParagraphSpacing, // block-level space before/after (margin-top/bottom, pt)
+    PageSetupBridge, // doc-attr page geometry → syncs the pagination engine
     Link.configure({ openOnClick: false, autolink: true }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     TaskList,

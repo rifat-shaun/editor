@@ -27,7 +27,7 @@ const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sa
 const SECTION_LABEL: CSSProperties = {
   fontSize: 11,
   fontWeight: 600,
-  color: '#8a939b',
+  color: 'var(--color-muted)',
   textTransform: 'uppercase',
   letterSpacing: '.05em',
   whiteSpace: 'nowrap',
@@ -110,20 +110,20 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
   const paperOptions = PAPER_ORDER.map((k) => ({ value: k, label: `${PAPER_SIZES[k].label} (${PAPER_SIZES[k].dim})` }));
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col" style={{ fontFamily: FONT, color: '#3d4652' }}>
+    <div className="flex min-h-0 flex-1 flex-col" style={{ fontFamily: FONT, color: 'var(--ui-text)' }}>
       <div className="flex-1 overflow-y-auto p-3 docs-scroll" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Preview — on top */}
       <div>
         <div style={{ ...SECTION_LABEL, marginBottom: 10 }}>Preview</div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '4px 0 12px', background: '#fafbfc', borderRadius: 8, border: '1px solid #eceff1' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '4px 0 12px', background: 'var(--color-chrome)', borderRadius: 8, border: '1px solid var(--ui-divider)' }}>
           <div
             style={{
               position: 'relative',
               width: mini.w,
               height: mini.h,
               marginTop: 12,
-              background: '#fff',
-              border: '1px solid #d7dde1',
+              background: 'var(--ui-surface)',
+              border: '1px solid var(--ui-border-strong)',
               borderRadius: 3,
               boxShadow: '0 2px 6px rgba(31,41,51,.1)',
               transition: 'width 150ms ease, height 150ms ease',
@@ -133,7 +133,7 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
               style={{
                 position: 'absolute',
                 ...guide,
-                border: '1px dashed #7ecfdd',
+                border: '1px dashed var(--ui-guide)',
                 transition: 'top 150ms ease, right 150ms ease, bottom 150ms ease, left 150ms ease',
                 display: 'flex',
                 flexDirection: 'column',
@@ -142,13 +142,13 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
                 overflow: 'hidden',
               }}
             >
-              <div style={{ height: 2.5, width: '70%', background: '#c9d2d8', borderRadius: 1 }} />
+              <div style={{ height: 2.5, width: '70%', background: 'var(--ui-skeleton-h)', borderRadius: 1 }} />
               {[0, 1, 2].map((i) => (
-                <div key={i} style={{ height: 2, width: i === 2 ? '55%' : '100%', background: '#e3e7ea', borderRadius: 1 }} />
+                <div key={i} style={{ height: 2, width: i === 2 ? '55%' : '100%', background: 'var(--color-border)', borderRadius: 1 }} />
               ))}
             </div>
           </div>
-          <div style={{ fontSize: 10.5, color: '#8a939b', textAlign: 'center', lineHeight: 1.5 }}>
+          <div style={{ fontSize: 10.5, color: 'var(--color-muted)', textAlign: 'center', lineHeight: 1.5 }}>
             <div>{capA}</div>
             <div>{capB}</div>
           </div>
@@ -158,7 +158,7 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
       {/* Orientation */}
       <div>
         <div style={{ ...SECTION_LABEL, marginBottom: 6 }}>Orientation</div>
-        <div style={{ display: 'flex', background: '#eef1f3', borderRadius: 7, padding: 2 }} role="radiogroup" aria-label="Orientation">
+        <div style={{ display: 'flex', background: 'var(--ui-hover)', borderRadius: 7, padding: 2 }} role="radiogroup" aria-label="Orientation">
           {(['portrait', 'landscape'] as const).map((o) => {
             const on = orientation === o;
             return (
@@ -176,8 +176,8 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
                   borderRadius: 5,
                   border: 'none',
                   cursor: 'pointer',
-                  background: on ? '#fff' : 'transparent',
-                  color: on ? '#0e7490' : '#7a848d',
+                  background: on ? 'var(--ui-surface)' : 'transparent',
+                  color: on ? 'var(--color-primary)' : 'var(--ui-text-dim)',
                   boxShadow: on ? '0 1px 2px rgba(0,0,0,.08)' : 'none',
                 }}
               >
@@ -223,14 +223,14 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
                   borderRadius: 8,
                   cursor: 'pointer',
                   textAlign: 'left',
-                  border: on ? '1px solid #0e7490' : '1px solid #d7dde1',
-                  background: on ? '#f2fcfd' : '#fff',
+                  border: on ? '1px solid var(--color-primary)' : '1px solid var(--ui-border-strong)',
+                  background: on ? 'var(--ui-selected)' : 'var(--ui-surface)',
                 }}
               >
-                <span style={{ fontSize: 11.5, fontWeight: 600, color: on ? '#0e7490' : '#3d4652' }}>
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: on ? 'var(--color-primary)' : 'var(--ui-text)' }}>
                   {key[0]!.toUpperCase() + key.slice(1)}
                 </span>
-                <span style={{ fontSize: 10, color: on ? '#5f8a94' : '#8a939b' }}>
+                <span style={{ fontSize: 10, color: on ? 'var(--ui-teal-muted)' : 'var(--color-muted)' }}>
                   {`${px(p.top)}·${px(p.right)}·${px(p.bottom)}·${px(p.left)}px`}
                 </span>
               </button>
@@ -257,8 +257,8 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
         className="shrink-0"
         style={{
           padding: '11px 12px',
-          background: '#fafbfc',
-          borderTop: '1px solid #eceff1',
+          background: 'var(--color-chrome)',
+          borderTop: '1px solid var(--ui-divider)',
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 8,
@@ -268,7 +268,7 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
           type="button"
           onClick={cancel}
           disabled={!dirty}
-          style={{ fontSize: 12, fontWeight: 600, color: '#5f6b74', background: '#fff', border: '1px solid #d7dde1', borderRadius: 7, padding: '7px 14px', cursor: dirty ? 'pointer' : 'not-allowed', opacity: dirty ? 1 : 0.55 }}
+          style={{ fontSize: 12, fontWeight: 600, color: 'var(--ui-text-soft)', background: 'var(--ui-surface)', border: '1px solid var(--ui-border-strong)', borderRadius: 7, padding: '7px 14px', cursor: dirty ? 'pointer' : 'not-allowed', opacity: dirty ? 1 : 0.55 }}
         >
           Cancel
         </button>
@@ -276,7 +276,7 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
           type="button"
           onClick={apply}
           disabled={!dirty || anyError}
-          style={{ fontSize: 12, fontWeight: 600, color: '#fff', background: '#0e7490', border: '1px solid #0e7490', borderRadius: 7, padding: '7px 18px', cursor: !dirty || anyError ? 'not-allowed' : 'pointer', opacity: !dirty || anyError ? 0.55 : 1 }}
+          style={{ fontSize: 12, fontWeight: 600, color: '#fff', background: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 7, padding: '7px 18px', cursor: !dirty || anyError ? 'not-allowed' : 'pointer', opacity: !dirty || anyError ? 0.55 : 1 }}
         >
           Apply
         </button>
@@ -298,7 +298,7 @@ function NumberField({
 }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <span style={{ fontSize: 10.5, color: error ? '#c62828' : '#8a939b' }}>{label}</span>
+      <span style={{ fontSize: 10.5, color: error ? 'var(--ui-danger)' : 'var(--color-muted)' }}>{label}</span>
       <input
         type="text"
         inputMode="decimal"
@@ -306,14 +306,14 @@ function NumberField({
         aria-invalid={error || undefined}
         onChange={(e) => onChange(e.target.value)}
         style={{
-          border: `1px solid ${error ? '#e6a4a0' : '#d7dde1'}`,
+          border: `1px solid ${error ? 'var(--ui-danger-border)' : 'var(--ui-border-strong)'}`,
           borderRadius: 6,
           padding: '6px 9px',
           fontSize: 12.5,
-          color: '#1f2933',
+          color: 'var(--color-ink)',
           fontFamily: FONT,
           outline: 'none',
-          background: error ? '#fdf5f4' : '#fff',
+          background: error ? 'var(--ui-danger-field)' : 'var(--ui-surface)',
           width: '100%',
           boxSizing: 'border-box',
         }}

@@ -81,7 +81,7 @@ export function buildDocument(doc: PMNode, opts: BuildOptions = {}): Document {
   return new Document({
     creator: 'Docs Editor',
     title,
-    features: { updateFields: wantHF, trackRevisions: ctx.hasRevisions },
+    features: { updateFields: wantHF },
     styles: {
       default: {
         document: {

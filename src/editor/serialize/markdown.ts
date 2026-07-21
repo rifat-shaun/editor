@@ -14,7 +14,7 @@ import { DOMSerializer, type Node as PMNode, type Schema } from '@tiptap/pm/mode
 
 export interface MarkdownOptions {
   /** Embed raw HTML for content Markdown can't represent (merged tables, page
-   *  breaks, colors, redlines…). Off → those are flattened/dropped. */
+   *  breaks, colors…). Off → those are flattened/dropped. */
   htmlFallback?: boolean;
 }
 
@@ -155,8 +155,8 @@ export function buildMarkdownSerializer(schema: Schema, opts: MarkdownOptions): 
     },
   };
 
-  // Marks with no Markdown equivalent: underline, font size/color (textStyle),
-  // redline ins/del → raw HTML tags when htmlFallback, else dropped (content kept).
+  // Marks with no Markdown equivalent: underline, font size/color (textStyle)
+  // → raw HTML tags when htmlFallback, else dropped (content kept).
   const wrapMark = (tag: string, attrsToStyle?: (m: Record<string, unknown>) => string) =>
     html
       ? {
@@ -204,8 +204,6 @@ export function buildMarkdownSerializer(schema: Schema, opts: MarkdownOptions): 
           expelEnclosingWhitespace: true,
         }
       : { open: '', close: '', mixable: true, expelEnclosingWhitespace: true },
-    insertion: wrapMark('ins'),
-    deletion: wrapMark('del'),
   };
 
   return new MarkdownSerializer(nodes, marks);

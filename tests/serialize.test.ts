@@ -17,7 +17,7 @@ describe('JSON — canonical, lossless', () => {
         attrs: { listDefId: 'ld1', start: 3 },
         content: [{ type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'item' }] }] }],
       },
-      { type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'insertion', attrs: { changeId: 'c1' } }], text: 'added' }] },
+      { type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'bolded' }] },
     ],
   };
 

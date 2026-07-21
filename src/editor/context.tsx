@@ -12,8 +12,7 @@ import { useEditor } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
 import { buildExtensions } from './extensionsList';
 import { Pagination } from './pagination/extension';
-import { useAiSession, type AiSession } from './useAiSession';
-import type { AiProvider, EditorMode, JSONContent } from '../types';
+import type { EditorMode, JSONContent } from '../types';
 import type { RulerUnit } from '../components/rulerUnits';
 
 /** Persisted ruler preferences (first localStorage use — guarded for SSR/tests). */
@@ -62,7 +61,9 @@ export interface EditorStateValue {
   toggleRuler(): void;
   rulerUnit: RulerUnit;
   setRulerUnit(unit: RulerUnit): void;
-  ai: AiSession;
+  /** UI theme (View → Dark mode); light/dark, persisted, init from system. */
+  theme: 'light' | 'dark';
+  toggleTheme(): void;
 }
 
 const OUTLINE_BREAKPOINT = 1100;
@@ -81,13 +82,12 @@ const WORDS = /\S+/g;
 export function EditorProvider(props: {
   initialContent: JSONContent;
   initialMode: EditorMode;
-  aiProvider: AiProvider;
   onSave(content: JSONContent): void;
   title: string;
   onTitleChange?(title: string): void;
   children: ReactNode;
 }) {
-  const { initialContent, initialMode, aiProvider, onSave, onTitleChange } = props;
+  const { initialContent, initialMode, onSave, onTitleChange } = props;
 
   const [mode, setMode] = useState<EditorMode>(initialMode);
   const [title, setTitleState] = useState(props.title);
@@ -97,6 +97,17 @@ export function EditorProvider(props: {
   const [rulerUnit, setRulerUnitState] = useState<RulerUnit>(() =>
     readPref<RulerUnit>(RULER_UNIT_KEY, 'in', (r) => (r === 'cm' ? 'cm' : 'in')),
   );
+  const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
+    const stored = readPref<'light' | 'dark' | null>('docs-editor:theme', null, (r) =>
+      r === 'dark' ? 'dark' : r === 'light' ? 'light' : null,
+    );
+    if (stored) return stored;
+    try {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch {
+      return 'light';
+    }
+  });
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [docVersion, setDocVersion] = useState(0);
   const [outlineOpen, setOutlineOpen] = useState(
@@ -126,6 +137,12 @@ export function EditorProvider(props: {
     setRulerUnitState(unit);
     writePref(RULER_UNIT_KEY, unit);
   };
+  const toggleTheme = () =>
+    setThemeState((t) => {
+      const next = t === 'dark' ? 'light' : 'dark';
+      writePref('docs-editor:theme', next);
+      return next;
+    });
 
   const toggleOutline = () => {
     outlineUserSet.current = true;
@@ -165,16 +182,11 @@ export function EditorProvider(props: {
     },
   });
 
-  const ai = useAiSession(editor ?? null, aiProvider);
-
-  // Keep the registry's positions in sync with every document mutation, and
-  // bump a version counter so derived views (outline, word count) recompute.
-  const aiRef = useRef(ai);
-  aiRef.current = ai;
+  // Bump a version counter so derived views (outline, word count) recompute,
+  // and track the real page count from the pagination engine.
   useEffect(() => {
     if (!editor) return;
     const handler = ({ transaction }: { transaction: import('@tiptap/pm/state').Transaction }) => {
-      aiRef.current.onTransaction(transaction);
       if (transaction.docChanged) setDocVersion((v) => v + 1);
       // The pagination engine writes the real page count to its storage on every
       // (debounced) recompute, which also fires a transaction — pick it up here.
@@ -190,6 +202,12 @@ export function EditorProvider(props: {
   useEffect(() => {
     if (editor) editor.setEditable(mode !== 'viewing');
   }, [editor, mode]);
+
+  // Reflect the theme on <html> so the token overrides reach both the chrome
+  // and portaled popovers (which render into document.body).
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   // Keep the running header in sync with the (renameable) document title.
   useEffect(() => {
@@ -262,11 +280,12 @@ export function EditorProvider(props: {
       toggleRuler,
       rulerUnit,
       setRulerUnit,
-      ai,
+      theme,
+      toggleTheme,
     }),
-    // setTitle / toggleOutline / toggleRuler intentionally excluded to avoid churn.
+    // setTitle / toggleOutline / toggleRuler / toggleTheme intentionally excluded to avoid churn.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editor, mode, title, wordCount, charCount, pageCount, savedAt, outline, outlineOpen, zoom, showRuler, rulerUnit, ai],
+    [editor, mode, title, wordCount, charCount, pageCount, savedAt, outline, outlineOpen, zoom, showRuler, rulerUnit, theme],
   );
 
   return <EditorContext.Provider value={value}>{props.children}</EditorContext.Provider>;

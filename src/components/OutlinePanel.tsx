@@ -3,7 +3,7 @@ import { useEditorState } from '../editor/context';
 import { Icon } from './icons';
 
 export function OutlinePanel() {
-  const { editor, outline, ai, outlineOpen, toggleOutline } = useEditorState();
+  const { editor, outline, outlineOpen, toggleOutline } = useEditorState();
   const [activePos, setActivePos] = useState<number | null>(null);
 
   useEffect(() => {
@@ -35,8 +35,6 @@ export function OutlinePanel() {
     }
   };
 
-  const pending = ai.counts.pending;
-
   if (!outlineOpen) return null;
 
   return (
@@ -57,7 +55,7 @@ export function OutlinePanel() {
             onClick={toggleOutline}
             title="Hide outline"
             aria-label="Hide outline"
-            className="flex h-6 w-6 items-center justify-center rounded text-muted hover:bg-[#e9edee] hover:text-ui"
+            className="flex h-6 w-6 items-center justify-center rounded text-muted hover:bg-[var(--ui-hover)] hover:text-ui"
           >
             <Icon.chevronLeft size={15} />
           </button>
@@ -78,8 +76,8 @@ export function OutlinePanel() {
               style={{ paddingLeft: isSub ? 20 : 8 }}
               className={[
                 'block w-full truncate rounded-md py-1.5 pr-2 text-left transition-colors',
-                isSub ? 'text-[11.5px] text-[#7a848d]' : 'text-[12px] text-ui',
-                active ? '!text-primary font-semibold bg-primary-soft' : 'hover:bg-[#e9edee]',
+                isSub ? 'text-[11.5px] text-[var(--ui-text-dim)]' : 'text-[12px] text-ui',
+                active ? '!text-primary font-semibold bg-primary-soft' : 'hover:bg-[var(--ui-hover)]',
               ].join(' ')}
             >
               {item.text}
@@ -87,16 +85,6 @@ export function OutlinePanel() {
           );
         })}
       </nav>
-      {pending > 0 && (
-        <button
-          type="button"
-          onClick={() => ai.focusNext()}
-          className="flex items-center gap-1.5 border-t border-border px-3 py-2.5 text-[11.5px] font-semibold text-primary hover:bg-[#e9edee]"
-        >
-          <Icon.sparkle size={13} />
-          {pending} AI edit{pending === 1 ? '' : 's'} pending
-        </button>
-      )}
       </aside>
     </>
   );

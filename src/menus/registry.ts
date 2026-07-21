@@ -102,7 +102,6 @@ export const COMMANDS: Record<string, Command> = {
 
   /* ------------------------------- View ------------------------------- */
   'view.mode.editing': { run: ({ ui }) => ui.setMode('editing'), isChecked: ({ ui }) => ui.mode === 'editing' },
-  'view.mode.suggesting': { run: ({ ui }) => ui.setMode('suggesting'), isChecked: ({ ui }) => ui.mode === 'suggesting' },
   'view.mode.viewing': { run: ({ ui }) => ui.setMode('viewing'), isChecked: ({ ui }) => ui.mode === 'viewing' },
   'view.showOutline': { run: ({ ui }) => ui.toggleOutline(), isChecked: ({ ui }) => ui.outlineOpen },
   'view.showRuler': { run: ({ ui }) => ui.toggleRuler(), isChecked: ({ ui }) => ui.showRuler },
@@ -110,7 +109,7 @@ export const COMMANDS: Record<string, Command> = {
     run: ({ editor }) => editor.commands.toggleNonPrinting(),
     isChecked: ({ editor }) => isNonPrintingEnabled(editor),
   },
-  'view.showSuggestedEdits': {}, // unbuilt toggle
+  'view.darkMode': { run: ({ ui }) => ui.toggleTheme(), isChecked: ({ ui }) => ui.theme === 'dark' },
   'view.zoom.50': { run: ({ ui }) => ui.setZoom(50), isChecked: ({ ui }) => ui.zoom === 50 },
   'view.zoom.75': { run: ({ ui }) => ui.setZoom(75), isChecked: ({ ui }) => ui.zoom === 75 },
   'view.zoom.100': { run: ({ ui }) => ui.setZoom(100), isChecked: ({ ui }) => ui.zoom === 100 },
@@ -137,7 +136,6 @@ export const COMMANDS: Record<string, Command> = {
   },
   'insert.hr': { run: ({ editor }) => chain(editor).setHorizontalRule().run() },
   'insert.variable': {}, 'insert.comment': {}, // unbuilt
-  'insert.aiDraft': { run: ({ ui }) => ui.ai.openPrompt() },
   'insert.pageBreak': { run: ({ editor }) => chain(editor).insertPageBreak().run() },
   'insert.headersFooters': {}, 'insert.pageNumbers': {}, 'insert.toc': {}, 'insert.specialChars': {}, // unbuilt
 
@@ -183,12 +181,6 @@ export const COMMANDS: Record<string, Command> = {
   'format.clearFormatting': { run: ({ editor }) => chain(editor).unsetAllMarks().clearNodes().run() },
 
   /* ------------------------------- Tools ------------------------------ */
-  'tools.aiEdit': { run: ({ ui }) => ui.ai.openPrompt() },
-  'tools.reviewAi': {
-    run: ({ ui }) => ui.ai.focusNext(),
-    isEnabled: ({ ui }) => ui.ai.counts.pending > 0,
-    badge: ({ ui }) => (ui.ai.counts.pending > 0 ? { text: String(ui.ai.counts.pending), variant: 'teal' } : null),
-  },
   'tools.spellingGrammar': {}, // unbuilt
   'tools.wordCount': { run: ({ svc }) => svc.openWordCount() },
   'tools.variables': { badge: () => null }, // feature not built → no run (disabled), badge always hidden

@@ -26,7 +26,7 @@ uses Print; DOCX uses the separate `export/docx` engine.
 
 `editor.getJSON()` is the schema verbatim, so **every** custom node/mark/attr
 round-trips (list defs, table merges, line-height, spacing, page breaks,
-redlines, page setup). `serialize('json')` wraps it with a `version` tag;
+page setup). `serialize('json')` wraps it with a `version` tag;
 `deserialize('json')`:
 
 1. reads the envelope (or a legacy bare doc → version 1),
@@ -56,7 +56,7 @@ node/mark's `parseHTML`).
 Custom `MarkdownSerializer` (prosemirror-markdown, no new dependency). Default is
 **pure Markdown** (flatten/drop per the matrix); `{ htmlFallback: true }` embeds
 raw HTML for content Markdown can't express (merged tables, page breaks,
-underline/color, redlines).
+underline/color).
 
 ## Fidelity matrix
 
@@ -74,7 +74,6 @@ underline/color, redlines).
 | Tables (simple) | ✅ | ✅ / ✅ | ✅ GFM |
 | Tables (merged / widths / cell color) | ✅ | ✅ / ✅ | ❌ flattened / ✅ raw HTML |
 | Page break | ✅ | ✅ / ✅ | ❌ drop / ✅ HTML div |
-| Redline ins/del | ✅ | ✅ / ⚠️ ids stripped | ❌ drop / ✅ `<ins>`/`<del>` |
 | Blockquote, code block, hr, image | ✅ | ✅ / ✅ | ✅ |
 | List/bullet definition registries, pageSetup (doc attrs) | ✅ | ✅ roundtrip wrapper / ❌ | ❌ / ❌ |
 | Comments, variables | n/a (not built) | n/a | n/a |

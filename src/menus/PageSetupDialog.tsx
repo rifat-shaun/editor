@@ -28,7 +28,7 @@ const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sa
 const SECTION_LABEL: CSSProperties = {
   fontSize: 11,
   fontWeight: 600,
-  color: '#8a939b',
+  color: 'var(--color-muted)',
   textTransform: 'uppercase',
   letterSpacing: '.05em',
   whiteSpace: 'nowrap',
@@ -116,7 +116,7 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
   return createPortal(
     <div
       className="fixed inset-0 z-[80] flex items-center justify-center"
-      style={{ background: 'rgba(31,41,51,.32)' }}
+      style={{ background: 'var(--ui-scrim)' }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' && !anyError) {
           e.preventDefault();
@@ -129,16 +129,16 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
         role="dialog"
         aria-modal="true"
         aria-label="Page setup"
-        style={{ width: 520, background: '#fff', borderRadius: 12, boxShadow: '0 24px 64px rgba(31,41,51,.35)', fontFamily: FONT, color: '#3d4652' }}
+        style={{ width: 520, background: 'var(--ui-surface)', borderRadius: 12, boxShadow: '0 24px 64px rgba(31,41,51,.35)', fontFamily: FONT, color: 'var(--ui-text)' }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '15px 20px 13px', borderBottom: '1px solid #eceff1' }}>
-          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#1f2933' }}>Page setup</span>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '15px 20px 13px', borderBottom: '1px solid var(--ui-divider)' }}>
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'var(--color-ink)' }}>Page setup</span>
           <button
             type="button"
             aria-label="Close"
             onClick={onClose}
-            style={{ display: 'inline-flex', width: 24, height: 24, alignItems: 'center', justifyContent: 'center', borderRadius: 6, border: 'none', background: 'transparent', color: '#8a939b', cursor: 'pointer' }}
+            style={{ display: 'inline-flex', width: 24, height: 24, alignItems: 'center', justifyContent: 'center', borderRadius: 6, border: 'none', background: 'transparent', color: 'var(--color-muted)', cursor: 'pointer' }}
           >
             ✕
           </button>
@@ -147,11 +147,11 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
         {/* Body */}
         <div style={{ display: 'flex' }}>
           {/* Left — controls */}
-          <div style={{ flex: 1, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 14, borderRight: '1px solid #eceff1' }}>
+          <div style={{ flex: 1, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 14, borderRight: '1px solid var(--ui-divider)' }}>
             {/* Orientation */}
             <div>
               <div style={{ ...SECTION_LABEL, marginBottom: 6 }}>Orientation</div>
-              <div style={{ display: 'flex', gap: 0, background: '#eef1f3', borderRadius: 7, padding: 2 }} role="radiogroup" aria-label="Orientation">
+              <div style={{ display: 'flex', gap: 0, background: 'var(--ui-hover)', borderRadius: 7, padding: 2 }} role="radiogroup" aria-label="Orientation">
                 {(['portrait', 'landscape'] as const).map((o) => {
                   const on = orientation === o;
                   return (
@@ -170,8 +170,8 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
                         borderRadius: 5,
                         border: 'none',
                         cursor: 'pointer',
-                        background: on ? '#fff' : 'transparent',
-                        color: on ? '#0e7490' : '#7a848d',
+                        background: on ? 'var(--ui-surface)' : 'transparent',
+                        color: on ? 'var(--color-primary)' : 'var(--ui-text-dim)',
                         boxShadow: on ? '0 1px 2px rgba(0,0,0,.08)' : 'none',
                       }}
                     >
@@ -217,14 +217,14 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
                         borderRadius: 8,
                         cursor: 'pointer',
                         textAlign: 'left',
-                        border: on ? '1px solid #0e7490' : '1px solid #d7dde1',
-                        background: on ? '#f2fcfd' : '#fff',
+                        border: on ? '1px solid var(--color-primary)' : '1px solid var(--ui-border-strong)',
+                        background: on ? 'var(--ui-selected)' : 'var(--ui-surface)',
                       }}
                     >
-                      <span style={{ fontSize: 11.5, fontWeight: 600, color: on ? '#0e7490' : '#3d4652' }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 600, color: on ? 'var(--color-primary)' : 'var(--ui-text)' }}>
                         {key[0]!.toUpperCase() + key.slice(1)}
                       </span>
-                      <span style={{ fontSize: 10, color: on ? '#5f8a94' : '#8a939b' }}>
+                      <span style={{ fontSize: 10, color: on ? 'var(--ui-teal-muted)' : 'var(--color-muted)' }}>
                         {`${px(p.top)}·${px(p.right)}·${px(p.bottom)}·${px(p.left)}px`}
                       </span>
                     </button>
@@ -247,15 +247,15 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
           </div>
 
           {/* Right — preview */}
-          <div style={{ width: 180, background: '#fafbfc', padding: '18px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ width: 180, background: 'var(--color-chrome)', padding: '18px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ ...SECTION_LABEL, alignSelf: 'stretch', marginBottom: 12 }}>Preview</div>
             <div
               style={{
                 position: 'relative',
                 width: mini.w,
                 height: mini.h,
-                background: '#fff',
-                border: '1px solid #d7dde1',
+                background: 'var(--ui-surface)',
+                border: '1px solid var(--ui-border-strong)',
                 borderRadius: 3,
                 boxShadow: '0 2px 6px rgba(31,41,51,.1)',
                 transition: 'width 150ms ease, height 150ms ease',
@@ -265,7 +265,7 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
                 style={{
                   position: 'absolute',
                   ...guide,
-                  border: '1px dashed #7ecfdd',
+                  border: '1px dashed var(--ui-guide)',
                   transition: 'top 150ms ease, right 150ms ease, bottom 150ms ease, left 150ms ease',
                   display: 'flex',
                   flexDirection: 'column',
@@ -274,13 +274,13 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ height: 3, width: '70%', background: '#c9d2d8', borderRadius: 1 }} />
+                <div style={{ height: 3, width: '70%', background: 'var(--ui-skeleton-h)', borderRadius: 1 }} />
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} style={{ height: 2, width: i === 3 ? '55%' : '100%', background: '#e3e7ea', borderRadius: 1 }} />
+                  <div key={i} style={{ height: 2, width: i === 3 ? '55%' : '100%', background: 'var(--color-border)', borderRadius: 1 }} />
                 ))}
               </div>
             </div>
-            <div style={{ marginTop: 12, fontSize: 10.5, color: '#8a939b', textAlign: 'center', lineHeight: 1.5 }}>
+            <div style={{ marginTop: 12, fontSize: 10.5, color: 'var(--color-muted)', textAlign: 'center', lineHeight: 1.5 }}>
               <div>{capA}</div>
               <div>{capB}</div>
             </div>
@@ -288,11 +288,11 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, padding: '13px 20px', borderTop: '1px solid #eceff1', background: '#fafbfc', borderBottomLeftRadius: 12, borderBottomRightRadius: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, padding: '13px 20px', borderTop: '1px solid var(--ui-divider)', background: 'var(--color-chrome)', borderBottomLeftRadius: 12, borderBottomRightRadius: 12 }}>
           <button
             type="button"
             onClick={onClose}
-            style={{ fontSize: 12, fontWeight: 600, color: '#5f6b74', background: '#fff', border: '1px solid #d7dde1', borderRadius: 7, padding: '7px 16px', cursor: 'pointer' }}
+            style={{ fontSize: 12, fontWeight: 600, color: 'var(--ui-text-soft)', background: 'var(--ui-surface)', border: '1px solid var(--ui-border-strong)', borderRadius: 7, padding: '7px 16px', cursor: 'pointer' }}
           >
             Cancel
           </button>
@@ -300,7 +300,7 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
             type="button"
             onClick={commit}
             disabled={anyError}
-            style={{ fontSize: 12, fontWeight: 600, color: '#fff', background: '#0e7490', border: '1px solid #0e7490', borderRadius: 7, padding: '7px 18px', cursor: anyError ? 'not-allowed' : 'pointer', opacity: anyError ? 0.55 : 1 }}
+            style={{ fontSize: 12, fontWeight: 600, color: '#fff', background: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 7, padding: '7px 18px', cursor: anyError ? 'not-allowed' : 'pointer', opacity: anyError ? 0.55 : 1 }}
           >
             OK
           </button>
@@ -324,7 +324,7 @@ function NumberField({
 }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <span style={{ fontSize: 10.5, color: error ? '#c62828' : '#8a939b' }}>{label}</span>
+      <span style={{ fontSize: 10.5, color: error ? 'var(--ui-danger)' : 'var(--color-muted)' }}>{label}</span>
       <input
         type="text"
         inputMode="decimal"
@@ -332,14 +332,14 @@ function NumberField({
         aria-invalid={error || undefined}
         onChange={(e) => onChange(e.target.value)}
         style={{
-          border: `1px solid ${error ? '#e6a4a0' : '#d7dde1'}`,
+          border: `1px solid ${error ? 'var(--ui-danger-border)' : 'var(--ui-border-strong)'}`,
           borderRadius: 6,
           padding: '6px 9px',
           fontSize: 12.5,
-          color: '#1f2933',
+          color: 'var(--color-ink)',
           fontFamily: FONT,
           outline: 'none',
-          background: error ? '#fdf5f4' : '#fff',
+          background: error ? 'var(--ui-danger-field)' : 'var(--ui-surface)',
           width: '100%',
           boxSizing: 'border-box',
         }}

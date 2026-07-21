@@ -19,8 +19,8 @@ const SYSTEM_FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Ar
 const panelStyle = (pos: CSSProperties): CSSProperties => ({
   position: 'fixed',
   minWidth: 220,
-  background: '#fff',
-  border: '1px solid #e3e7ea',
+  background: 'var(--ui-surface)',
+  border: '1px solid var(--color-border)',
   borderRadius: 9,
   boxShadow: '0 10px 32px rgba(31, 41, 51, 0.18)',
   padding: 5,
@@ -46,10 +46,10 @@ const rowBase: CSSProperties = {
 };
 
 const RIGHT = {
-  shortcut: { fontSize: 10.5, color: '#a3abb2' } as CSSProperties,
-  submenu: { fontSize: 10, color: '#a3abb2' } as CSSProperties,
-  check: { fontSize: 12, fontWeight: 700, color: '#0e7490' } as CSSProperties,
-  hint: { fontSize: 10, color: '#a3abb2' } as CSSProperties,
+  shortcut: { fontSize: 10.5, color: 'var(--ui-faint)' } as CSSProperties,
+  submenu: { fontSize: 10, color: 'var(--ui-faint)' } as CSSProperties,
+  check: { fontSize: 12, fontWeight: 700, color: 'var(--color-primary)' } as CSSProperties,
+  hint: { fontSize: 10, color: 'var(--ui-faint)' } as CSSProperties,
 };
 
 const badgeStyle = (variant: 'teal' | 'amber'): CSSProperties => ({
@@ -57,8 +57,8 @@ const badgeStyle = (variant: 'teal' | 'amber'): CSSProperties => ({
   fontWeight: 600,
   borderRadius: 8,
   padding: '1px 7px',
-  color: variant === 'amber' ? '#8a6a10' : '#0e7490',
-  background: variant === 'amber' ? '#fff8e6' : '#e0f7fa',
+  color: variant === 'amber' ? 'var(--ui-amber)' : 'var(--color-primary)',
+  background: variant === 'amber' ? 'var(--ui-amber-bg)' : 'var(--color-primary-soft)',
 });
 
 export interface MenuPanelProps {
@@ -242,7 +242,7 @@ export function MenuPanel({
   return createPortal(
     <div ref={panelRef} role="menu" style={panelStyle(pos)} onKeyDown={onKeyDown}>
       {searchIndex && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '2px 2px 6px', padding: '6px 9px', border: '1px solid #d7dde1', borderRadius: 7 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '2px 2px 6px', padding: '6px 9px', border: '1px solid var(--ui-border-strong)', borderRadius: 7 }}>
           <span aria-hidden="true" style={{ fontSize: 12 }}>🔍</span>
           <input
             ref={inputRef}
@@ -269,17 +269,17 @@ export function MenuPanel({
                 else onCloseAll();
               }
             }}
-            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 12.5, fontFamily: SYSTEM_FONT, color: '#3d4652', minWidth: 0 }}
+            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 12.5, fontFamily: SYSTEM_FONT, color: 'var(--ui-text)', minWidth: 0 }}
           />
-          <span aria-hidden="true" style={{ fontSize: 10.5, color: '#a3abb2' }}>{formatShortcut('Mod-/')}</span>
+          <span aria-hidden="true" style={{ fontSize: 10.5, color: 'var(--ui-faint)' }}>{formatShortcut('Mod-/')}</span>
         </div>
       )}
       {searching && nav.length === 0 && (
-        <div style={{ ...rowBase, color: '#a3abb2', cursor: 'default' }}>No matching commands</div>
+        <div style={{ ...rowBase, color: 'var(--ui-faint)', cursor: 'default' }}>No matching commands</div>
       )}
       {displayItems.map((node, i) => {
         if (isDivider(node)) {
-          return <div key={`d${i}`} role="separator" style={{ height: 1, background: '#f2f4f5', margin: '4px 6px' }} />;
+          return <div key={`d${i}`} role="separator" style={{ height: 1, background: 'var(--ui-hover)', margin: '4px 6px' }} />;
         }
         const item = node;
         const cmd = getCommand(item.id);
@@ -292,13 +292,13 @@ export function MenuPanel({
         const isActive = active === i;
 
         const color = !interactive
-          ? '#c2c9cf'
+          ? 'var(--ui-disabled)'
           : item.destructive
-            ? '#c62828'
+            ? 'var(--ui-danger)'
             : item.ai
-              ? '#0e7490'
-              : '#3d4652';
-        const hoverBg = item.destructive ? '#fdecea' : '#f7f9fa';
+              ? 'var(--color-primary)'
+              : 'var(--ui-text)';
+        const hoverBg = item.destructive ? 'var(--ui-danger-bg)' : 'var(--ui-row-hover)';
 
         return (
           <div key={item.id} style={{ position: 'relative' }}>
@@ -333,7 +333,7 @@ export function MenuPanel({
                     ✓
                   </span>
                 )}
-                {item.glyph && <span aria-hidden="true" style={{ color: '#a3abb2' }}>{item.glyph}</span>}
+                {item.glyph && <span aria-hidden="true" style={{ color: 'var(--ui-faint)' }}>{item.glyph}</span>}
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {item.ai ? `✦ ${item.label}` : item.label}
                 </span>

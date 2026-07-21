@@ -17,7 +17,7 @@ import { Icon } from './icons';
 import { lineHeightAtSelection } from './lineHeightSelection';
 import { paragraphSpacingAtSelection, hasSpace, MIXED } from './paragraphSpacingSelection';
 
-const ACCENT = '#0e7490';
+const ACCENT = 'var(--color-primary)';
 
 /** Preset key → the normalized line-height value the extension stores. */
 const LINE_PRESET_VALUE: Record<string, string> = {
@@ -82,7 +82,7 @@ function MiniChevron() {
 function RowCaret() {
   return (
     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M2.75 1.5 5.25 4l-2.5 2.5" stroke="#a3abb2" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2.75 1.5 5.25 4l-2.5 2.5" stroke="var(--ui-faint)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -97,7 +97,7 @@ const groupLabelStyle: CSSProperties = {
   fontSize: 10,
   fontWeight: 600,
   textTransform: 'uppercase',
-  color: '#a3abb2',
+  color: 'var(--ui-faint)',
   letterSpacing: '0.06em',
   padding: '6px 10px 3px',
 };
@@ -111,7 +111,7 @@ const rowBaseStyle: CSSProperties = {
   borderRadius: 6,
   fontFamily: SYSTEM_FONT,
   fontSize: 12.5,
-  color: '#3d4652',
+  color: 'var(--ui-text)',
   whiteSpace: 'nowrap',
   cursor: 'pointer',
   border: 'none',
@@ -123,7 +123,7 @@ const rowBaseStyle: CSSProperties = {
 const hintStyle: CSSProperties = {
   fontFamily: SYSTEM_FONT,
   fontSize: 10.5,
-  color: '#a3abb2',
+  color: 'var(--ui-faint)',
   textAlign: 'right',
 };
 
@@ -158,7 +158,7 @@ function Row({
   onClick?: () => void;
 }) {
   const isHover = hovered === rowKey;
-  const bg = selected ? '#f2fcfd' : isHover ? '#f7f9fa' : 'transparent';
+  const bg = selected ? 'var(--ui-selected)' : isHover ? 'var(--ui-row-hover)' : 'transparent';
   return (
     <button
       type="button"
@@ -223,8 +223,8 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
     borderRadius: 5,
     border: 'none',
     cursor: 'pointer',
-    color: open ? ACCENT : '#4a5560',
-    background: open ? '#e0f7fa' : btnHover ? '#f2f4f5' : 'transparent',
+    color: open ? ACCENT : 'var(--color-ui)',
+    background: open ? 'var(--color-primary-soft)' : btnHover ? 'var(--ui-hover)' : 'transparent',
   };
 
   const panelStyle: CSSProperties = rect
@@ -233,8 +233,8 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
         top: Math.round(rect.bottom + 4),
         left: Math.round(rect.left),
         width: 240,
-        background: '#fff',
-        border: '1px solid #e3e7ea',
+        background: 'var(--ui-surface)',
+        border: '1px solid var(--color-border)',
         borderRadius: 9,
         boxShadow: '0 10px 32px rgba(31, 41, 51, 0.18)',
         padding: 5,
@@ -304,7 +304,7 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
                     onHoverChange={setHovered}
                     onClick={o.key === 'custom' ? openCustom : () => applyLine(o.key)}
                   >
-                    <span style={{ color: selected ? '#1f2933' : '#3d4652', fontWeight: selected ? 600 : 400 }}>
+                    <span style={{ color: selected ? 'var(--color-ink)' : 'var(--ui-text)', fontWeight: selected ? 600 : 400 }}>
                       {o.label}
                     </span>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
@@ -319,7 +319,7 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
               })}
 
               {/* PARAGRAPH SPACING */}
-              <div style={{ ...groupLabelStyle, borderTop: '1px solid #f2f4f5', marginTop: 5 }}>
+              <div style={{ ...groupLabelStyle, borderTop: '1px solid var(--ui-hover)', marginTop: 5 }}>
                 Paragraph spacing
               </div>
               <Row rowKey="before" hovered={hovered} onHoverChange={setHovered} onClick={toggleBefore}>
@@ -336,7 +336,7 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
               </Row>
 
               {/* FOOTER */}
-              <div style={{ borderTop: '1px solid #f2f4f5', margin: '4px 6px' }} />
+              <div style={{ borderTop: '1px solid var(--ui-hover)', margin: '4px 6px' }} />
               <Row rowKey="custom-footer" hovered={hovered} onHoverChange={setHovered} onClick={openCustom}>
                 <span>Custom spacing…</span>
               </Row>
@@ -354,7 +354,7 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
 
 function Stepper({
   valueLabel,
-  valueColor = '#1f2933',
+  valueColor = 'var(--color-ink)',
   onDec,
   onInc,
 }: {
@@ -369,9 +369,9 @@ function Stepper({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#fff',
+    background: 'var(--ui-surface)',
     border: 'none',
-    color: '#4a5560',
+    color: 'var(--color-ui)',
     cursor: 'pointer',
   };
   return (
@@ -379,7 +379,7 @@ function Stepper({
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        border: '1px solid #d7dde1',
+        border: '1px solid var(--ui-border-strong)',
         borderRadius: 6,
         overflow: 'hidden',
       }}
@@ -395,8 +395,8 @@ function Stepper({
           fontSize: 12.5,
           fontWeight: valueColor === ACCENT ? 600 : 400,
           color: valueColor,
-          borderLeft: '1px solid #eceff1',
-          borderRight: '1px solid #eceff1',
+          borderLeft: '1px solid var(--ui-divider)',
+          borderRight: '1px solid var(--ui-divider)',
           padding: '6px 4px',
           fontVariantNumeric: 'tabular-nums',
         }}
@@ -418,7 +418,7 @@ const sectionLabel: CSSProperties = {
   fontWeight: 600,
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
-  color: '#a3abb2',
+  color: 'var(--ui-faint)',
   marginBottom: 7,
 };
 
@@ -462,12 +462,12 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
     onClose();
   };
 
-  const ptColor = (n: number) => (n > 0 ? ACCENT : '#1f2933');
+  const ptColor = (n: number) => (n > 0 ? ACCENT : 'var(--color-ink)');
 
   return createPortal(
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center"
-      style={{ background: 'rgba(31,41,51,.28)' }}
+      style={{ background: 'var(--ui-scrim)' }}
     >
       <div
         ref={ref}
@@ -476,7 +476,7 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
         aria-label="Custom spacing"
         style={{
           width: 320,
-          background: '#fff',
+          background: 'var(--ui-surface)',
           borderRadius: 12,
           boxShadow: '0 12px 36px rgba(31,41,51,.2)',
           fontFamily: SYSTEM_FONT,
@@ -484,7 +484,7 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '15px 18px 0' }}>
-          <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: '#1f2933' }}>Custom spacing</span>
+          <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: 'var(--color-ink)' }}>Custom spacing</span>
           <button
             type="button"
             aria-label="Close"
@@ -498,7 +498,7 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
               borderRadius: 6,
               border: 'none',
               background: 'transparent',
-              color: '#8a939b',
+              color: 'var(--color-muted)',
               cursor: 'pointer',
             }}
           >
@@ -517,7 +517,7 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
                 onDec={() => setLine((v) => Math.max(0.5, Math.round((v - 0.05) * 100) / 100))}
                 onInc={() => setLine((v) => Math.min(5, Math.round((v + 0.05) * 100) / 100))}
               />
-              <span style={{ marginLeft: 10, fontSize: 12.5, color: '#8a939b' }}>× line height</span>
+              <span style={{ marginLeft: 10, fontSize: 12.5, color: 'var(--color-muted)' }}>× line height</span>
             </div>
           </div>
 
@@ -544,9 +544,9 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
           </div>
 
           {/* Preview */}
-          <div style={{ border: '1px solid #eceff1', borderRadius: 8, padding: '10px 12px', background: '#fafbfc' }}>
+          <div style={{ border: '1px solid var(--ui-divider)', borderRadius: 8, padding: '10px 12px', background: 'var(--color-chrome)' }}>
             <div style={{ ...sectionLabel, marginBottom: 6 }}>Preview</div>
-            <div style={{ fontFamily: "'Times New Roman', Georgia, serif", fontSize: 13, color: '#1f2933' }}>
+            <div style={{ fontFamily: "'Times New Roman', Georgia, serif", fontSize: 13, color: 'var(--color-ink)' }}>
               {[
                 'The obligations herein shall survive termination.',
                 'Each party shall return all Confidential Information upon written request of the other.',
@@ -579,7 +579,7 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
           <button
             type="button"
             onClick={reset}
-            style={{ fontSize: 12, color: '#8a939b', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+            style={{ fontSize: 12, color: 'var(--color-muted)', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
           >
             Reset
           </button>
@@ -589,9 +589,9 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
               onClick={onClose}
               style={{
                 fontSize: 12.5,
-                color: '#4a5560',
-                background: '#fff',
-                border: '1px solid #d7dde1',
+                color: 'var(--color-ui)',
+                background: 'var(--ui-surface)',
+                border: '1px solid var(--ui-border-strong)',
                 borderRadius: 7,
                 padding: '6px 14px',
                 cursor: 'pointer',

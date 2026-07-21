@@ -5,7 +5,7 @@ export function StatusBar() {
   const { wordCount, pageCount, zoom, setZoom } = useEditorState();
 
   return (
-    <footer className="print-hide flex h-8 shrink-0 items-center justify-between border-t border-border bg-chrome px-3 text-[11px] text-[#7a848d]">
+    <footer className="print-hide flex h-8 shrink-0 items-center justify-between border-t border-border bg-chrome px-3 text-[11px] text-[var(--ui-text-dim)]">
       <span>
         {pageCount.toLocaleString()} {pageCount === 1 ? 'page' : 'pages'} · {wordCount.toLocaleString()} words · English (US)
       </span>
@@ -19,14 +19,14 @@ export function StatusBar() {
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
             aria-label="Zoom"
-            className="h-1 w-28 cursor-pointer accent-[#0e7490]"
+            className="h-1 w-28 cursor-pointer accent-[var(--color-primary)]"
           />
           <span className="w-9 tabular-nums">{zoom}%</span>
         </div>
         <span className="h-4 w-px bg-border" />
         <button
           type="button"
-          className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-ui hover:bg-[#eef1f3]"
+          className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-ui hover:bg-[var(--ui-hover)]"
         >
           <Icon.present size={13} />
           Present

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useEditorState } from '../editor/context';
-import type { AiScope } from '../types';
 import { fontSizeAtSelection, BASE_FONT_PT } from './fontSizeSelection';
 import { LineSpacingMenu } from './LineSpacingMenu';
 import { Icon } from './icons';
-import { Menu, MenuItem, MenuLabel, Segmented, ToolbarDivider, ToolButton } from './primitives';
+import { Menu, ToolbarDivider, ToolButton } from './primitives';
 import { TableGridPicker } from './TableGridPicker';
 import { NumberedListMenu } from './NumberedListStylePicker';
 import { BulletListMenu } from './BulletListStylePicker';
@@ -30,12 +29,6 @@ const FONT_FAMILIES = [
 ];
 const ZOOM_LEVELS = [50, 75, 90, 100, 125, 150, 200];
 const FONT_SIZES_PT = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72, 96];
-
-const PRESETS: { label: string; instruction: string }[] = [
-  { label: 'Shorten', instruction: 'Make this more concise without losing meaning.' },
-  { label: 'Formalize tone', instruction: 'Rewrite in a more formal, professional tone.' },
-  { label: 'Fix grammar & clarity', instruction: 'Fix grammar and improve clarity.' },
-];
 
 /**
  * Toolbar groups in display order. `keep` is the priority used by the
@@ -75,71 +68,6 @@ function useForceRerenderOnSelection() {
       editor.off('transaction', bump);
     };
   }, [editor]);
-}
-
-function AiEditMenu() {
-  const { ai } = useEditorState();
-  const [scope, setScope] = useState<AiScope>('selection');
-
-  return (
-    <Menu
-      align="right"
-      panelClassName="min-w-[248px]"
-      trigger={({ toggle, open, id }) => (
-        <button
-          type="button"
-          aria-haspopup="menu"
-          aria-expanded={open}
-          aria-controls={id}
-          onClick={toggle}
-          className="inline-flex h-8 items-center gap-1 rounded-[6px] bg-primary-soft px-2.5 text-[12px] font-semibold text-primary hover:brightness-105"
-        >
-          <Icon.sparkle size={14} />
-          AI edit
-          <Icon.chevronDown size={13} />
-        </button>
-      )}
-    >
-      {(close) => (
-        <>
-          <MenuLabel>Apply to</MenuLabel>
-          <div className="px-2 pb-1.5">
-            <Segmented<AiScope>
-              label="Apply scope"
-              value={scope}
-              onChange={setScope}
-              options={[
-                { value: 'selection', label: 'Selection' },
-                { value: 'section', label: 'Section' },
-                { value: 'document', label: 'Document' },
-              ]}
-            />
-          </div>
-          <div className="my-1 h-px bg-border" />
-          <MenuItem
-            icon={<Icon.sparkle size={14} />}
-            onSelect={() => {
-              close();
-              ai.openPrompt();
-            }}
-          >
-            Custom instruction…
-          </MenuItem>
-          {PRESETS.map((p) => (
-            <MenuItem
-              key={p.label}
-              onSelect={() => {
-                close();
-                void ai.run(p.instruction, scope);
-              }}
-            >
-              {p.label}
-            </MenuItem>
-          ))}
-        </>
-      )}
-    </Menu>
-  );
 }
 
 export function FormattingToolbar() {
@@ -527,7 +455,7 @@ export function FormattingToolbar() {
                 aria-label="More formatting options"
                 title="More"
                 onClick={toggle}
-                className="inline-flex h-8 min-w-8 items-center justify-center rounded-[5px] text-ui hover:bg-[#eef1f3]"
+                className="inline-flex h-8 min-w-8 items-center justify-center rounded-[5px] text-ui hover:bg-[var(--ui-hover)]"
               >
                 <Icon.more size={18} />
               </button>
@@ -544,7 +472,6 @@ export function FormattingToolbar() {
             )}
           </Menu>
         )}
-        <AiEditMenu />
       </div>
     </div>
   );

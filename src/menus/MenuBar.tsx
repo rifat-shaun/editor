@@ -29,7 +29,7 @@ const triggerStyle = (open: boolean, hover: boolean): CSSProperties => ({
   border: 'none',
   background: 'transparent',
   cursor: 'pointer',
-  color: open ? '#0e7490' : hover ? '#1f2933' : '#4a5560',
+  color: open ? 'var(--color-primary)' : hover ? 'var(--color-ink)' : 'var(--color-ui)',
   fontWeight: open ? 600 : 400,
 });
 

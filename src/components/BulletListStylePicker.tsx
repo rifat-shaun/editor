@@ -37,7 +37,7 @@ const LABEL_STYLE: CSSProperties = {
   fontWeight: 600,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  color: '#a3abb2',
+  color: 'var(--ui-faint)',
 };
 
 const PREVIEW_INDENTS = [0, 8, 16, 0];
@@ -60,8 +60,8 @@ function PresetCard({
   tabIndex: number;
 }) {
   const [hover, setHover] = useState(false);
-  const border = selected ? '1.5px solid #0e7490' : `1px solid ${hover ? '#a5e8f2' : '#e3e7ea'}`;
-  const bg = selected ? '#f2fcfd' : hover ? '#fbfdfe' : '#ffffff';
+  const border = selected ? '1.5px solid var(--color-primary)' : `1px solid ${hover ? 'var(--color-primary-border)' : 'var(--color-border)'}`;
+  const bg = selected ? 'var(--ui-selected)' : hover ? 'var(--ui-surface-2)' : 'var(--ui-surface)';
   // 4 preview lines showing levels 1/2/3/1.
   const lines = [0, 1, 2, 0].map((d) => markerGlyph(def[d] ?? def[def.length - 1]!));
   return (
@@ -92,7 +92,7 @@ function PresetCard({
       }}
     >
       {selected && (
-        <span aria-hidden="true" style={{ position: 'absolute', top: 5, right: 5, color: '#0e7490' }}>
+        <span aria-hidden="true" style={{ position: 'absolute', top: 5, right: 5, color: 'var(--color-primary)' }}>
           <Icon.check size={13} />
         </span>
       )}
@@ -105,13 +105,13 @@ function PresetCard({
                 lineHeight: 1,
                 width: 10,
                 textAlign: 'center',
-                color: '#4a5560',
+                color: 'var(--color-ui)',
                 whiteSpace: 'nowrap',
               }}
             >
               {glyph}
             </span>
-            <span aria-hidden="true" style={{ flex: 1, height: 4, borderRadius: 3, background: '#e3e7ea' }} />
+            <span aria-hidden="true" style={{ flex: 1, height: 4, borderRadius: 3, background: 'var(--color-border)' }} />
           </div>
         ))}
       </div>
@@ -144,8 +144,8 @@ function PresetPicker({
       aria-label="Bullet list style"
       style={{
         width: 312,
-        background: '#ffffff',
-        border: '1px solid #e3e7ea',
+        background: 'var(--ui-surface)',
+        border: '1px solid var(--color-border)',
         borderRadius: 10,
         boxShadow: '0 8px 28px rgba(31,41,51,.16)',
         padding: 10,
@@ -170,7 +170,7 @@ function PresetPicker({
           alignItems: 'center',
           marginTop: 10,
           paddingTop: 9,
-          borderTop: '1px solid #f2f4f5',
+          borderTop: '1px solid var(--ui-hover)',
         }}
       >
         <button
@@ -180,7 +180,7 @@ function PresetPicker({
           style={{
             fontSize: 11.5,
             fontWeight: 600,
-            color: '#0e7490',
+            color: 'var(--color-primary)',
             background: 'transparent',
             border: 'none',
             padding: 0,
@@ -232,16 +232,16 @@ function CustomizeDialog({
     height: 34,
     padding: '0 10px',
     borderRadius: 7,
-    border: '1px solid #d7dde1',
-    background: '#ffffff',
+    border: '1px solid var(--ui-border-strong)',
+    background: 'var(--ui-surface)',
     fontSize: 12.5,
-    color: '#1f2933',
+    color: 'var(--color-ink)',
   };
 
   return createPortal(
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center"
-      style={{ background: 'rgba(31,41,51,.28)' }}
+      style={{ background: 'var(--ui-scrim)' }}
     >
       <div
         ref={ref}
@@ -250,26 +250,26 @@ function CustomizeDialog({
         aria-label="Customize bullet list"
         style={{
           width: 440,
-          background: '#ffffff',
+          background: 'var(--ui-surface)',
           borderRadius: 12,
           boxShadow: '0 12px 36px rgba(31,41,51,.2)',
           overflow: 'hidden',
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px', borderBottom: '1px solid #eceff1' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px', borderBottom: '1px solid var(--ui-divider)' }}>
           <button
             type="button"
             aria-label="Back to presets"
             onClick={onBack}
-            style={hdrBtn('#4a5560')}
+            style={hdrBtn('var(--color-ui)')}
           >
             <Icon.chevronLeft size={18} />
           </button>
-          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: '#1f2933' }}>
+          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: 'var(--color-ink)' }}>
             Customize bullet list
           </span>
-          <button type="button" aria-label="Close" onClick={onClose} style={hdrBtn('#8a939b')}>
+          <button type="button" aria-label="Close" onClick={onClose} style={hdrBtn('var(--color-muted)')}>
             <Icon.x size={16} />
           </button>
         </div>
@@ -277,7 +277,7 @@ function CustomizeDialog({
         {/* Body */}
         <div style={{ display: 'flex' }}>
           {/* Left rail */}
-          <div style={{ width: 118, borderRight: '1px solid #eceff1', padding: '12px 10px' }}>
+          <div style={{ width: 118, borderRight: '1px solid var(--ui-divider)', padding: '12px 10px' }}>
             <div style={{ ...LABEL_STYLE, padding: '0 4px 8px' }}>Level</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {draft.map((l, i) => {
@@ -296,8 +296,8 @@ function CustomizeDialog({
                       border: 'none',
                       fontSize: 12,
                       fontWeight: isActive ? 600 : 400,
-                      color: isActive ? '#0e7490' : '#4a5560',
-                      background: isActive ? '#e0f7fa' : 'transparent',
+                      color: isActive ? 'var(--color-primary)' : 'var(--color-ui)',
+                      background: isActive ? 'var(--color-primary-soft)' : 'transparent',
                     }}
                   >
                     {i + 1} — {markerGlyph(l) || '∅'}
@@ -319,7 +319,7 @@ function CustomizeDialog({
                   borderRadius: 6,
                   border: 'none',
                   fontSize: 12,
-                  color: draft.length >= 9 ? '#c2c9cf' : '#8a939b',
+                  color: draft.length >= 9 ? 'var(--ui-disabled)' : 'var(--color-muted)',
                   background: 'transparent',
                 }}
               >
@@ -361,9 +361,9 @@ function CustomizeDialog({
                 <input
                   aria-label="Marker color"
                   type="color"
-                  value={cfg.color ?? '#1f2933'}
+                  value={cfg.color ?? 'var(--color-ink)'}
                   onChange={(e) => patch({ color: e.target.value })}
-                  style={{ width: 44, height: 30, border: '1px solid #d7dde1', borderRadius: 6, background: '#fff' }}
+                  style={{ width: 44, height: 30, border: '1px solid var(--ui-border-strong)', borderRadius: 6, background: 'var(--ui-surface)' }}
                 />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -385,9 +385,9 @@ function CustomizeDialog({
             </div>
 
             {/* Live preview */}
-            <div style={{ background: '#f7f9fa', border: '1px solid #eceff1', borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ background: 'var(--ui-row-hover)', border: '1px solid var(--ui-divider)', borderRadius: 8, padding: '10px 12px' }}>
               <div style={{ ...LABEL_STYLE, marginBottom: 6 }}>Preview</div>
-              <div style={{ fontFamily: "'Times New Roman', Georgia, serif", fontSize: 13.5, color: '#1f2933', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <div style={{ fontFamily: "'Times New Roman', Georgia, serif", fontSize: 13.5, color: 'var(--color-ink)', display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {[0, 1, 2].map((d) => {
                   const lc = draft[d] ?? draft[draft.length - 1]!;
                   const isActive = active === d;
@@ -400,7 +400,7 @@ function CustomizeDialog({
                         display: 'flex',
                         gap: 8,
                         alignItems: 'baseline',
-                        ...(isActive ? { color: '#0e7490' } : {}),
+                        ...(isActive ? { color: 'var(--color-primary)' } : {}),
                       }}
                     >
                       <span style={{ minWidth: 14, color: lc.color ?? undefined, fontSize: lc.size ?? undefined }}>
@@ -416,11 +416,11 @@ function CustomizeDialog({
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderTop: '1px solid #eceff1', background: '#fafbfc' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderTop: '1px solid var(--ui-divider)', background: 'var(--color-chrome)' }}>
           <button
             type="button"
             onClick={() => setDraft((prev) => prev.map((l, i) => (i === active ? defaultBulletLevelConfig(active + 1) : l)))}
-            style={{ fontSize: 11.5, color: '#8a939b', background: 'transparent', border: 'none', padding: 0 }}
+            style={{ fontSize: 11.5, color: 'var(--color-muted)', background: 'transparent', border: 'none', padding: 0 }}
           >
             Reset level
           </button>
@@ -428,14 +428,14 @@ function CustomizeDialog({
             <button
               type="button"
               onClick={onClose}
-              style={{ fontSize: 12.5, color: '#4a5560', background: '#ffffff', border: '1px solid #d7dde1', borderRadius: 7, padding: '6px 14px' }}
+              style={{ fontSize: 12.5, color: 'var(--color-ui)', background: 'var(--ui-surface)', border: '1px solid var(--ui-border-strong)', borderRadius: 7, padding: '6px 14px' }}
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={apply}
-              style={{ fontSize: 12.5, fontWeight: 600, color: '#ffffff', background: '#0e7490', border: '1px solid #0e7490', borderRadius: 7, padding: '6px 16px' }}
+              style={{ fontSize: 12.5, fontWeight: 600, color: '#ffffff', background: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 7, padding: '6px 16px' }}
             >
               Apply
             </button>
@@ -503,7 +503,7 @@ export function BulletListMenu({ editor }: { editor: Editor }): ReactNode {
         aria-expanded={pickerOpen}
         title="Bullet list styles"
         onClick={() => setPickerOpen((v) => !v)}
-        className="inline-flex h-8 w-5 items-center justify-center rounded-[5px] text-ui hover:bg-[#eef1f3]"
+        className="inline-flex h-8 w-5 items-center justify-center rounded-[5px] text-ui hover:bg-[var(--ui-hover)]"
       >
         <Icon.chevronDown size={13} />
       </button>

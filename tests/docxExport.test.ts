@@ -44,7 +44,7 @@ describe('numbering mapping', () => {
 /* --------------------------- integration (pack) --------------------------- */
 
 async function pack(doc: PMNode, opts: BuildOptions = {}) {
-  const buf = await exportDocxBuffer(doc, { title: 'Test', revisionDate: new Date('2020-01-01T00:00:00Z'), ...opts });
+  const buf = await exportDocxBuffer(doc, { title: 'Test', ...opts });
   expect(buf[0]).toBe(0x50); // 'P' — valid ZIP
   const zip = await JSZip.loadAsync(buf);
   const read = async (p: string) => (zip.file(p) ? await zip.file(p)!.async('text') : '');
@@ -271,25 +271,6 @@ describe('full pipeline → OOXML parts', () => {
     expect(numbering).toMatch(/<w:start w:val="5"/);
   });
 
-  it('redline marks → tracked-change ins/del', async () => {
-    const doc: PMNode = {
-      type: 'doc',
-      content: [
-        {
-          type: 'paragraph',
-          content: [
-            { type: 'text', text: 'keep ' },
-            { type: 'text', text: 'added', marks: [{ type: 'insertion', attrs: { changeId: 'c1' } }] },
-            { type: 'text', text: 'gone', marks: [{ type: 'deletion', attrs: { changeId: 'c2' } }] },
-          ],
-        },
-      ],
-    };
-    const { document } = await pack(doc);
-    expect(document).toMatch(/<w:ins\b/);
-    expect(document).toMatch(/<w:del\b/);
-    expect(document).toMatch(/<w:delText/);
-  });
 
   it('every OOXML part is well-formed XML (guards against Word "repair")', async () => {
     const legalDef = extendDefinition(getPreset('legal')!.levels);

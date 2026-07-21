@@ -28,7 +28,7 @@ export function TableGridPicker({ editor }: { editor: Editor }) {
           aria-expanded={open}
           aria-controls={id}
           onClick={toggle}
-          className="inline-flex h-8 min-w-8 items-center justify-center rounded-[5px] px-1.5 text-[12px] text-ui hover:bg-[#eef1f3]"
+          className="inline-flex h-8 min-w-8 items-center justify-center rounded-[5px] px-1.5 text-[12px] text-ui hover:bg-[var(--ui-hover)]"
         >
           <Icon.table size={16} />
         </button>
@@ -65,7 +65,7 @@ export function TableGridPicker({ editor }: { editor: Editor }) {
                   style={{ width: CELL, height: CELL }}
                   className={[
                     'rounded-[2px] border',
-                    active ? 'border-primary bg-primary-soft' : 'border-border bg-white hover:border-[#cfd6db]',
+                    active ? 'border-primary bg-primary-soft' : 'border-border bg-[var(--ui-surface)] hover:border-[var(--ui-border-strong)]',
                   ].join(' ')}
                 />
               );

@@ -131,8 +131,8 @@ function PresetCard({
   tabIndex: number;
 }) {
   const [hover, setHover] = useState(false);
-  const border = selected ? '1.5px solid #0e7490' : `1px solid ${hover ? '#a5e8f2' : '#e3e7ea'}`;
-  const bg = selected ? '#f2fcfd' : hover ? '#fbfdfe' : '#ffffff';
+  const border = selected ? '1.5px solid var(--color-primary)' : `1px solid ${hover ? 'var(--color-primary-border)' : 'var(--color-border)'}`;
+  const bg = selected ? 'var(--ui-selected)' : hover ? 'var(--ui-surface-2)' : 'var(--ui-surface)';
   return (
     <button
       type="button"
@@ -169,7 +169,7 @@ function PresetCard({
             top: 5,
             right: 5,
             display: 'inline-flex',
-            color: '#0e7490',
+            color: 'var(--color-primary)',
           }}
         >
           <Icon.check size={13} />
@@ -190,7 +190,7 @@ function PresetCard({
               style={{
                 fontSize: 9.5,
                 lineHeight: 1,
-                color: '#6b7580',
+                color: 'var(--ui-text-soft)',
                 fontVariantNumeric: 'tabular-nums',
                 whiteSpace: 'nowrap',
               }}
@@ -199,7 +199,7 @@ function PresetCard({
             </span>
             <span
               aria-hidden="true"
-              style={{ flex: 1, height: 4, borderRadius: 3, background: '#e3e7ea' }}
+              style={{ flex: 1, height: 4, borderRadius: 3, background: 'var(--color-border)' }}
             />
           </div>
         ))}
@@ -237,8 +237,8 @@ function PresetPicker({
       aria-label="Numbered list style"
       style={{
         width: 312,
-        background: '#ffffff',
-        border: '1px solid #e3e7ea',
+        background: 'var(--ui-surface)',
+        border: '1px solid var(--color-border)',
         borderRadius: 10,
         boxShadow: '0 8px 28px rgba(31,41,51,.16)',
         padding: 10,
@@ -264,7 +264,7 @@ function PresetPicker({
           justifyContent: 'space-between',
           marginTop: 10,
           paddingTop: 9,
-          borderTop: '1px solid #f2f4f5',
+          borderTop: '1px solid var(--ui-hover)',
         }}
       >
         <button
@@ -274,7 +274,7 @@ function PresetPicker({
           style={{
             fontSize: 11.5,
             fontWeight: 600,
-            color: '#0e7490',
+            color: 'var(--color-primary)',
             background: 'transparent',
             border: 'none',
             padding: 0,
@@ -289,7 +289,7 @@ function PresetPicker({
           onClick={onRestart}
           style={{
             fontSize: 11,
-            color: '#8a939b',
+            color: 'var(--color-muted)',
             background: 'transparent',
             border: 'none',
             padding: 0,
@@ -312,7 +312,7 @@ const LABEL_STYLE: CSSProperties = {
   fontWeight: 600,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  color: '#a3abb2',
+  color: 'var(--ui-faint)',
 };
 
 function Stepper({
@@ -330,16 +330,16 @@ function Stepper({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#ffffff',
+    background: 'var(--ui-surface)',
     border: 'none',
-    color: '#4a5560',
+    color: 'var(--color-ui)',
   };
   return (
     <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        border: '1px solid #d7dde1',
+        border: '1px solid var(--ui-border-strong)',
         borderRadius: 6,
         overflow: 'hidden',
       }}
@@ -352,9 +352,9 @@ function Stepper({
           minWidth: 30,
           textAlign: 'center',
           fontSize: 12.5,
-          color: '#1f2933',
-          borderLeft: '1px solid #eceff1',
-          borderRight: '1px solid #eceff1',
+          color: 'var(--color-ink)',
+          borderLeft: '1px solid var(--ui-divider)',
+          borderRight: '1px solid var(--ui-divider)',
           padding: '5px 4px',
           fontVariantNumeric: 'tabular-nums',
         }}
@@ -387,7 +387,7 @@ function SeparatorSegmented({
       style={{
         display: 'inline-flex',
         gap: 2,
-        background: '#eef1f3',
+        background: 'var(--ui-hover)',
         borderRadius: 7,
         padding: 2,
       }}
@@ -408,8 +408,8 @@ function SeparatorSegmented({
               border: 'none',
               fontSize: 12,
               fontWeight: active ? 600 : 500,
-              color: active ? '#0e7490' : '#4a5560',
-              background: active ? '#ffffff' : 'transparent',
+              color: active ? 'var(--color-primary)' : 'var(--color-ui)',
+              background: active ? 'var(--ui-surface)' : 'transparent',
               boxShadow: active ? '0 1px 2px rgba(31,41,51,.12)' : 'none',
             }}
           >
@@ -443,7 +443,7 @@ function Checkbox({
         background: 'transparent',
         border: 'none',
         padding: 0,
-        color: '#1f2933',
+        color: 'var(--color-ink)',
         fontSize: 12.5,
       }}
     >
@@ -456,8 +456,8 @@ function Checkbox({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: checked ? '#0e7490' : '#ffffff',
-          border: checked ? '1px solid #0e7490' : '1px solid #c2c9cf',
+          background: checked ? 'var(--color-primary)' : 'var(--ui-surface)',
+          border: checked ? '1px solid var(--color-primary)' : '1px solid var(--ui-disabled)',
           color: '#ffffff',
           flexShrink: 0,
         }}
@@ -509,7 +509,7 @@ function CustomizeDialog({
   return createPortal(
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center"
-      style={{ background: 'rgba(31,41,51,.28)' }}
+      style={{ background: 'var(--ui-scrim)' }}
     >
       <div
         ref={ref}
@@ -518,7 +518,7 @@ function CustomizeDialog({
         aria-label="Customize numbered list"
         style={{
           width: 440,
-          background: '#ffffff',
+          background: 'var(--ui-surface)',
           borderRadius: 12,
           boxShadow: '0 12px 36px rgba(31,41,51,.2)',
           overflow: 'hidden',
@@ -531,7 +531,7 @@ function CustomizeDialog({
             alignItems: 'center',
             gap: 10,
             padding: '13px 14px',
-            borderBottom: '1px solid #eceff1',
+            borderBottom: '1px solid var(--ui-divider)',
           }}
         >
           <button
@@ -547,12 +547,12 @@ function CustomizeDialog({
               borderRadius: 6,
               border: 'none',
               background: 'transparent',
-              color: '#4a5560',
+              color: 'var(--color-ui)',
             }}
           >
             <Icon.chevronLeft size={18} />
           </button>
-          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: '#1f2933' }}>
+          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: 'var(--color-ink)' }}>
             Customize numbered list
           </span>
           <button
@@ -568,7 +568,7 @@ function CustomizeDialog({
               borderRadius: 6,
               border: 'none',
               background: 'transparent',
-              color: '#8a939b',
+              color: 'var(--color-muted)',
             }}
           >
             <Icon.x size={16} />
@@ -578,7 +578,7 @@ function CustomizeDialog({
         {/* Body — two panes */}
         <div style={{ display: 'flex' }}>
           {/* Left rail */}
-          <div style={{ width: 118, borderRight: '1px solid #eceff1', padding: '12px 10px' }}>
+          <div style={{ width: 118, borderRight: '1px solid var(--ui-divider)', padding: '12px 10px' }}>
             <div style={{ ...LABEL_STYLE, padding: '0 4px 8px' }}>Level</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {draft.map((_, i) => {
@@ -597,11 +597,11 @@ function CustomizeDialog({
                       border: 'none',
                       fontSize: 12,
                       fontWeight: isActive ? 600 : 400,
-                      color: isActive ? '#0e7490' : '#4a5560',
-                      background: isActive ? '#e0f7fa' : 'transparent',
+                      color: isActive ? 'var(--color-primary)' : 'var(--color-ui)',
+                      background: isActive ? 'var(--color-primary-soft)' : 'transparent',
                     }}
                     onMouseEnter={(e) => {
-                      if (!isActive) e.currentTarget.style.background = '#f2f4f5';
+                      if (!isActive) e.currentTarget.style.background = 'var(--ui-hover)';
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive) e.currentTarget.style.background = 'transparent';
@@ -626,7 +626,7 @@ function CustomizeDialog({
                   borderRadius: 6,
                   border: 'none',
                   fontSize: 12,
-                  color: draft.length >= 9 ? '#c2c9cf' : '#8a939b',
+                  color: draft.length >= 9 ? 'var(--ui-disabled)' : 'var(--color-muted)',
                   background: 'transparent',
                 }}
               >
@@ -680,8 +680,8 @@ function CustomizeDialog({
             {/* Live preview */}
             <div
               style={{
-                background: '#f7f9fa',
-                border: '1px solid #eceff1',
+                background: 'var(--ui-row-hover)',
+                border: '1px solid var(--ui-divider)',
                 borderRadius: 8,
                 padding: '10px 12px',
               }}
@@ -691,7 +691,7 @@ function CustomizeDialog({
                 style={{
                   fontFamily: "'Times New Roman', Georgia, serif",
                   fontSize: 13.5,
-                  color: '#1f2933',
+                  color: 'var(--color-ink)',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 3,
@@ -708,7 +708,7 @@ function CustomizeDialog({
                         borderRadius: 4,
                         padding: `1px ${d === 0 ? 0 : 0}px 1px ${d * 14}px`,
                         ...(isActive
-                          ? { background: '#e0f7fa', color: '#0e7490', width: 'fit-content' }
+                          ? { background: 'var(--color-primary-soft)', color: 'var(--color-primary)', width: 'fit-content' }
                           : {}),
                       }}
                     >
@@ -728,8 +728,8 @@ function CustomizeDialog({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '10px 16px',
-            borderTop: '1px solid #eceff1',
-            background: '#fafbfc',
+            borderTop: '1px solid var(--ui-divider)',
+            background: 'var(--color-chrome)',
           }}
         >
           <button
@@ -739,7 +739,7 @@ function CustomizeDialog({
             }
             style={{
               fontSize: 11.5,
-              color: '#8a939b',
+              color: 'var(--color-muted)',
               background: 'transparent',
               border: 'none',
               padding: 0,
@@ -753,9 +753,9 @@ function CustomizeDialog({
               onClick={onClose}
               style={{
                 fontSize: 12.5,
-                color: '#4a5560',
-                background: '#ffffff',
-                border: '1px solid #d7dde1',
+                color: 'var(--color-ui)',
+                background: 'var(--ui-surface)',
+                border: '1px solid var(--ui-border-strong)',
                 borderRadius: 7,
                 padding: '6px 14px',
               }}
@@ -769,8 +769,8 @@ function CustomizeDialog({
                 fontSize: 12.5,
                 fontWeight: 600,
                 color: '#ffffff',
-                background: '#0e7490',
-                border: '1px solid #0e7490',
+                background: 'var(--color-primary)',
+                border: '1px solid var(--color-primary)',
                 borderRadius: 7,
                 padding: '6px 16px',
               }}
@@ -835,7 +835,7 @@ export function NumberedListMenu({ editor }: { editor: Editor }) {
         aria-expanded={pickerOpen}
         title="Numbered list styles"
         onClick={() => setPickerOpen((v) => !v)}
-        className="inline-flex h-8 w-5 items-center justify-center rounded-[5px] text-ui hover:bg-[#eef1f3]"
+        className="inline-flex h-8 w-5 items-center justify-center rounded-[5px] text-ui hover:bg-[var(--ui-hover)]"
       >
         <Icon.chevronDown size={13} />
       </button>

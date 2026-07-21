@@ -21,10 +21,8 @@ const ITEMS: RailItem[] = [
 ];
 
 export function ToolRail() {
-  const { editor, ai } = useEditorState();
+  const { editor } = useEditorState();
   const [active, setActive] = useState<PanelKey | null>(null);
-
-  const aiActive = ai.phase === 'reviewing' || ai.phase === 'generating';
 
   // Escape closes the open panel.
   useEffect(() => {
@@ -42,7 +40,7 @@ export function ToolRail() {
         <section
           role="region"
           aria-label={ITEMS.find((i) => i.key === active)?.label}
-          className="flex w-[300px] shrink-0 flex-col border-l border-border bg-white"
+          className="flex w-[300px] shrink-0 flex-col border-l border-border bg-[var(--ui-surface)]"
         >
           <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
             <span className="text-[13px] font-semibold text-ink">
@@ -52,7 +50,7 @@ export function ToolRail() {
               type="button"
               onClick={() => setActive(null)}
               aria-label="Close panel"
-              className="flex h-7 w-7 items-center justify-center rounded text-muted hover:bg-[#eef1f3]"
+              className="flex h-7 w-7 items-center justify-center rounded text-muted hover:bg-[var(--ui-hover)]"
             >
               <Icon.x size={15} />
             </button>
@@ -64,20 +62,7 @@ export function ToolRail() {
           ) : (
           <div className="flex-1 overflow-y-auto p-3 docs-scroll">
             {active === 'history' && (
-              <div className="flex flex-col gap-1.5">
-                {ai.versions.length === 0 ? (
-                  <p className="text-[12px] text-muted">No versions yet.</p>
-                ) : (
-                  ai.versions.map((v) => (
-                    <div key={v.id} className="rounded-md border border-border p-2.5">
-                      <p className="text-[12px] font-medium text-ink">{v.label}</p>
-                      <p className="text-[11px] text-muted">
-                        {v.summary.accepted} accepted · {v.summary.rejected} rejected
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
+              <p className="text-[12px] text-muted">No versions yet.</p>
             )}
 
             {active === 'export' && (
@@ -117,26 +102,6 @@ export function ToolRail() {
       )}
 
       <div className="flex w-[46px] shrink-0 flex-col items-center gap-1 border-l border-border bg-panel py-2">
-        <button
-          type="button"
-          title="AI edits"
-          aria-label="AI edits"
-          onClick={() => (ai.phase === 'idle' ? ai.openPrompt() : ai.focusNext())}
-          className="group relative mb-1 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
-          style={
-            aiActive
-              ? { background: '#0e7490', color: '#fff', boxShadow: '0 0 0 3px #d4f2f7' }
-              : { color: '#8a939b' }
-          }
-        >
-          <Icon.sparkle size={18} />
-          {ai.counts.pending > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-warn px-1 text-[9px] font-bold text-white">
-              {ai.counts.pending}
-            </span>
-          )}
-        </button>
-
         {ITEMS.map((it) => {
           const IconCmp = Icon[it.icon];
           const isActive = active === it.key;
@@ -150,7 +115,7 @@ export function ToolRail() {
               onClick={() => setActive((cur) => (cur === it.key ? null : it.key))}
               className={[
                 'flex h-9 w-9 items-center justify-center rounded-md transition-colors',
-                isActive ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-[#e9edee] hover:text-ui',
+                isActive ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-[var(--ui-hover)] hover:text-ui',
               ].join(' ')}
             >
               <IconCmp size={18} />

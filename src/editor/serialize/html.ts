@@ -2,7 +2,7 @@
  * HTML serialization. Two modes:
  *  - 'roundtrip' (default): self-contained. `editor.getHTML()` already emits
  *    every per-node/mark datum (line-height, spacing, font-size, alignment,
- *    list/bullet def-ids, table widths/merges, redline marks, task state). The
+ *    list/bullet def-ids, table widths/merges, task state). The
  *    three items that live OUTSIDE the node tree — the list/bullet definition
  *    registries, `pageSetup`, and the editor font-family (whole-editor CSS) —
  *    are carried in a wrapper's data-attrs so nothing is silently lost.

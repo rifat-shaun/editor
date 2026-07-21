@@ -99,7 +99,7 @@ export function Ruler({ scrollerRef }: { scrollerRef: RefObject<HTMLDivElement |
   return (
     <div
       ref={containerRef}
-      className="print-hide relative shrink-0 border-b border-border bg-[#fbfcfd]"
+      className="print-hide relative shrink-0 border-b border-border bg-[var(--ui-surface-2)]"
       style={{ height: H }}
       role="group"
       aria-label="Ruler"
@@ -110,7 +110,7 @@ export function Ruler({ scrollerRef }: { scrollerRef: RefObject<HTMLDivElement |
         onClick={() => setRulerUnit(rulerUnit === 'in' ? 'cm' : 'in')}
         title="Toggle ruler units"
         aria-label={`Ruler units: ${rulerUnit === 'in' ? 'inches' : 'centimeters'}`}
-        style={{ position: 'absolute', left: 4, top: 2, height: H - 5, padding: '0 6px', fontSize: 10, fontWeight: 600, color: '#5f6b74', border: '1px solid #d7dde1', borderRadius: 4, background: '#fff', cursor: 'pointer', zIndex: 2 }}
+        style={{ position: 'absolute', left: 4, top: 2, height: H - 5, padding: '0 6px', fontSize: 10, fontWeight: 600, color: 'var(--ui-text-soft)', border: '1px solid var(--ui-border-strong)', borderRadius: 4, background: 'var(--ui-surface)', cursor: 'pointer', zIndex: 2 }}
       >
         {rulerUnit === 'in' ? 'in' : 'cm'}
       </button>
@@ -118,9 +118,9 @@ export function Ruler({ scrollerRef }: { scrollerRef: RefObject<HTMLDivElement |
       {/* Page-aligned layer. */}
       <div style={{ position: 'absolute', top: 0, left: offset, width: sx(pageW), height: H, overflow: 'hidden' }}>
         {/* Margin shading + text column. */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: sx(contentStart), height: H, background: '#e9edf0' }} />
-        <div style={{ position: 'absolute', top: 0, left: sx(contentEnd), width: sx(mr), height: H, background: '#e9edf0' }} />
-        <div style={{ position: 'absolute', top: 0, left: sx(contentStart), width: sx(contentEnd - contentStart), height: H, background: '#fff', borderLeft: '1px solid #cfd6db', borderRight: '1px solid #cfd6db' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, width: sx(contentStart), height: H, background: 'var(--ui-shade)' }} />
+        <div style={{ position: 'absolute', top: 0, left: sx(contentEnd), width: sx(mr), height: H, background: 'var(--ui-shade)' }} />
+        <div style={{ position: 'absolute', top: 0, left: sx(contentStart), width: sx(contentEnd - contentStart), height: H, background: 'var(--ui-surface)', borderLeft: '1px solid var(--ui-border-strong)', borderRight: '1px solid var(--ui-border-strong)' }} />
 
         <Ticks pageW={pageW} ml={ml} sx={sx} unit={rulerUnit} />
 
@@ -170,10 +170,10 @@ function Ticks({ pageW, ml, sx, unit }: { pageW: number; ml: number; sx: (n: num
     const x = sx(xu);
     const major = i % perMajor === 0;
     const h = major ? 6 : 3;
-    els.push(<div key={`t${i}`} style={{ position: 'absolute', left: x, bottom: 0, width: 1, height: h, background: '#aeb7bd' }} />);
+    els.push(<div key={`t${i}`} style={{ position: 'absolute', left: x, bottom: 0, width: 1, height: h, background: 'var(--ui-faint)' }} />);
     if (major && i >= 0) {
       const n = i / perMajor;
-      if (n > 0) els.push(<div key={`l${i}`} style={{ position: 'absolute', left: x, top: 2, transform: 'translateX(-50%)', fontSize: 9, color: '#8a939b', lineHeight: 1 }}>{label(n)}</div>);
+      if (n > 0) els.push(<div key={`l${i}`} style={{ position: 'absolute', left: x, top: 2, transform: 'translateX(-50%)', fontSize: 9, color: 'var(--color-muted)', lineHeight: 1 }}>{label(n)}</div>);
     }
   }
   return <>{els}</>;
@@ -230,8 +230,8 @@ function Marker({
 
   const triangle = (dir: 'up' | 'down'): CSSProperties =>
     dir === 'down'
-      ? { borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '6px solid #5f6b74' }
-      : { borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderBottom: '6px solid #5f6b74' };
+      ? { borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '6px solid var(--ui-text-soft)' }
+      : { borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderBottom: '6px solid var(--ui-text-soft)' };
 
   const common: CSSProperties = {
     position: 'absolute',
@@ -247,7 +247,7 @@ function Marker({
     kind === 'first'
       ? { ...common, top: 1, ...triangle('down') }
       : kind === 'left'
-        ? { ...common, top: 15, width: 10, height: 6, background: '#5f6b74', borderRadius: 1 }
+        ? { ...common, top: 15, width: 10, height: 6, background: 'var(--ui-text-soft)', borderRadius: 1 }
         : { ...common, top: 9, ...triangle('up') }; // hanging + right both bottom triangles
 
   const labels: Record<MarkerKind, string> = {
@@ -271,7 +271,7 @@ function Marker({
         style={shape}
       />
       {drag && (
-        <div style={{ position: 'absolute', left: x, top: H + 2, transform: 'translateX(-50%)', fontSize: 10, background: '#1f2933', color: '#fff', padding: '1px 5px', borderRadius: 3, whiteSpace: 'nowrap', zIndex: 5 }}>
+        <div style={{ position: 'absolute', left: x, top: H + 2, transform: 'translateX(-50%)', fontSize: 10, background: 'var(--color-ink)', color: '#fff', padding: '1px 5px', borderRadius: 3, whiteSpace: 'nowrap', zIndex: 5 }}>
           {label}
         </div>
       )}

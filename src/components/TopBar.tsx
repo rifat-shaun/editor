@@ -36,8 +36,8 @@ function DownloadWord() {
       className={[
         'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-semibold disabled:opacity-60',
         error
-          ? 'border-[#e6a4a0] bg-[#fdecea] text-[#c62828]'
-          : 'border-border text-ui hover:bg-[#f2f4f5]',
+          ? 'border-[var(--ui-danger-border)] bg-[var(--ui-danger-bg)] text-[var(--ui-danger)]'
+          : 'border-border text-ui hover:bg-[var(--ui-hover)]',
       ].join(' ')}
     >
       {busy ? <Icon.spinner size={14} /> : error ? <Icon.stop size={14} /> : <Icon.exportIcon size={14} />}
@@ -48,12 +48,11 @@ function DownloadWord() {
 
 const MODE_LABEL: Record<EditorMode, string> = {
   editing: '✎ Editing',
-  suggesting: '✍ Suggesting',
   viewing: '👁 Viewing',
 };
 
 const COLLABORATORS = [
-  { name: 'Dana Ruiz', color: '#0e7490' },
+  { name: 'Dana Ruiz', color: 'var(--color-primary)' },
   { name: 'Amir Shah', color: '#b5651d' },
   { name: 'Lee Park', color: '#7a4fd6' },
 ];
@@ -86,7 +85,7 @@ function ModePill() {
       )}
     >
       {(close) =>
-        (['editing', 'suggesting', 'viewing'] as EditorMode[]).map((m) => (
+        (['editing', 'viewing'] as EditorMode[]).map((m) => (
           <MenuItem
             key={m}
             onSelect={() => {
@@ -126,7 +125,7 @@ export function TopBar() {
   };
 
   return (
-    <header className="print-hide flex h-14 shrink-0 items-center gap-3 border-b border-[#eceff1] bg-white px-3">
+    <header className="print-hide flex h-14 shrink-0 items-center gap-3 border-b border-[var(--ui-divider)] bg-[var(--ui-surface)] px-3">
       <ToolButton label="Home" className="text-primary">
         <Icon.appGrid size={19} />
       </ToolButton>
@@ -153,7 +152,7 @@ export function TopBar() {
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="truncate rounded px-1 text-[14px] font-semibold text-ink hover:bg-[#f2f4f5]"
+              className="truncate rounded px-1 text-[14px] font-semibold text-ink hover:bg-[var(--ui-hover)]"
               title="Rename"
             >
               {title}
@@ -165,7 +164,7 @@ export function TopBar() {
           <ToolButton label="Move to folder">
             <Icon.move size={16} />
           </ToolButton>
-          <span className="rounded-full bg-[#f2f4f5] px-2 py-0.5 text-[10.5px] text-muted">
+          <span className="rounded-full bg-[var(--ui-hover)] px-2 py-0.5 text-[10.5px] text-muted">
             {relativeTime(savedAt)}
           </span>
         </div>
@@ -175,7 +174,7 @@ export function TopBar() {
       <div className="ml-auto flex items-center gap-2.5">
         <button
           type="button"
-          className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-[12px] text-ui hover:bg-[#f2f4f5]"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-[12px] text-ui hover:bg-[var(--ui-hover)]"
         >
           <Icon.comment size={16} />2
         </button>

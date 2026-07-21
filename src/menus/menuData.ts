@@ -74,7 +74,6 @@ const VIEW: MenuSpec = {
       label: 'Mode',
       submenu: [
         { id: 'view.mode.editing', label: 'Editing', role: 'radio', radioGroup: 'mode' },
-        { id: 'view.mode.suggesting', label: 'Suggesting', role: 'radio', radioGroup: 'mode' },
         { id: 'view.mode.viewing', label: 'Viewing', role: 'radio', radioGroup: 'mode' },
       ],
     },
@@ -82,7 +81,7 @@ const VIEW: MenuSpec = {
     { id: 'view.showOutline', label: 'Show outline', role: 'checkbox' },
     { id: 'view.showRuler', label: 'Show ruler', role: 'checkbox' },
     { id: 'view.showNonPrinting', label: 'Show non-printing characters', role: 'checkbox' },
-    { id: 'view.showSuggestedEdits', label: 'Show suggested edits', role: 'checkbox' },
+    { id: 'view.darkMode', label: 'Dark mode', role: 'checkbox' },
     { divider: true },
     {
       id: 'view.zoom',
@@ -120,7 +119,6 @@ const INSERT: MenuSpec = {
     { divider: true },
     { id: 'insert.variable', label: 'Variable', glyph: '{ }', hint: '@' },
     { id: 'insert.comment', label: 'Comment' },
-    { id: 'insert.aiDraft', label: 'AI draft', ai: true, shortcut: 'Mod-J' },
     { divider: true },
     { id: 'insert.pageBreak', label: 'Page break' },
     { id: 'insert.headersFooters', label: 'Headers & footers', submenu: [{ id: 'insert.hf.stub', label: 'Edit header' }] },
@@ -220,9 +218,6 @@ const TOOLS: MenuSpec = {
   id: 'tools',
   label: 'Tools',
   items: [
-    { id: 'tools.aiEdit', label: 'AI edit', ai: true, shortcut: 'Mod-E' },
-    { id: 'tools.reviewAi', label: 'Review AI edits', ai: true },
-    { divider: true },
     { id: 'tools.spellingGrammar', label: 'Spelling & grammar', submenu: [{ id: 'tools.sg.stub', label: 'Check document' }] },
     { id: 'tools.wordCount', label: 'Word count', shortcut: 'Mod-Shift-C' },
     { divider: true },

@@ -6,8 +6,6 @@ import TextStyle from '@tiptap/extension-text-style';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
-import { DeletionMark, InsertionMark } from './extensions/redline';
-import { Spotlight } from './extensions/spotlight';
 import { buildTableExtensions } from './extensions/table';
 import { CustomDocument, CustomOrderedList } from './extensions/listNumbering/extension';
 import { CustomBulletList } from './extensions/bulletList/extension';
@@ -56,8 +54,5 @@ export function buildExtensions() {
     PageBreak,
     SelectionHighlight,
     ListPaste,
-    DeletionMark,
-    InsertionMark,
-    Spotlight,
   ];
 }

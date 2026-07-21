@@ -21,7 +21,7 @@ const SHIFT = IS_MAC ? '⇧' : 'Shift';
 const BKSP = IS_MAC ? '⌫' : 'Backspace';
 const sc = (...parts: string[]) => parts.join(IS_MAC ? '' : '+');
 
-const FILL_COLORS = ['#fbe4e4', '#ddf2e6', '#d8eef5', '#fdf3d0', '#eceff2'];
+const FILL_COLORS = ['#fbe4e4', '#ddf2e6', '#d8eef5', '#fdf3d0', 'var(--ui-divider)'];
 
 /** Innermost table node enclosing the current selection. */
 function currentTable(editor: Editor): PMNode | null {
@@ -101,7 +101,7 @@ function Section({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export function TableMenu() {
-  const { editor, ai } = useEditorState();
+  const { editor } = useEditorState();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
@@ -204,7 +204,7 @@ export function TableMenu() {
     return () => cancelAnimationFrame(id);
   }, [open]);
 
-  if (!editor || !open || ai.phase === 'generating') return null;
+  if (!editor || !open) return null;
 
   const can = editor.can();
   const table = currentTable(editor);

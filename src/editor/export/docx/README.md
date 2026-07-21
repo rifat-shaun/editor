@@ -2,7 +2,7 @@
 
 Exports the editor's content to a Word `.docx` using **docx-js** (`docx`). Driven
 entirely by `editor.getJSON()` (ProseMirror JSON) — never the rendered DOM — so
-custom-node attributes (list definitions, table spans, redlines) survive.
+custom-node attributes (list definitions, table spans, indent, spacing) survive.
 
 ## Pipeline
 
@@ -21,10 +21,6 @@ The TopBar "Word" button calls `downloadDocx` with a loading state.
   horizontal rule, code block (monospace + shading), hard break.
 - **Marks → run props**: bold, italic, strike, underline, `code` (Courier),
   link (`ExternalHyperlink`), `textStyle.fontSize` (→ half-points).
-- **Redlines → native tracked changes**: `insertion` → `InsertedTextRun`
-  (`w:ins`), `deletion` → `DeletedTextRun` (`w:del`/`w:delText`), author
-  "AI review"; the document opens with track-changes on so they can be
-  accepted/rejected.
 - **Lists** (`numbering.ts`, the crux): each editor list definition → a docx
   numbering config. Number style → `LevelFormat` (DECIMAL / DECIMAL_ZERO /
   LOWER|UPPER_LETTER / LOWER|UPPER_ROMAN), separator → the `%1.`/`%1)` template,
@@ -86,8 +82,6 @@ source of truth (mirror it if `styles.css` changes):
   register an `ImageRun` converter (base64 → `Uint8Array`; remote → `fetch` to
   binary first; all async must resolve before `Packer`).
 - **Interactive Word checkboxes**: **deferred** — task lists render ☐/☑ glyphs.
-- **Block-level tracked changes**: out of scope — the redline marks are inline
-  only, so the editor can't produce a whole inserted/deleted block.
 - **Mixed ordered/bullet nesting**: a nested list of the *other* type gets its
   own numbering reference (correct format + indent); numbering restarts in that
   sub-branch. Homogeneous trees (incl. composite `1.a.i`) are exact.
@@ -127,4 +121,4 @@ apps to complete the gate.
   in `levelFormatFor` if it's a genuinely new format.
 
 Tests: `tests/docxExport.test.ts` (numbering mapping incl. composite, colspan/
-rowspan, tracked changes, bullet glyph, and XML well-formedness of every part).
+rowspan, indent/spacing, bullet glyph, and XML well-formedness of every part).

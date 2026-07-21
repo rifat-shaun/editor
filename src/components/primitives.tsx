@@ -27,7 +27,7 @@ export function ToolButton({
       className={[
         'inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-[5px] px-1.5',
         'text-[12px] text-ui transition-colors',
-        active ? 'bg-primary-soft text-primary' : 'hover:bg-[#eef1f3]',
+        active ? 'bg-primary-soft text-primary' : 'hover:bg-[var(--ui-hover)]',
         className,
       ].join(' ')}
       {...rest}
@@ -38,7 +38,7 @@ export function ToolButton({
 }
 
 export function ToolbarDivider() {
-  return <span aria-hidden="true" className="mx-1 h-[18px] w-px shrink-0 bg-[#e3e7ea]" />;
+  return <span aria-hidden="true" className="mx-1 h-[18px] w-px shrink-0 bg-[var(--color-border)]" />;
 }
 
 /**
@@ -111,7 +111,7 @@ export function Menu({
               role="menu"
               style={panelStyle}
               className={[
-                'z-[60] max-h-[70vh] min-w-[220px] overflow-y-auto rounded-lg border border-border bg-white p-1 shadow-lg docs-scroll',
+                'z-[60] max-h-[70vh] min-w-[220px] overflow-y-auto rounded-lg border border-border bg-[var(--ui-surface)] p-1 shadow-lg docs-scroll',
                 panelClassName,
               ].join(' ')}
             >
@@ -140,7 +140,7 @@ export function MenuItem({
       type="button"
       role="menuitem"
       onClick={onSelect}
-      className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[12.5px] text-ui hover:bg-[#eef1f3]"
+      className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[12.5px] text-ui hover:bg-[var(--ui-hover)]"
     >
       {icon && <span className="text-muted">{icon}</span>}
       <span className="flex-1">{children}</span>
@@ -184,7 +184,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.value)}
           className={[
             'rounded-[5px] px-2.5 py-1 text-[11.5px] font-medium transition-colors',
-            value === o.value ? 'bg-white text-primary shadow-sm' : 'text-ui hover:text-ink',
+            value === o.value ? 'bg-[var(--ui-surface)] text-primary shadow-sm' : 'text-ui hover:text-ink',
           ].join(' ')}
         >
           {o.label}

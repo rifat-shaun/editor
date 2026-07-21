@@ -7,11 +7,9 @@
 import {
   AlignmentType,
   BorderStyle,
-  DeletedTextRun,
   ExternalHyperlink,
   HeadingLevel,
   type ILevelsOptions,
-  InsertedTextRun,
   PageBreak as DocxPageBreak,
   Paragraph,
   ShadingType,
@@ -54,10 +52,6 @@ export interface NumberingInstance {
 }
 
 export interface ExportOptions {
-  /** Author label for tracked-change (redline) revisions. */
-  revisionAuthor?: string;
-  /** Timestamp for revisions (Date). Injected for determinism in tests. */
-  revisionDate?: Date;
   /** Font theme (single source of truth). Defaults to DEFAULT_FONT_THEME. */
   fontTheme?: DocxFontTheme;
 }
@@ -67,28 +61,16 @@ export class ExportContext {
   bulletDefs: Record<string, BulletDefinition>;
   numbering: NumberingInstance[] = [];
   private refSeq = 0;
-  private revSeq = 0;
-  readonly author: string;
-  readonly date: Date;
   readonly theme: DocxFontTheme;
 
   constructor(doc: PMNode, opts: ExportOptions = {}) {
     this.listDefs = (doc.attrs?.listDefs as Record<string, ListDefinition>) ?? {};
     this.bulletDefs = (doc.attrs?.bulletDefs as Record<string, BulletDefinition>) ?? {};
-    this.author = opts.revisionAuthor ?? 'AI review';
-    this.date = opts.revisionDate ?? new Date();
     this.theme = opts.fontTheme ?? DEFAULT_FONT_THEME;
   }
 
   nextRef(): string {
     return `num-${++this.refSeq}`;
-  }
-  nextRevisionId(): number {
-    return ++this.revSeq;
-  }
-  /** True once any tracked-change (redline) run has been emitted. */
-  get hasRevisions(): boolean {
-    return this.revSeq > 0;
   }
 }
 
@@ -104,7 +86,7 @@ interface RunOpts {
   color?: string;
 }
 
-/** Fold a text node's marks into run options (excluding link + redline). */
+/** Fold a text node's marks into run options (excluding link). */
 function runOptionsFromMarks(marks: PMMark[], theme: DocxFontTheme): RunOpts {
   const opts: RunOpts = {};
   for (const m of marks) {
@@ -129,22 +111,12 @@ function runOptionsFromMarks(marks: PMMark[], theme: DocxFontTheme): RunOpts {
   return opts;
 }
 
-/** A text node → a docx run, honouring tracked-change (insertion/deletion) marks. */
-function textToRun(node: PMNode, ctx: ExportContext): TextRun | InsertedTextRun | DeletedTextRun {
-  const marks = node.marks ?? [];
-  const base = { ...runOptionsFromMarks(marks, ctx.theme), text: node.text ?? '' };
-  const has = (t: string) => marks.some((m) => m.type === t);
-  const iso = ctx.date.toISOString();
-  if (has('insertion')) {
-    return new InsertedTextRun({ ...base, id: ctx.nextRevisionId(), author: ctx.author, date: iso });
-  }
-  if (has('deletion')) {
-    return new DeletedTextRun({ ...base, id: ctx.nextRevisionId(), author: ctx.author, date: iso });
-  }
-  return new TextRun(base);
+/** A text node → a docx run. */
+function textToRun(node: PMNode, ctx: ExportContext): TextRun {
+  return new TextRun({ ...runOptionsFromMarks(node.marks ?? [], ctx.theme), text: node.text ?? '' });
 }
 
-type InlineChild = TextRun | InsertedTextRun | DeletedTextRun | ExternalHyperlink;
+type InlineChild = TextRun | ExternalHyperlink;
 
 /** Convert a block's inline content to runs, wrapping linked text in hyperlinks. */
 function convertInline(content: PMNode[] | undefined, ctx: ExportContext): InlineChild[] {

@@ -2,7 +2,7 @@
 
 /* ------------------------------------------------------------------ *
  * Design tokens (Tailwind v4 @theme -> utility classes)
- * bg-primary, text-ui, border-border, bg-del-bg, etc.
+ * bg-primary, text-ui, border-border, bg-chrome, etc.
  * ------------------------------------------------------------------ */
 @theme {
   --color-primary: #0e7490;
@@ -15,14 +15,6 @@
   --color-chrome: #fafbfc;
   --color-panel: #f4f6f7;
   --color-desk: #e8ecef;
-  --color-del: #c62828;
-  --color-del-bg: #fdecea;
-  --color-ins: #0e7c66;
-  --color-ins-bg: #e0f5ef;
-  --color-ins-border: #23a67f;
-  --color-spotlight: #fffbe8;
-  --color-spotlight-border: #f0c93c;
-  --color-warn: #e8b04b;
 
   --font-ui:
     system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -43,11 +35,103 @@
   box-sizing: border-box;
 }
 
+/* ------------------------------------------------------------------ *
+ * Dark mode. Chrome + popovers are driven by design tokens; toggling sets
+ * data-theme="dark" on <html>, which overrides the @theme colors and the
+ * --ui-* popover palette. The document PAGE stays a light sheet on a dark
+ * desk — `.docs-page-content` re-asserts the light token values so document
+ * content (text, tables) never inverts. `color-scheme` fixes native
+ * form controls / scrollbars.
+ * ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+  /* Popover/menu/dialog/ruler palette (light = current values). */
+  --ui-surface: #ffffff;
+  --ui-surface-2: #fbfcfd;
+  --ui-hover: #f2f4f5;
+  --ui-row-hover: #f7f9fa;
+  --ui-selected: #f2fcfd;
+  --ui-text: #3d4652;
+  --ui-faint: #a3abb2;
+  --ui-text-soft: #5f6b74;
+  --ui-text-dim: #7a848d;
+  --ui-disabled: #c2c9cf;
+  --ui-divider: #eceff1;
+  --ui-border-strong: #d7dde1;
+  --ui-teal-muted: #5f8a94;
+  --ui-guide: #7ecfdd;
+  --ui-shade: #e9edf0;
+  --ui-skeleton-h: #c9d2d8;
+  --ui-skeleton-b: #e3e7ea;
+  --ui-danger: #c62828;
+  --ui-danger-bg: #fdecea;
+  --ui-danger-border: #e6a4a0;
+  --ui-danger-field: #fdf5f4;
+  --ui-amber: #8a6a10;
+  --ui-amber-bg: #fff8e6;
+  --ui-scrim: rgba(31, 41, 51, 0.32);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  /* @theme chrome overrides */
+  --color-ink: #e7ebee;
+  --color-ui: #c3ccd4;
+  --color-muted: #9aa4ae;
+  --color-border: #333c45;
+  --color-chrome: #1b2127;
+  --color-panel: #20272e;
+  --color-desk: #0f141a;
+  --color-primary: #2fa9cb;
+  --color-primary-soft: #0e3a46;
+  --color-primary-border: #266072;
+  /* popover palette */
+  --ui-surface: #242b32;
+  --ui-surface-2: #1e242b;
+  --ui-hover: #2c343c;
+  --ui-row-hover: #2b333b;
+  --ui-selected: #103138;
+  --ui-text: #d3dae0;
+  --ui-faint: #8a939d;
+  --ui-text-soft: #b3bbc3;
+  --ui-text-dim: #9aa3ac;
+  --ui-disabled: #58616a;
+  --ui-divider: #2d353d;
+  --ui-border-strong: #3a434c;
+  --ui-teal-muted: #7fb3bf;
+  --ui-guide: #2fa9cb;
+  --ui-shade: #2a323a;
+  --ui-skeleton-h: #48515a;
+  --ui-skeleton-b: #363e46;
+  --ui-danger: #f0736c;
+  --ui-danger-bg: #3a1f1d;
+  --ui-danger-border: #6f3a37;
+  --ui-danger-field: #2c1c1b;
+  --ui-amber: #d9b866;
+  --ui-amber-bg: #35301f;
+  --ui-scrim: rgba(0, 0, 0, 0.55);
+}
+
+/* The document page is a light island regardless of theme. */
+:root[data-theme='dark'] .docs-page-content {
+  --color-ink: #1f2933;
+  --color-primary: #0e7490;
+  --color-primary-soft: #e0f7fa;
+  --color-primary-border: #a5e8f2;
+  --color-border: #e3e7ea;
+  background: #ffffff;
+  color: #1a212b;
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
+}
+
+body {
+  background: var(--color-desk);
 }
 
 /* All buttons are clickable. Bare `button` (low specificity) so the table drag
@@ -441,8 +525,8 @@ button:disabled {
 }
 .pgn-rowdrag-handle.is-blocked:hover,
 .pgn-coldrag-handle.is-blocked:hover {
-  background: var(--color-del-bg, #fdecea);
-  color: var(--color-del, #c62828);
+  background: var(--ui-danger-bg);
+  color: var(--ui-danger);
 }
 .pgn-rowdrag-handle svg,
 .pgn-coldrag-handle svg {
@@ -712,7 +796,7 @@ body.pgn-row-dragging {
   gap: 12px;
   max-width: 440px;
   padding: 12px 14px;
-  border: 1px solid var(--color-del, #c62828);
+  border: 1px solid var(--ui-danger);
   border-left-width: 4px;
   border-radius: 10px;
   background: #fff;
@@ -723,7 +807,7 @@ body.pgn-row-dragging {
 .pgn-move-error-title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--color-del, #c62828);
+  color: var(--ui-danger);
   margin-bottom: 2px;
 }
 .pgn-move-error-msg {
@@ -755,60 +839,6 @@ body.pgn-row-dragging {
   .pgn-rowdrag-ghost {
     display: none !important;
   }
-}
-
-/* ------------------------------------------------------------------ *
- * Redline marks (tracked changes) — visual only until accepted
- * ------------------------------------------------------------------ */
-.redline-del {
-  color: var(--color-del);
-  background: var(--color-del-bg);
-  text-decoration: line-through;
-  border-radius: 2px;
-  padding: 0 1px;
-  cursor: pointer;
-}
-
-.redline-ins {
-  color: var(--color-ins);
-  background: var(--color-ins-bg);
-  border-bottom: 2px solid var(--color-ins-border);
-  border-radius: 2px;
-  padding: 0 1px;
-  cursor: pointer;
-}
-
-/* Spotlight wraps the active change's block */
-.redline-spotlight {
-  background: var(--color-spotlight);
-  outline: 2px solid var(--color-spotlight-border);
-  border-radius: 2px;
-}
-
-.redline-accepted {
-  background: transparent;
-}
-.redline-rejected {
-  opacity: 0.55;
-}
-
-.redline-tag {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 0 4px;
-  border-radius: 3px;
-  margin-left: 3px;
-  vertical-align: middle;
-}
-.redline-tag.accepted {
-  color: var(--color-ins);
-  background: var(--color-ins-bg);
-}
-.redline-tag.rejected {
-  color: var(--color-del);
-  background: var(--color-del-bg);
 }
 
 /* ------------------------------------------------------------------ *
@@ -922,7 +952,9 @@ body.pgn-row-dragging {
    page edges to fake per-page elevation within one continuous element. */
 .pgn-gap {
   height: var(--pgn-gap);
-  background: var(--pgn-desk, #e8ecef);
+  /* The inter-page gap shows the desk — track the themed desk color so it goes
+     dark with the rest of the desk (the page sheets stay a light island). */
+  background: var(--pgn-desk, var(--color-desk));
   box-shadow:
     inset 0 6px 6px -6px rgba(0, 0, 0, 0.18),
     inset 0 -6px 6px -6px rgba(0, 0, 0, 0.18);

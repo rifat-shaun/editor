@@ -26,28 +26,28 @@ export function WordCountDialog({
   ];
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center" style={{ background: 'rgba(31,41,51,.28)' }}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center" style={{ background: 'var(--ui-scrim)' }}>
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-label="Word count"
-        style={{ width: 280, background: '#fff', borderRadius: 12, boxShadow: '0 12px 36px rgba(31,41,51,.2)', fontFamily: SYSTEM_FONT }}
+        style={{ width: 280, background: 'var(--ui-surface)', borderRadius: 12, boxShadow: '0 12px 36px rgba(31,41,51,.2)', fontFamily: SYSTEM_FONT }}
       >
         <div style={{ display: 'flex', alignItems: 'center', padding: '15px 18px 4px' }}>
-          <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: '#1f2933' }}>Word count</span>
+          <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: 'var(--color-ink)' }}>Word count</span>
           <button
             type="button"
             aria-label="Close"
             onClick={onClose}
-            style={{ border: 'none', background: 'transparent', color: '#8a939b', cursor: 'pointer', fontSize: 16 }}
+            style={{ border: 'none', background: 'transparent', color: 'var(--color-muted)', cursor: 'pointer', fontSize: 16 }}
           >
             ✕
           </button>
         </div>
         <div style={{ padding: '8px 18px 16px' }}>
           {rows.map(([label, value]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', fontSize: 12.5, color: '#3d4652' }}>
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', fontSize: 12.5, color: 'var(--ui-text)' }}>
               <span>{label}</span>
               <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{value}</span>
             </div>

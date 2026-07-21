@@ -66,8 +66,6 @@ export interface EditorStateValue {
   toggleTheme(): void;
 }
 
-const OUTLINE_BREAKPOINT = 1100;
-
 const EditorContext = createContext<EditorStateValue | null>(null);
 
 /** Public hook: read editor + AI review state from within a `<DocsEditor>`. */
@@ -110,21 +108,11 @@ export function EditorProvider(props: {
   });
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [docVersion, setDocVersion] = useState(0);
-  const [outlineOpen, setOutlineOpen] = useState(
-    () => typeof window === 'undefined' || window.innerWidth >= OUTLINE_BREAKPOINT,
-  );
-  const outlineUserSet = useRef(false);
+  // The outline panel is off by default; the user opens it via View → Show
+  // outline (or the toolbar toggle).
+  const [outlineOpen, setOutlineOpen] = useState(false);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  // Auto-collapse the outline on narrow viewports until the user overrides it.
-  useEffect(() => {
-    const onResize = () => {
-      if (!outlineUserSet.current) setOutlineOpen(window.innerWidth >= OUTLINE_BREAKPOINT);
-    };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   const toggleRuler = () => {
     setShowRuler((v) => {
@@ -144,10 +132,7 @@ export function EditorProvider(props: {
       return next;
     });
 
-  const toggleOutline = () => {
-    outlineUserSet.current = true;
-    setOutlineOpen((o) => !o);
-  };
+  const toggleOutline = () => setOutlineOpen((o) => !o);
 
   const editor = useEditor({
     editable: initialMode !== 'viewing',

@@ -106,12 +106,16 @@ export function MenuBar({ menus, onRename }: { menus: MenuSpec[]; onRename: () =
           setOpenId(help.id);
         }
       } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
-        // Page setup — the macOS-standard ⇧⌘P (pairs with Print ⌘P).
+        // Page setup — the macOS-standard ⇧⌘P (pairs with Print ⌘P). Edits page
+        // geometry, so it's disabled in view mode.
+        if (ui.mode === 'viewing') return;
         e.preventDefault();
         setOpenId(null);
         setPageSetupOpen(true);
       } else if (e.key === 'F2' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        // Rename — the classic F2 rename key; focuses the title editor.
+        // Rename — the classic F2 rename key; focuses the title editor. Editing
+        // the title is disabled in view mode.
+        if (ui.mode === 'viewing') return;
         e.preventDefault();
         setOpenId(null);
         onRename();
@@ -119,7 +123,7 @@ export function MenuBar({ menus, onRename }: { menus: MenuSpec[]; onRename: () =
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [menus, onRename]);
+  }, [menus, onRename, ui.mode]);
 
   const onTriggerKey = (e: React.KeyboardEvent, id: string) => {
     switch (e.key) {

@@ -227,12 +227,17 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
     background: open ? 'var(--color-primary-soft)' : btnHover ? 'var(--ui-hover)' : 'transparent',
   };
 
+  const PANEL_W = 240;
   const panelStyle: CSSProperties = rect
     ? {
         position: 'fixed',
         top: Math.round(rect.bottom + 4),
-        left: Math.round(rect.left),
-        width: 240,
+        // Prefer left-aligned to the trigger, but if it would overflow the right
+        // edge, shift left so it renders on the left (stays fully on screen).
+        left: Math.round(
+          Math.max(8, Math.min(rect.left, window.innerWidth - PANEL_W - 8)),
+        ),
+        width: PANEL_W,
         background: 'var(--ui-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: 9,

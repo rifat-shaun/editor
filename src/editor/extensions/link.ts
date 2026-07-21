@@ -99,6 +99,7 @@ export const LinkKit = Link.extend({
   addKeyboardShortcuts() {
     return {
       'Mod-k': () => {
+        if (!this.editor.isEditable) return false; // no link editing in view mode
         this.editor.view.dom.dispatchEvent(new CustomEvent('docs:open-link', { bubbles: true }));
         return true;
       },

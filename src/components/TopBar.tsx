@@ -7,46 +7,6 @@ import { TextField } from './TextField';
 import { MenuBar } from '../menus/MenuBar';
 import { MENUS } from '../menus/menuData';
 
-function DownloadWord() {
-  const { editor, title } = useEditorState();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
-  if (!editor) return null;
-
-  const run = async () => {
-    setBusy(true);
-    setError(false);
-    try {
-      // Lazy-load docx-js so it isn't in the main bundle.
-      const { downloadDocx } = await import('../editor/export/docx');
-      await downloadDocx(editor, title || 'Document', { includeHeaderFooter: true });
-    } catch (err) {
-      console.error('DOCX export failed', err);
-      setError(true);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      disabled={busy}
-      title={error ? 'Export failed — click to retry' : 'Download as Word (.docx)'}
-      onClick={run}
-      className={[
-        'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-semibold disabled:opacity-60',
-        error
-          ? 'border-[var(--ui-danger-border)] bg-[var(--ui-danger-bg)] text-[var(--ui-danger)]'
-          : 'border-border text-ui hover:bg-[var(--ui-hover)]',
-      ].join(' ')}
-    >
-      {busy ? <Icon.spinner size={14} /> : error ? <Icon.stop size={14} /> : <Icon.exportIcon size={14} />}
-      {busy ? 'Exporting…' : error ? 'Retry export' : 'Word'}
-    </button>
-  );
-}
-
 const MODE_LABEL: Record<EditorMode, string> = {
   editing: '✎ Editing',
   viewing: '👁 Viewing',
@@ -104,13 +64,18 @@ function ModePill() {
 }
 
 export function TopBar() {
-  const { title, setTitle, savedAt } = useEditorState();
+  const { title, setTitle, savedAt, mode } = useEditorState();
+  const viewing = mode === 'viewing';
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(title);
   const inputRef = useRef<HTMLInputElement>(null);
   const [, force] = useState(0);
 
   useEffect(() => setDraft(title), [title]);
+  // Leave title-edit mode (and never enter it) when the doc is view-only.
+  useEffect(() => {
+    if (viewing) setEditing(false);
+  }, [viewing]);
   useEffect(() => {
     if (editing) inputRef.current?.select();
   }, [editing]);
@@ -126,14 +91,14 @@ export function TopBar() {
   };
 
   return (
-    <header className="print-hide flex h-14 shrink-0 items-center gap-3 border-b border-[var(--ui-divider)] bg-[var(--ui-surface)] px-3">
+    <header className="print-hide flex h-14 shrink-0 items-center gap-3 border-b border-(--ui-divider) bg-(--ui-surface) px-3">
       <ToolButton label="Home" className="text-primary">
         <Icon.appGrid size={19} />
       </ToolButton>
 
       <div className="flex min-w-0 flex-col justify-center">
-        <div className="flex items-center gap-2">
-          {editing ? (
+        <div className="flex items-center gap-2 w-fit">
+          {editing && !viewing ? (
             <TextField
               ref={inputRef}
               value={draft}
@@ -146,27 +111,24 @@ export function TopBar() {
                   setEditing(false);
                 }
               }}
-              className="w-64"
+              className="w-64! h-6!"
               inputClassName="font-semibold text-ink"
               aria-label="Document title"
             />
+          ) : viewing ? (
+            // View mode: the title is read-only (no rename affordance).
+            <span className="truncate px-1 text-[14px] font-semibold text-ink h-6!">{title}</span>
           ) : (
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="truncate rounded px-1 text-[14px] font-semibold text-ink hover:bg-[var(--ui-hover)]"
+              className="truncate  h-6! rounded px-1 text-[14px] font-semibold text-ink hover:bg-(--ui-hover)"
               title="Rename"
             >
               {title}
             </button>
           )}
-          <ToolButton label="Star document">
-            <Icon.star size={16} />
-          </ToolButton>
-          <ToolButton label="Move to folder">
-            <Icon.move size={16} />
-          </ToolButton>
-          <span className="rounded-full bg-[var(--ui-hover)] px-2 py-0.5 text-[10.5px] text-muted">
+          <span className="shrink-0 whitespace-nowrap rounded-full bg-(--ui-hover) px-2 py-0.5 text-[10.5px] text-muted">
             {relativeTime(savedAt)}
           </span>
         </div>
@@ -174,21 +136,7 @@ export function TopBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-2.5">
-        <button
-          type="button"
-          className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-[12px] text-ui hover:bg-[var(--ui-hover)]"
-        >
-          <Icon.comment size={16} />2
-        </button>
         <ModePill />
-        <DownloadWord />
-        <button
-          type="button"
-          className="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-4 text-[12px] font-semibold text-white hover:brightness-110"
-        >
-          <Icon.share size={14} />
-          Share
-        </button>
         <div className="flex items-center pl-1">
           {COLLABORATORS.map((c, i) => (
             <span

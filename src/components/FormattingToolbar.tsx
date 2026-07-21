@@ -203,12 +203,6 @@ export function FormattingToolbar() {
         <ToolButton label="Redo (⌘⇧Z)" onClick={() => chain().redo().run()}>
           <Icon.redo size={16} />
         </ToolButton>
-        <ToolButton label="Print" onClick={() => window.print()}>
-          <Icon.print size={16} />
-        </ToolButton>
-        <ToolButton label="Spellcheck">
-          <Icon.spellcheck size={16} />
-        </ToolButton>
       </>
     ),
     zoom: (
@@ -445,7 +439,9 @@ export function FormattingToolbar() {
         {overflowed.length > 0 && (
           <Menu
             align="right"
-            panelClassName="min-w-[220px] p-2"
+            // Size to content (fewer rows), capped to the viewport so it never
+            // overflows the screen; groups wrap only when they truly can't fit.
+            panelClassName="w-max max-w-[calc(100vw-16px)] p-2"
             trigger={({ toggle, open, id }) => (
               <button
                 type="button"
@@ -462,9 +458,13 @@ export function FormattingToolbar() {
             )}
           >
             {() => (
-              <div className="flex flex-col gap-0.5">
-                {overflowed.map((g) => (
-                  <div key={g.id} className="flex flex-wrap items-center gap-0.5 rounded-md px-0.5 py-0.5">
+              // Lay the overflowed groups out like the toolbar itself: a compact
+              // horizontal strip (with group dividers) that wraps to new rows,
+              // rather than one group per line.
+              <div className="flex flex-wrap items-center gap-x-0.5 gap-y-2">
+                {overflowed.map((g, i) => (
+                  <div key={g.id} className="flex shrink-0 items-center gap-0.5">
+                    {i > 0 && <ToolbarDivider />}
                     {nodeById[g.id]}
                   </div>
                 ))}

@@ -64,7 +64,8 @@ function rangeRect(editor: Editor, from: number, to: number): Box | null {
 }
 
 export function LinkLayer() {
-  const { editor } = useEditorState();
+  const { editor, mode } = useEditorState();
+  const viewing = mode === 'viewing';
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const [card, setCard] = useState<CardState | null>(null);
   const [pos, setPos] = useState<Box | null>(null);
@@ -102,7 +103,7 @@ export function LinkLayer() {
   );
 
   const openFromSelection = useCallback(() => {
-    if (!editor) return;
+    if (!editor || !editor.isEditable) return; // view mode: no insert/edit popover
     const { state } = editor;
     const { from, to, empty } = state.selection;
     const info = linkAt(state, from);
@@ -559,23 +560,28 @@ export function LinkLayer() {
           {c.href.replace(/^https?:\/\//, '')}
         </a>
         <span style={{ width: 1, height: 16, background: 'var(--ui-divider)', flex: 'none' }} />
-        <CardBtn title="Edit link" color="var(--color-ui)" hover="var(--ui-hover)" onClick={() => openEditFor({ from: c.from, to: c.to }, c.href)}>
-          <Icon.pencil size={15} />
-        </CardBtn>
+        {/* Edit + Remove mutate the doc → hidden in view mode; Copy / open-URL stay. */}
+        {!viewing && (
+          <CardBtn title="Edit link" color="var(--color-ui)" hover="var(--ui-hover)" onClick={() => openEditFor({ from: c.from, to: c.to }, c.href)}>
+            <Icon.pencil size={15} />
+          </CardBtn>
+        )}
         <CardBtn title={copied ? 'Copied' : 'Copy link'} color="var(--color-ui)" hover="var(--ui-hover)" onClick={copyUrl}>
           {copied ? <Icon.check size={15} /> : <Icon.copy size={15} />}
         </CardBtn>
-        <CardBtn
-          title="Remove link"
-          color="var(--ui-danger)"
-          hover="var(--ui-danger-bg)"
-          onClick={() => {
-            removeRange(c.from, c.to);
-            setCard(null);
-          }}
-        >
-          <Icon.trash size={15} />
-        </CardBtn>
+        {!viewing && (
+          <CardBtn
+            title="Remove link"
+            color="var(--ui-danger)"
+            hover="var(--ui-danger-bg)"
+            onClick={() => {
+              removeRange(c.from, c.to);
+              setCard(null);
+            }}
+          >
+            <Icon.trash size={15} />
+          </CardBtn>
+        )}
       </div>
     );
   }

@@ -229,7 +229,6 @@ function convertListItem(
   listType: string,
   out: Paragraph[],
 ): void {
-  const checked = item.type === 'taskItem' ? Boolean(item.attrs?.checked) : null;
   let first = true;
   for (const block of item.content ?? []) {
     if (block.type === 'orderedList' || block.type === 'bulletList') {
@@ -237,18 +236,15 @@ function convertListItem(
       out.push(...convertList(block, ctx, depth + 1, sameType ? ref : null));
     } else if (block.type === 'paragraph' || block.type === 'heading') {
       const children = convertInline(block.content, ctx);
-      if (checked !== null && first) {
-        children.unshift(new TextRun({ text: checked ? '☑ ' : '☐ ' }));
-      }
       out.push(
         new Paragraph({
           children,
           alignment: alignmentFor(block.attrs),
           spacing: spacingFor(block.attrs),
-          // Task items aren't Word-numbered; ordinary list items number their
-          // FIRST paragraph only (extra paragraphs are indented continuations).
-          numbering: checked === null && first ? { reference: ref, level: depth } : undefined,
-          indent: (checked !== null || !first) ? { left: 720 * (depth + 1) } : undefined,
+          // List items number their FIRST paragraph only (extra paragraphs are
+          // indented continuations).
+          numbering: first ? { reference: ref, level: depth } : undefined,
+          indent: !first ? { left: 720 * (depth + 1) } : undefined,
         }),
       );
       first = false;
@@ -410,11 +406,6 @@ export const NODE_CONVERTERS: Record<string, NodeConverter> = {
   ],
   orderedList: (n, ctx) => convertList(n, ctx, 0, null),
   bulletList: (n, ctx) => convertList(n, ctx, 0, null),
-  taskList: (n, ctx) => {
-    const out: Paragraph[] = [];
-    for (const item of n.content ?? []) convertListItem(item, ctx, 0, '', 'taskList', out);
-    return out;
-  },
   table: (n, ctx) => [convertTable(n, ctx)],
   pageBreak: () => [new Paragraph({ children: [new DocxPageBreak()] })],
 };

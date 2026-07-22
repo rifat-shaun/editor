@@ -182,14 +182,6 @@ export const Icon = {
       <path d="M6.5 3.5h7.5M6.5 8h7.5M6.5 12.5h7.5" />
     </Svg16>
   ),
-  checklist: (p: P) => (
-    <Svg16 {...p}>
-      <rect x="1.5" y="1.8" width="4.4" height="4.4" rx="1" strokeWidth={1.2} />
-      <path d="M2.8 3.9l.9.9 1.5-1.7" strokeWidth={1.1} />
-      <rect x="1.5" y="9.4" width="4.4" height="4.4" rx="1" strokeWidth={1.2} />
-      <path d="M8.5 4h5.5M8.5 11.6h5.5" />
-    </Svg16>
-  ),
   link: (p: P) => (
     <Svg16 {...p}>
       <path d="M6.8 9.2a3 3 0 004.3.2l1.8-1.8a3 3 0 10-4.3-4.3l-1 1" />

@@ -22,7 +22,7 @@ import {
 } from './config';
 import type { ListDefinition, ListDefRegistry } from '../extensions/listNumbering/model';
 
-const LIST_TYPES = new Set(['orderedList', 'bulletList', 'taskList']);
+const LIST_TYPES = new Set(['orderedList', 'bulletList']);
 
 /**
  * Split top-level block indices into pages. `breakPositions` are the positions

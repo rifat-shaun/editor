@@ -112,25 +112,13 @@ describe('Markdown — lossy per policy', () => {
     e.destroy();
   });
 
-  it('ordered list honors start; task list uses GFM checkboxes', () => {
+  it('ordered list honors start', () => {
     const e = new Editor({
       extensions: ext(),
       content: { type: 'doc', content: [{ type: 'orderedList', attrs: { start: 3 }, content: [{ type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }] }] }] },
     });
     expect(serialize(e, 'markdown')).toMatch(/^3\. x/m);
     e.destroy();
-
-    const t = new Editor({
-      extensions: ext(),
-      content: { type: 'doc', content: [{ type: 'taskList', content: [
-        { type: 'taskItem', attrs: { checked: true }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'done' }] }] },
-        { type: 'taskItem', attrs: { checked: false }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'todo' }] }] },
-      ] }] },
-    });
-    const md = serialize(t, 'markdown');
-    expect(md).toContain('- [x] done');
-    expect(md).toContain('- [ ] todo');
-    t.destroy();
   });
 
   it('simple table → GFM pipes', () => {

@@ -130,7 +130,7 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
         role="dialog"
         aria-modal="true"
         aria-label="Page setup"
-        style={{ width: 520, background: 'var(--ui-surface)', borderRadius: 12, boxShadow: '0 24px 64px rgba(31,41,51,.35)', fontFamily: FONT, color: 'var(--ui-text)' }}
+        style={{ width: 580, background: 'var(--ui-surface)', borderRadius: 12, boxShadow: '0 24px 64px rgba(31,41,51,.35)', fontFamily: FONT, color: 'var(--ui-text)' }}
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '15px 20px 13px', borderBottom: '1px solid var(--ui-divider)' }}>
@@ -248,7 +248,7 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
           </div>
 
           {/* Right — preview */}
-          <div style={{ width: 180, background: 'var(--color-chrome)', padding: '18px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ width: 240, background: 'var(--color-chrome)', padding: '18px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ ...SECTION_LABEL, alignSelf: 'stretch', marginBottom: 12 }}>Preview</div>
             <div
               style={{

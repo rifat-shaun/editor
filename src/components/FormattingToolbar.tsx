@@ -378,13 +378,6 @@ export function FormattingToolbar() {
           </ToolButton>
           <NumberedListMenu editor={editor} />
         </span>
-        <ToolButton
-          label="Checklist"
-          active={editor.isActive('taskList')}
-          onClick={() => chain().toggleTaskList().run()}
-        >
-          <Icon.checklist size={16} />
-        </ToolButton>
       </>
     ),
     insert: (

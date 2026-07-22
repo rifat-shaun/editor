@@ -6,7 +6,7 @@ import type { EditorView } from '@tiptap/pm/view';
 import type { Node as PMNode } from '@tiptap/pm/model';
 import type { BlockMetric } from './computeBreaks';
 
-const LIST_TYPES = new Set(['orderedList', 'bulletList', 'taskList']);
+const LIST_TYPES = new Set(['orderedList', 'bulletList']);
 
 /**
  * Measure a block's border-box height and its vertical margins SEPARATELY.

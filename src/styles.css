@@ -289,8 +289,7 @@ button:disabled {
 /* Tailwind's preflight resets lists to `list-style: none`. Restore native
    markers for any list that ISN'T driven by the custom numbering engine, so a
    plain toggled/pasted list still shows markers. Custom numbered lists carry a
-   `[data-list-def]` and set `list-style: none` themselves (higher specificity),
-   and the task list opts out via its own rule. */
+   `[data-list-def]` and set `list-style: none` themselves (higher specificity). */
 .docs-page-content ol {
   list-style-type: decimal;
 }
@@ -381,19 +380,6 @@ button:disabled {
   background: #f2fcfd;
 }
 
-/* Task list (checklist) rendering */
-.docs-page-content ul[data-type='taskList'] {
-  list-style: none;
-  padding-left: 4px;
-}
-.docs-page-content ul[data-type='taskList'] li {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-}
-.docs-page-content ul[data-type='taskList'] li > label {
-  margin-top: 6px;
-}
 
 /* ------------------------------------------------------------------ *
  * Tables (adapted from prosemirror-tables/style/tables.css, themed to

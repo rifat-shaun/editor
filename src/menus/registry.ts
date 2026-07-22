@@ -168,7 +168,6 @@ export const COMMANDS: Record<string, Command> = {
     run: ({ editor }) => { chain(editor).toggleBulletList().run(); editor.commands.applyBulletPreset('classic'); },
     isChecked: ({ editor }) => editor.isActive('bulletList'),
   },
-  'list.checklist': { run: ({ editor }) => chain(editor).toggleTaskList().run(), isChecked: ({ editor }) => editor.isActive('taskList') },
   'format.columns': {}, 'format.pageColor': {}, // unbuilt
   'table.insert': { run: ({ editor }) => chain(editor).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
   'table.addRow': { run: ({ editor }) => chain(editor).addRowAfter().run(), isEnabled: ({ editor }) => editor.isActive('table') },

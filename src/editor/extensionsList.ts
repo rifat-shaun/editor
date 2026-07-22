@@ -3,8 +3,6 @@ import Underline from '@tiptap/extension-underline';
 import { LinkKit } from './extensions/link';
 import TextAlign from '@tiptap/extension-text-align';
 import TextStyle from '@tiptap/extension-text-style';
-import TaskList from '@tiptap/extension-task-list';
-import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import { buildTableExtensions } from './extensions/table';
 import { CustomDocument, CustomOrderedList } from './extensions/listNumbering/extension';
@@ -53,8 +51,6 @@ export function buildExtensions() {
       HTMLAttributes: { rel: 'noopener', target: '_blank' },
     }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    TaskList,
-    TaskItem.configure({ nested: true }),
     Placeholder.configure({ placeholder: 'Start writing your document…' }),
     ...buildTableExtensions(),
     PageBreak,

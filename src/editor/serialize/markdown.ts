@@ -117,12 +117,6 @@ export function buildMarkdownSerializer(schema: Schema, opts: MarkdownOptions): 
     listItem(state, node) {
       state.renderContent(node);
     },
-    taskList(state, node) {
-      state.renderList(node, '  ', (i) => (node.child(i).attrs.checked ? '- [x] ' : '- [ ] '));
-    },
-    taskItem(state, node) {
-      state.renderContent(node);
-    },
     // Forced page break: no Markdown representation.
     pageBreak(state, node) {
       if (html) state.write('<div style="page-break-after:always"></div>');

@@ -189,7 +189,6 @@ const FORMAT: MenuSpec = {
       submenu: [
         { id: 'list.numbered', label: 'Numbered list', role: 'checkbox' },
         { id: 'list.bulleted', label: 'Bulleted list', role: 'checkbox' },
-        { id: 'list.checklist', label: 'Checklist', role: 'checkbox' },
       ],
     },
     { divider: true },

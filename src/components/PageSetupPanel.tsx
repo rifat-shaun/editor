@@ -204,7 +204,7 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
       {/* Margins */}
       <div>
         <div style={{ ...SECTION_LABEL, marginBottom: 6 }}>Margins</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
           {MARGIN_PRESET_ORDER.map((key) => {
             const p = MARGIN_PRESETS[key];
             const on = activePreset === key;
@@ -239,7 +239,7 @@ export function PageSetupPanel({ editor }: { editor: Editor }) {
           })}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginTop: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 7, marginTop: 10 }}>
           {SIDES.map((s) => (
             <NumberField
               key={s}

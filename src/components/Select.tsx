@@ -45,8 +45,9 @@ export interface SelectProps {
   renderOption?: (opt: SelectOption, selected: boolean) => ReactNode;
   /** Custom trigger label (defaults to the selected option's label). */
   renderTriggerLabel?: (opt: SelectOption | null) => ReactNode;
-  /** Editable trigger (e.g. font size): typing + Enter commits a raw value. */
-  editable?: { onCommit: (raw: string) => void };
+  /** Editable trigger (e.g. font size): typing + Enter/blur commits a raw value;
+   *  optional `onStep` handles ↑/↓ increment (kept out of the presets list). */
+  editable?: { onCommit: (raw: string) => void; onStep?: (delta: number) => void };
   minWidth?: number;
   /** Extra classes on the trigger (layout only). */
   className?: string;
@@ -178,6 +179,7 @@ export function Select(props: SelectProps) {
   }, [active, open]);
 
   const typeahead = useRef({ buf: '', t: 0 });
+  const suppressBlur = useRef(false); // skip the commit-on-blur after Enter/Esc
   function onListKeyDown(e: KeyboardEvent) {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -207,11 +209,24 @@ export function Select(props: SelectProps) {
     if (editable) {
       if (e.key === 'Enter') {
         e.preventDefault();
+        suppressBlur.current = true; // the editor-refocus blur must not re-commit
         editable.onCommit(draft);
+        setDraft('');
         setOpen(false);
-      } else if (e.key === 'ArrowDown') {
+      } else if (e.key === 'Escape') {
+        // Revert to the current value without applying.
         e.preventDefault();
-        openMenu();
+        suppressBlur.current = true;
+        setDraft('');
+        triggerRef.current?.blur();
+      } else if (e.key === 'ArrowDown' && e.altKey) {
+        e.preventDefault();
+        openMenu(); // discovery path: Alt+↓ (or the chevron) opens the presets
+      } else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && editable.onStep) {
+        // Stepper: ↑/↓ increment the applied size by ±1 (keeps input focus).
+        e.preventDefault();
+        setDraft('');
+        editable.onStep(e.key === 'ArrowUp' ? 1 : -1);
       }
       return;
     }
@@ -286,11 +301,21 @@ export function Select(props: SelectProps) {
             aria-expanded={open}
             aria-controls={id}
             disabled={disabled}
-            value={open || draft !== '' ? draft : selected?.label ?? ''}
+            value={open || draft !== '' ? draft : selected?.label ?? value ?? ''}
             placeholder={placeholder}
             onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ''))}
-            onFocus={() => setDraft(selected?.label ?? '')}
-            onBlur={() => { if (draft) editable.onCommit(draft); }}
+            onFocus={(e) => {
+              setDraft(selected?.label ?? value ?? '');
+              e.currentTarget.select(); // select-all so typing overwrites cleanly
+            }}
+            onBlur={() => {
+              if (suppressBlur.current) {
+                suppressBlur.current = false; // Enter/Esc already handled it
+              } else if (draft) {
+                editable.onCommit(draft); // commit-on-blur (invalid input is clamped/reverted by the caller)
+              }
+              setDraft(''); // fall back to the reactive value (e.g. shows the clamped size)
+            }}
             onKeyDown={onTriggerKeyDown}
             style={{ width: 26, border: 'none', outline: 'none', background: 'transparent', font: 'inherit', color: 'inherit', padding: 0, textAlign: 'center' }}
           />

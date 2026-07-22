@@ -141,6 +141,14 @@ export function FormattingToolbar() {
     const clamped = Math.max(6, Math.min(72, Math.round(pt)));
     chain().setFontSize(`${clamped}pt`).run();
   };
+  // Arrow-key stepper: read the LIVE size and apply ±delta WITHOUT stealing focus
+  // from the input (so repeated presses stay responsive and the field keeps
+  // focus). Reads fresh each press → robust to rapid key-repeat.
+  const stepPt = (delta: number) => {
+    const cur = fontSizeAtSelection(editor) ?? BASE_FONT_PT;
+    const clamped = Math.max(6, Math.min(72, Math.round(cur) + delta));
+    editor.chain().setFontSize(`${clamped}pt`).run();
+  };
 
   const paraValue = editor.isActive('heading', { level: 1 })
     ? 'h1'
@@ -252,7 +260,7 @@ export function FormattingToolbar() {
           className="w-[52px]"
           value={fontPt === null ? null : String(fontPt)}
           onChange={(v) => applyPt(Number(v))}
-          editable={{ onCommit: (raw) => raw && applyPt(Number(raw)) }}
+          editable={{ onCommit: (raw) => raw && applyPt(Number(raw)), onStep: stepPt }}
           placeholder="–"
           options={FONT_SIZES_PT.map((s) => ({ value: String(s), label: String(s) }))}
         />

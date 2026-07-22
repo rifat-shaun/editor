@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEditorState } from '../editor/context';
 import { Icon, type IconName } from './icons';
 import { PageSetupPanel } from './PageSetupPanel';
@@ -28,6 +29,12 @@ export function ToolRail() {
   const { editor, mode } = useEditorState();
   const viewing = mode === 'viewing';
   const [active, setActive] = useState<PanelKey | null>(null);
+  const reduce = useReducedMotion();
+  // Width wipe for the panel: it's in-flow, so animating width smoothly pushes
+  // the editor. Content lives in a fixed-width inner box clipped by the
+  // overflow-hidden panel. Keyed by presence (not by which panel), so switching
+  // panels while open swaps content without re-running the width animation.
+  const panelTransition = { duration: reduce ? 0 : 0.24, ease: [0.16, 1, 0.3, 1] as const };
 
   // Close an edit-only panel (e.g. Page setup) when switching to view mode.
   useEffect(() => {
@@ -46,12 +53,19 @@ export function ToolRail() {
 
   return (
     <div className="print-hide flex shrink-0">
-      {active && (
-        <section
-          role="region"
-          aria-label={ITEMS.find((i) => i.key === active)?.label}
-          className="flex w-[300px] shrink-0 flex-col border-l border-border bg-[var(--ui-surface)]"
-        >
+      <AnimatePresence initial={false}>
+        {active && (
+          <motion.section
+            key="railpanel"
+            role="region"
+            aria-label={ITEMS.find((i) => i.key === active)?.label}
+            className="shrink-0 overflow-hidden border-l border-border bg-[var(--ui-surface)]"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 300, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={panelTransition}
+          >
+            <div className="flex h-full w-[300px] flex-col">
           <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
             <span className="text-[13px] font-semibold text-ink">
               {ITEMS.find((i) => i.key === active)?.label}
@@ -91,8 +105,10 @@ export function ToolRail() {
             )}
           </div>
           )}
-        </section>
-      )}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
 
       <div className="flex w-[46px] shrink-0 flex-col items-center gap-1 border-l border-border bg-panel py-2">
         {ITEMS.map((it) => {

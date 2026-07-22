@@ -57,7 +57,8 @@
     "@tiptap/pm": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
-    "docx": "^9.7.1"
+    "docx": "^9.7.1",
+    "framer-motion": "^11.18.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",

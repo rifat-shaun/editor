@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEditorState } from '../editor/context';
 import { Icon } from './icons';
 
 export function OutlinePanel() {
   const { editor, outline, outlineOpen, toggleOutline } = useEditorState();
   const [activePos, setActivePos] = useState<number | null>(null);
+  const reduce = useReducedMotion();
+  // Width-based expand/collapse: on desktop the sidebar is in-flow, so animating
+  // width smoothly pushes/reveals the editor; content sits in a fixed-width inner
+  // box clipped by the animating (overflow-hidden) aside for a clean wipe.
+  const EASE = [0.16, 1, 0.3, 1] as const;
+  const panelTransition = { duration: reduce ? 0 : 0.24, ease: EASE };
 
   useEffect(() => {
     if (!editor) return;
@@ -35,17 +42,30 @@ export function OutlinePanel() {
     }
   };
 
-  if (!outlineOpen) return null;
-
   return (
-    <>
-      {/* Scrim: on narrow screens the panel overlays the page. */}
-      <div
-        onClick={toggleOutline}
-        className="print-hide absolute inset-0 z-20 bg-black/20 lg:hidden"
-        aria-hidden="true"
-      />
-      <aside className="print-hide absolute inset-y-0 left-0 z-30 flex w-56 shrink-0 flex-col border-r border-border bg-panel shadow-xl lg:relative lg:z-auto lg:shadow-none">
+    <AnimatePresence initial={false}>
+      {outlineOpen && (
+        <>
+          {/* Scrim: on narrow screens the panel overlays the page. */}
+          <motion.div
+            key="outline-scrim"
+            onClick={toggleOutline}
+            className="print-hide absolute inset-0 z-20 bg-black/20 lg:hidden"
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduce ? 0 : 0.2 }}
+          />
+          <motion.aside
+            key="outline-aside"
+            className="print-hide absolute inset-y-0 left-0 z-30 shrink-0 overflow-hidden border-r border-border bg-panel shadow-xl lg:relative lg:z-auto lg:shadow-none"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 224, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={panelTransition}
+          >
+            <div className="flex h-full w-56 flex-col">
         <div className="flex items-center justify-between px-3 pb-1 pt-3">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted">
             Outline
@@ -85,7 +105,10 @@ export function OutlinePanel() {
           );
         })}
       </nav>
-      </aside>
-    </>
+            </div>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

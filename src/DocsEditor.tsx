@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { EditorContent } from '@tiptap/react';
 import { EditorProvider, useEditorState } from './editor/context';
-import type { DocsEditorProps } from './types';
+import type { BrandLogo, DocsEditorProps } from './types';
 import { TopBar } from './components/TopBar';
 import { FormattingToolbar } from './components/FormattingToolbar';
 import { OutlinePanel } from './components/OutlinePanel';
@@ -11,18 +11,23 @@ import { StatusBar } from './components/StatusBar';
 import { TableMenu } from './components/TableMenu';
 import { LinkLayer } from './components/LinkLayer';
 
-function DocsEditorShell({ className }: { className?: string }) {
+function DocsEditorShell({ className, brandLogo }: { className?: string; brandLogo?: BrandLogo }) {
   const { editor } = useEditorState();
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={rootRef}
-      data-docs-editor-root
-      className={['flex h-full min-h-0 w-full flex-col bg-white text-ink', className ?? ''].join(' ')}
-    >
-      <TopBar />
+    // Scope anchor: the shipped stylesheet scopes every rule under
+    // `[data-docs-editor-root]` so nothing leaks into the host app. It's a
+    // transparent full-size wrapper (no utility classes of its own) so all
+    // styled elements stay *descendants* of the anchor. The design tokens the
+    // stylesheet defines on this element are inherited by everything inside.
+    <div data-docs-editor-root style={{ height: '100%', width: '100%' }}>
+      <div
+        ref={rootRef}
+        className={['flex h-full min-h-0 w-full flex-col bg-white text-ink', className ?? ''].join(' ')}
+      >
+        <TopBar brandLogo={brandLogo} />
       <FormattingToolbar />
 
       <div data-docs-body className="relative flex min-h-0 flex-1 overflow-hidden bg-desk">
@@ -51,6 +56,7 @@ function DocsEditorShell({ className }: { className?: string }) {
       <StatusBar />
       <TableMenu />
       <LinkLayer />
+      </div>
     </div>
   );
 }
@@ -67,8 +73,9 @@ export function DocsEditor(props: DocsEditorProps) {
       onSave={props.onSave}
       title={props.title ?? 'Untitled document'}
       onTitleChange={props.onTitleChange}
+      theme={props.theme}
     >
-      <DocsEditorShell className={props.className} />
+      <DocsEditorShell className={props.className} brandLogo={props.brandLogo} />
     </EditorProvider>
   );
 }

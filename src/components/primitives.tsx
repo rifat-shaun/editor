@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from './portalHost';
 import { useDismissable } from '../hooks/useDismissable';
 import { Icon } from './icons';
 
@@ -118,7 +119,7 @@ export function Menu({
               {children(() => setOpen(false))}
             </div>
           </>,
-          document.body,
+          getPortalHost(),
         )}
     </>
   );

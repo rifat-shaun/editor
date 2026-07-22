@@ -24,6 +24,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.build.json && LIB=1 vite build",
+    "build:watch": "LIB=1 vite build --watch",
+    "prepack": "npm run build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -38,6 +40,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
+    "@emotion/is-prop-valid": "^1.4.0",
     "@tiptap/core": "^2.11.5",
     "@tiptap/extension-bullet-list": "^2.27.2",
     "@tiptap/extension-document": "^2.27.2",
@@ -73,6 +76,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "jsdom": "^26.0.0",
+    "postcss": "^8.5.19",
     "prettier": "^3.5.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

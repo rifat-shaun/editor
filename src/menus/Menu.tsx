@@ -8,10 +8,11 @@
  */
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from '../components/portalHost';
 import type { MenuNode } from './types';
 import { isDivider } from './types';
 import { formatShortcut } from './platform';
-import { getCommand, isItemEnabled, type CmdCtx } from './registry';
+import { getCommand, isItemEnabled, isItemVisible, type CmdCtx } from './registry';
 import { filterCommands, type FlatCmd } from './helpSearch';
 
 const SYSTEM_FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -101,9 +102,11 @@ export function MenuPanel({
 
   // In search mode with a query, the rows become flat command results.
   const searching = !!searchIndex && query.trim().length > 0;
-  const displayItems: MenuNode[] = searching
-    ? filterCommands(searchIndex!, query).map((c) => ({ id: c.id, label: c.label, hint: c.path, shortcut: c.shortcut }))
-    : items;
+  const displayItems: MenuNode[] = (
+    searching
+      ? filterCommands(searchIndex!, query).map((c) => ({ id: c.id, label: c.label, hint: c.path, shortcut: c.shortcut }))
+      : items
+  ).filter((n) => isDivider(n) || isItemVisible(n.id, ctx));
 
   const nav = focusableIndices(displayItems);
   // Search panels start focused in the input (active = -1); others on the first item.
@@ -363,6 +366,6 @@ export function MenuPanel({
         );
       })}
     </div>,
-    document.body,
+    getPortalHost(),
   );
 }

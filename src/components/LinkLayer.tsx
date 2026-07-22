@@ -21,6 +21,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from './portalHost';
 import type { Editor } from '@tiptap/core';
 import { useEditorState } from '../editor/context';
 import { Icon } from './icons';
@@ -361,8 +362,8 @@ export function LinkLayer() {
     <>
       {/* Rendered as function calls (not <Component/>) so the inputs keep their
           identity + focus across re-renders instead of remounting per keystroke. */}
-      {popover && pos && createPortal(renderPopover(), document.body)}
-      {card && cardPos && !popover && createPortal(renderHoverCard(), document.body)}
+      {popover && pos && createPortal(renderPopover(), getPortalHost())}
+      {card && cardPos && !popover && createPortal(renderHoverCard(), getPortalHost())}
     </>
   );
 

@@ -5,6 +5,7 @@
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from '../components/portalHost';
 import type { Editor } from '@tiptap/core';
 import { useDismissable } from '../hooks/useDismissable';
 import { Select } from '../components/Select';
@@ -308,7 +309,7 @@ export function PageSetupDialog({ editor, onClose }: { editor: Editor; onClose: 
         </div>
       </div>
     </div>,
-    document.body,
+    getPortalHost(),
   );
 }
 

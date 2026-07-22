@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from './portalHost';
 import { useDismissable } from '../hooks/useDismissable';
 
 /* ------------------------------------------------------------------ *
@@ -471,7 +472,7 @@ export function Select(props: SelectProps) {
               )}
             </div>
           </>,
-          document.body,
+          getPortalHost(),
         )}
     </div>
   );

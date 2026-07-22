@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from './portalHost';
 import type { Editor } from '@tiptap/core';
 import { useDismissable } from '../hooks/useDismissable';
 import { Icon } from './icons';
@@ -435,7 +436,7 @@ function CustomizeDialog({
         </div>
       </div>
     </div>,
-    document.body,
+    getPortalHost(),
   );
 }
 

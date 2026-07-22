@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Editor } from '@tiptap/core';
 import { buildExtensions } from '../src/editor/extensionsList';
 import { READ_ONLY_BYPASS } from '../src/editor/extensions/readOnlyGuard';
-import { commandEditsDoc, isItemEnabled, type CmdCtx } from '../src/menus/registry';
+import { commandEditsDoc, isItemEnabled, isItemVisible, getCommand, type CmdCtx } from '../src/menus/registry';
 
 function makeEditor(editable: boolean): Editor {
   return new Editor({ extensions: buildExtensions(), content: '<p>Hello world</p>', editable });
@@ -150,6 +150,28 @@ describe('menu: view-mode disables editing commands', () => {
       expect(isItemEnabled(id, ctx('editing'))).toBe(true);
     }
     editor.destroy();
+  });
+});
+
+describe('controlled theme (host-owned light/dark)', () => {
+  const ctx = (themeControlled: boolean): CmdCtx =>
+    ({ editor: {}, ui: { theme: 'light', themeControlled, toggleTheme: () => {} }, svc: {} } as unknown as CmdCtx);
+
+  it('view.darkMode is hidden when the theme is controlled, shown when it is not', () => {
+    expect(isItemVisible('view.darkMode', ctx(true))).toBe(false);
+    expect(isItemVisible('view.darkMode', ctx(false))).toBe(true);
+  });
+
+  it('other View items stay visible regardless of theme control', () => {
+    for (const id of ['view.showOutline', 'view.showRuler', 'view.showNonPrinting']) {
+      expect(isItemVisible(id, ctx(true))).toBe(true);
+      expect(isItemVisible(id, ctx(false))).toBe(true);
+    }
+  });
+
+  it('isItemVisible defaults to true for items without a visibility predicate', () => {
+    expect(isItemVisible('edit.copy', ctx(true))).toBe(true);
+    expect(getCommand('view.darkMode')?.isVisible).toBeTypeOf('function');
   });
 });
 

@@ -3,6 +3,7 @@
  * editor context — no new state. Same modal chrome as the other dialogs.
  */
 import { createPortal } from 'react-dom';
+import { getPortalHost } from '../components/portalHost';
 import { useDismissable } from '../hooks/useDismissable';
 
 const SYSTEM_FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -55,6 +56,6 @@ export function WordCountDialog({
         </div>
       </div>
     </div>,
-    document.body,
+    getPortalHost(),
   );
 }

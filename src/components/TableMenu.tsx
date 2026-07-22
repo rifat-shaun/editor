@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from './portalHost';
 import { CellSelection } from '@tiptap/pm/tables';
 import type { Node as PMNode } from '@tiptap/pm/model';
 import type { Editor } from '@tiptap/core';
@@ -322,6 +323,6 @@ export function TableMenu() {
         <MenuItem icon="✕" label="Delete table" destructive disabled={!can.deleteTable()} onSelect={act(() => editor.chain().focus().deleteTable().run())} />
       </div>
     </div>,
-    document.body,
+    getPortalHost(),
   );
 }

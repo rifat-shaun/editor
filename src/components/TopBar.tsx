@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useEditorState } from '../editor/context';
-import type { EditorMode } from '../types';
+import type { BrandLogo, EditorMode } from '../types';
 import { Icon } from './icons';
 import { Menu, MenuItem, ToolButton } from './primitives';
 import { TextField } from './TextField';
@@ -63,8 +63,8 @@ function ModePill() {
   );
 }
 
-export function TopBar() {
-  const { title, setTitle, savedAt, mode } = useEditorState();
+export function TopBar({ brandLogo }: { brandLogo?: BrandLogo }) {
+  const { title, setTitle, savedAt, mode, theme } = useEditorState();
   const viewing = mode === 'viewing';
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(title);
@@ -92,8 +92,20 @@ export function TopBar() {
 
   return (
     <header className="print-hide flex h-14 shrink-0 items-center gap-3 border-b border-(--ui-divider) bg-(--ui-surface) px-3">
-      <ToolButton label="Home" className="text-primary">
-        <Icon.appGrid size={19} />
+      <ToolButton label={brandLogo?.alt ?? 'Home'} className="text-primary">
+        {brandLogo ? (
+          <img
+            // Theme-aware: fall back to the light source when no dark variant
+            // is provided. Constrained to the app-grid icon's footprint (19px)
+            // so the logo drops in at the same size; object-contain preserves
+            // the aspect ratio inside that box.
+            src={theme === 'dark' ? (brandLogo.dark ?? brandLogo.light) : brandLogo.light}
+            alt={brandLogo.alt ?? 'Home'}
+            className="h-5 w-5 object-contain"
+          />
+        ) : (
+          <Icon.appGrid size={19} />
+        )}
       </ToolButton>
 
       <div className="flex min-w-0 flex-col justify-center">

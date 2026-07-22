@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from './portalHost';
 import type { Editor } from '@tiptap/core';
 import { useDismissable } from '../hooks/useDismissable';
 import { Icon } from './icons';
@@ -107,7 +108,7 @@ export function AnchoredPopover({
         {children}
       </div>
     </>,
-    document.body,
+    getPortalHost(),
   );
 }
 
@@ -781,7 +782,7 @@ function CustomizeDialog({
         </div>
       </div>
     </div>,
-    document.body,
+    getPortalHost(),
   );
 }
 

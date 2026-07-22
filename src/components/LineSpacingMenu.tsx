@@ -11,6 +11,7 @@
  */
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalHost } from './portalHost';
 import type { Editor } from '@tiptap/core';
 import { useDismissable } from '../hooks/useDismissable';
 import { Icon } from './icons';
@@ -347,7 +348,7 @@ export function LineSpacingMenu({ editor }: { editor: Editor }) {
               </Row>
             </div>
           </>,
-          document.body,
+          getPortalHost(),
         )}
 
       {dialogOpen && <CustomSpacingDialog editor={editor} onClose={() => setDialogOpen(false)} />}
@@ -624,6 +625,6 @@ function CustomSpacingDialog({ editor, onClose }: { editor: Editor; onClose: () 
         </div>
       </div>
     </div>,
-    document.body,
+    getPortalHost(),
   );
 }

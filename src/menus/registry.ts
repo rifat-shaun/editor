@@ -42,6 +42,8 @@ export interface Command {
   isEnabled?: (ctx: CmdCtx) => boolean;
   /** Checkbox/radio checked state. */
   isChecked?: (ctx: CmdCtx) => boolean;
+  /** Visibility predicate (default true). False → the item is omitted entirely. */
+  isVisible?: (ctx: CmdCtx) => boolean;
   /** Right-slot count badge; null → hidden. */
   badge?: (ctx: CmdCtx) => { text: string; variant?: 'teal' | 'amber' } | null;
 }
@@ -109,7 +111,12 @@ export const COMMANDS: Record<string, Command> = {
     run: ({ editor }) => editor.commands.toggleNonPrinting(),
     isChecked: ({ editor }) => isNonPrintingEnabled(editor),
   },
-  'view.darkMode': { run: ({ ui }) => ui.toggleTheme(), isChecked: ({ ui }) => ui.theme === 'dark' },
+  'view.darkMode': {
+    run: ({ ui }) => ui.toggleTheme(),
+    isChecked: ({ ui }) => ui.theme === 'dark',
+    // Hidden when the host controls the theme (DocsEditor `theme` prop).
+    isVisible: ({ ui }) => !ui.themeControlled,
+  },
   'view.zoom.50': { run: ({ ui }) => ui.setZoom(50), isChecked: ({ ui }) => ui.zoom === 50 },
   'view.zoom.75': { run: ({ ui }) => ui.setZoom(75), isChecked: ({ ui }) => ui.zoom === 75 },
   'view.zoom.100': { run: ({ ui }) => ui.setZoom(100), isChecked: ({ ui }) => ui.zoom === 100 },
@@ -210,6 +217,12 @@ const EDIT_IDS = new Set([
 /** True when a command edits the document (so it's disabled in view mode). */
 export function commandEditsDoc(id: string): boolean {
   return EDIT_IDS.has(id) || EDIT_PREFIXES.some((p) => id.startsWith(p));
+}
+
+/** Whether an item id should render at all (default true; no entry → visible). */
+export function isItemVisible(id: string, ctx: CmdCtx): boolean {
+  const cmd = COMMANDS[id];
+  return cmd?.isVisible ? cmd.isVisible(ctx) : true;
 }
 
 /** Whether an item id should render enabled. */

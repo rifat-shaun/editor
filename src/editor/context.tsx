@@ -64,6 +64,9 @@ export interface EditorStateValue {
   /** UI theme (View → Dark mode); light/dark, persisted, init from system. */
   theme: 'light' | 'dark';
   toggleTheme(): void;
+  /** True when the theme is controlled by the host (DocsEditor `theme` prop);
+   *  the Dark-mode toggle is hidden and `toggleTheme` is a no-op. */
+  themeControlled: boolean;
 }
 
 const EditorContext = createContext<EditorStateValue | null>(null);
@@ -83,6 +86,8 @@ export function EditorProvider(props: {
   onSave(content: JSONContent): void;
   title: string;
   onTitleChange?(title: string): void;
+  /** Controlled theme; when set, the host owns light/dark. */
+  theme?: 'light' | 'dark';
   children: ReactNode;
 }) {
   const { initialContent, initialMode, onSave, onTitleChange } = props;
@@ -95,7 +100,7 @@ export function EditorProvider(props: {
   const [rulerUnit, setRulerUnitState] = useState<RulerUnit>(() =>
     readPref<RulerUnit>(RULER_UNIT_KEY, 'in', (r) => (r === 'cm' ? 'cm' : 'in')),
   );
-  const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
+  const [internalTheme, setInternalTheme] = useState<'light' | 'dark'>(() => {
     const stored = readPref<'light' | 'dark' | null>('docs-editor:theme', null, (r) =>
       r === 'dark' ? 'dark' : r === 'light' ? 'light' : null,
     );
@@ -106,6 +111,9 @@ export function EditorProvider(props: {
       return 'light';
     }
   });
+  // When the host passes `theme`, it owns light/dark; otherwise the editor does.
+  const themeControlled = props.theme !== undefined;
+  const theme = themeControlled ? props.theme! : internalTheme;
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [docVersion, setDocVersion] = useState(0);
   // The outline panel is off by default; the user opens it via View → Show
@@ -125,12 +133,14 @@ export function EditorProvider(props: {
     setRulerUnitState(unit);
     writePref(RULER_UNIT_KEY, unit);
   };
-  const toggleTheme = () =>
-    setThemeState((t) => {
+  const toggleTheme = () => {
+    if (themeControlled) return; // the host owns the theme
+    setInternalTheme((t) => {
       const next = t === 'dark' ? 'light' : 'dark';
       writePref('docs-editor:theme', next);
       return next;
     });
+  };
 
   const toggleOutline = () => setOutlineOpen((o) => !o);
 
@@ -267,10 +277,11 @@ export function EditorProvider(props: {
       setRulerUnit,
       theme,
       toggleTheme,
+      themeControlled,
     }),
     // setTitle / toggleOutline / toggleRuler / toggleTheme intentionally excluded to avoid churn.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editor, mode, title, wordCount, charCount, pageCount, savedAt, outline, outlineOpen, zoom, showRuler, rulerUnit, theme],
+    [editor, mode, title, wordCount, charCount, pageCount, savedAt, outline, outlineOpen, zoom, showRuler, rulerUnit, theme, themeControlled],
   );
 
   return <EditorContext.Provider value={value}>{props.children}</EditorContext.Provider>;

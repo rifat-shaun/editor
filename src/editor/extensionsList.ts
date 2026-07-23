@@ -20,6 +20,7 @@ import { ReadOnlyGuard } from './extensions/readOnlyGuard';
 import { Variable } from './extensions/variable';
 import { VariableHighlight } from './extensions/variableHighlight';
 import { VariableSuggest } from './extensions/variableSuggest';
+import { FindReplace } from './find/findPlugin';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -61,6 +62,7 @@ export function buildExtensions() {
     Variable, // atomic inline merge-field token (@ picker / menu / consumer button)
     VariableHighlight, // View-menu "Highlight variables" toggle (view-only)
     VariableSuggest, // detects @query → opens the variable picker
+    FindReplace, // sidebar find & replace: match highlights + replace commands
     ReadOnlyGuard, // view mode: block programmatic doc mutations (toolbar/⌘B/menu)
     ListPaste,
   ];

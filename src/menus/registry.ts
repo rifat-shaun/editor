@@ -102,7 +102,10 @@ export const COMMANDS: Record<string, Command> = {
   'edit.paste': { run: ({ editor }) => void pasteFromClipboard(editor, false) },
   'edit.pasteNoFormat': { run: ({ editor }) => void pasteFromClipboard(editor, true) },
   'edit.selectAll': { run: ({ editor }) => chain(editor).selectAll().run() },
-  'edit.findReplace': {}, // unbuilt
+  'edit.findReplace': {
+    // Opens the Find & replace sidebar (ToolRail listens for this event).
+    run: () => document.dispatchEvent(new CustomEvent('docs:open-find')),
+  },
 
   /* ------------------------------- View ------------------------------- */
   'view.mode.editing': { run: ({ ui }) => ui.setMode('editing'), isChecked: ({ ui }) => ui.mode === 'editing' },

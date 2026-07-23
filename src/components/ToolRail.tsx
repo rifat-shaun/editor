@@ -6,7 +6,7 @@ import { Icon, type IconName } from './icons';
 import { PageSetupPanel } from './PageSetupPanel';
 import { ExportPanelBody } from './ExportPanel';
 import { VariablesPanel } from './VariablesPanel';
-import { TextField } from './TextField';
+import { FindPanel } from './FindPanel';
 
 type PanelKey = 'pageSetup' | 'variables' | 'comments' | 'find' | 'history' | 'export' | 'share';
 
@@ -55,6 +55,24 @@ export function ToolRail() {
     return () => document.removeEventListener('keydown', onKey);
   }, [active]);
 
+  // Open Find & replace via ⌘F/Ctrl+F (overriding the browser find while the
+  // editor is mounted) or the Edit → Find & replace menu (`docs:open-find`).
+  useEffect(() => {
+    const openFind = () => setActive('find');
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        openFind();
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    document.addEventListener('docs:open-find', openFind as EventListener);
+    return () => {
+      document.removeEventListener('keydown', onKey, true);
+      document.removeEventListener('docs:open-find', openFind as EventListener);
+    };
+  }, []);
+
   return (
     <div className="print-hide flex shrink-0">
       <AnimatePresence initial={false}>
@@ -98,6 +116,9 @@ export function ToolRail() {
           ) : active === 'variables' ? (
             // Owns the full panel height: search + scrollable list.
             <VariablesPanel />
+          ) : active === 'find' ? (
+            // Owns the full panel height: fields + results + footer.
+            <FindPanel onClose={() => setActive(null)} />
           ) : (
           <div className="flex-1 overflow-y-auto p-3 docs-scroll">
             {active === 'history' && (
@@ -108,9 +129,6 @@ export function ToolRail() {
               <p className="text-[12px] text-muted">
                 Open comments appear beside the document. No unresolved comments right now.
               </p>
-            )}
-            {active === 'find' && (
-              <TextField type="search" aria-label="Find in document" placeholder="Find in document…" />
             )}
             {active === 'share' && (
               <p className="text-[12px] text-muted">Use the Share button in the top bar.</p>

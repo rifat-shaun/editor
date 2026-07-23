@@ -441,6 +441,26 @@ button:disabled {
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * Find & Replace match highlights (view-only inline decorations; never in
+ * the document, export, or print). The content island is always light, so
+ * literal highlight colors are fine. */
+.find-match {
+  background: #fdf0a8; /* soft yellow */
+  border-radius: 2px;
+}
+.find-match-current {
+  background: #ffd23f; /* stronger amber for the active match */
+  box-shadow: 0 0 0 1px #e0a800;
+}
+@media print {
+  .find-match,
+  .find-match-current {
+    background: none !important;
+    box-shadow: none !important;
+  }
+}
+
 
 /* ------------------------------------------------------------------ *
  * Tables (adapted from prosemirror-tables/style/tables.css, themed to

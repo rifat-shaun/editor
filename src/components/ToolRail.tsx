@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEditorState } from '../editor/context';
+import { useVariables } from '../editor/variablesContext';
 import { Icon, type IconName } from './icons';
 import { PageSetupPanel } from './PageSetupPanel';
 import { ExportPanelBody } from './ExportPanel';
+import { VariablesPanel } from './VariablesPanel';
 import { TextField } from './TextField';
 
-type PanelKey = 'pageSetup' | 'comments' | 'find' | 'history' | 'export' | 'share';
+type PanelKey = 'pageSetup' | 'variables' | 'comments' | 'find' | 'history' | 'export' | 'share';
 
 interface RailItem {
   key: PanelKey;
@@ -18,6 +20,7 @@ interface RailItem {
 
 const ITEMS: RailItem[] = [
   { key: 'pageSetup', icon: 'pageSetup', label: 'Page setup', edits: true },
+  { key: 'variables', icon: 'variable', label: 'Variables' },
   { key: 'comments', icon: 'comment', label: 'Comments' },
   { key: 'find', icon: 'find', label: 'Find & replace' },
   { key: 'history', icon: 'history', label: 'Version history' },
@@ -27,6 +30,7 @@ const ITEMS: RailItem[] = [
 
 export function ToolRail() {
   const { editor, mode } = useEditorState();
+  const { catalog } = useVariables();
   const viewing = mode === 'viewing';
   const [active, setActive] = useState<PanelKey | null>(null);
   const reduce = useReducedMotion();
@@ -67,8 +71,13 @@ export function ToolRail() {
           >
             <div className="flex h-full w-[300px] flex-col">
           <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
-            <span className="text-[13px] font-semibold text-ink">
+            <span className="flex items-center gap-2 text-[13px] font-semibold text-ink">
               {ITEMS.find((i) => i.key === active)?.label}
+              {active === 'variables' && catalog.length > 0 && (
+                <span className="rounded-full bg-primary-soft px-1.5 text-[11px] font-semibold text-primary">
+                  {catalog.length}
+                </span>
+              )}
             </span>
             <button
               type="button"
@@ -86,6 +95,9 @@ export function ToolRail() {
           ) : active === 'export' && editor ? (
             // Owns the full panel height: scrollable body + a fixed footer.
             <ExportPanelBody />
+          ) : active === 'variables' ? (
+            // Owns the full panel height: search + scrollable list.
+            <VariablesPanel />
           ) : (
           <div className="flex-1 overflow-y-auto p-3 docs-scroll">
             {active === 'history' && (

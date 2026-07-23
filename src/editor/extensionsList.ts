@@ -17,6 +17,9 @@ import { NonPrinting } from './extensions/nonPrinting';
 import { PageBreak } from './extensions/pageBreak';
 import { SelectionHighlight } from './extensions/selectionHighlight';
 import { ReadOnlyGuard } from './extensions/readOnlyGuard';
+import { Variable } from './extensions/variable';
+import { VariableHighlight } from './extensions/variableHighlight';
+import { VariableSuggest } from './extensions/variableSuggest';
 
 /**
  * The single source of truth for the editor's extension set. Exported so the
@@ -55,6 +58,9 @@ export function buildExtensions() {
     ...buildTableExtensions(),
     PageBreak,
     SelectionHighlight,
+    Variable, // atomic inline merge-field token (@ picker / menu / consumer button)
+    VariableHighlight, // View-menu "Highlight variables" toggle (view-only)
+    VariableSuggest, // detects @query → opens the variable picker
     ReadOnlyGuard, // view mode: block programmatic doc mutations (toolbar/⌘B/menu)
     ListPaste,
   ];

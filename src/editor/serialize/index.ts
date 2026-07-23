@@ -38,8 +38,13 @@ export function serialize(editor: Editor, format: Format, options: SerializeOpti
       return JSON.stringify({ type: DOC_TYPE, version: SCHEMA_VERSION, doc: editor.getJSON() } satisfies JsonEnvelope, null, 2);
     case 'html':
       return serializeHTML(editor, options);
-    case 'markdown':
-      return buildMarkdownSerializer(editor.schema, options).serialize(editor.state.doc);
+    case 'markdown': {
+      // Bake variable values (from editor storage) unless the caller supplied some.
+      const values =
+        options.variableValues ??
+        (editor.storage.variable as { values?: Record<string, string | null> } | undefined)?.values;
+      return buildMarkdownSerializer(editor.schema, { ...options, variableValues: values }).serialize(editor.state.doc);
+    }
     default:
       throw new Error(`Unknown format: ${format as string}`);
   }

@@ -31,6 +31,8 @@ import { orderedLevels, bulletLevels } from './numbering';
 import { lineHeightToSpacing, spacePtToTwips } from './lineSpacing';
 import { fontSizeToHalfPoints, pxToTwip, toHex } from './units';
 import { DEFAULT_FONT_THEME, resolveWordFont, type DocxFontTheme } from './fontTheme';
+import { variableBakedText } from '../../extensions/variable';
+import type { VariableValues } from '../../../types';
 
 /* ------------------------------ JSON types ------------------------------ */
 
@@ -54,6 +56,10 @@ export interface NumberingInstance {
 export interface ExportOptions {
   /** Font theme (single source of truth). Defaults to DEFAULT_FONT_THEME. */
   fontTheme?: DocxFontTheme;
+  /** Variable values, so tokens bake to their resolved value on export. */
+  variableValues?: VariableValues;
+  /** Unset variables → `{{name}}` placeholder (default) or omitted (false). */
+  includeUnsetVariables?: boolean;
 }
 
 export class ExportContext {
@@ -62,11 +68,15 @@ export class ExportContext {
   numbering: NumberingInstance[] = [];
   private refSeq = 0;
   readonly theme: DocxFontTheme;
+  readonly variableValues: VariableValues;
+  readonly includeUnsetVariables: boolean;
 
   constructor(doc: PMNode, opts: ExportOptions = {}) {
     this.listDefs = (doc.attrs?.listDefs as Record<string, ListDefinition>) ?? {};
     this.bulletDefs = (doc.attrs?.bulletDefs as Record<string, BulletDefinition>) ?? {};
     this.theme = opts.fontTheme ?? DEFAULT_FONT_THEME;
+    this.variableValues = opts.variableValues ?? {};
+    this.includeUnsetVariables = opts.includeUnsetVariables ?? true;
   }
 
   nextRef(): string {
@@ -129,6 +139,13 @@ function convertInline(content: PMNode[] | undefined, ctx: ExportContext): Inlin
       out.push(href ? new ExternalHyperlink({ children: [run], link: href }) : run);
     } else if (child.type === 'hardBreak') {
       out.push(new TextRun({ break: 1 }));
+    } else if (child.type === 'variable') {
+      // Bake the resolved value (or the {{name}} placeholder when unset, unless
+      // unset variables are omitted); marks on the token still apply.
+      const text = variableBakedText(ctx.variableValues, (child.attrs?.name as string) ?? '', {
+        includeUnset: ctx.includeUnsetVariables,
+      });
+      if (text) out.push(new TextRun({ ...runOptionsFromMarks(child.marks ?? [], ctx.theme), text }));
     }
   }
   return out;

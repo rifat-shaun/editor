@@ -30,7 +30,7 @@ function syncToEngine(editor: Editor, storage: { appliedKey: string }) {
   // when it's absent (e.g. headless test editors).
   if (typeof editor.commands.setPageFormat !== 'function') return;
   // null (unset / undone) → the app's configured default, which matches
-  // DEFAULT_PAGE_SETUP (Letter · 1" margins). This makes undo/redo restore the
+  // DEFAULT_PAGE_SETUP (A4 · 1" margins). This makes undo/redo restore the
   // visible geometry, not just the doc attr.
   const geo = resolveGeometry(setup ?? DEFAULT_PAGE_SETUP);
   editor.commands.setPageFormat(geo.pageFormat);

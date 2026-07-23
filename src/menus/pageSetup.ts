@@ -43,7 +43,7 @@ export const MARGIN_PRESET_ORDER: MarginPresetKey[] = ['normal', 'narrow', 'mode
 
 export const DEFAULT_PAGE_SETUP: PageSetup = {
   orientation: 'portrait',
-  paperSize: 'letter',
+  paperSize: 'a4',
   margins: { ...MARGIN_PRESETS.normal },
   marginPreset: 'normal',
 };

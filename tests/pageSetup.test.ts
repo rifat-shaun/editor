@@ -14,8 +14,12 @@ import {
 } from '../src/menus/pageSetup';
 
 describe('pageSetup geometry', () => {
+  // Explicit Letter fixture — the app default is A4, but these cases pin Letter
+  // geometry to test the size math independently of the default.
+  const letter: PageSetup = { ...DEFAULT_PAGE_SETUP, paperSize: 'letter' };
+
   it('resolves paper size in px and swaps for landscape', () => {
-    const portrait: PageSetup = { ...DEFAULT_PAGE_SETUP };
+    const portrait: PageSetup = { ...letter };
     expect(pagePx(portrait)).toEqual({ width: 816, height: 1056 }); // Letter
     expect(pagePx({ ...portrait, orientation: 'landscape' })).toEqual({ width: 1056, height: 816 });
   });
@@ -33,18 +37,18 @@ describe('pageSetup geometry', () => {
 
   it('max margin = half the relevant page dimension (inches)', () => {
     // Letter portrait: height 11" → top/bottom max 5.5; width 8.5" → left/right max 4.25→4.3 rounded
-    expect(maxMargin(DEFAULT_PAGE_SETUP, 'top')).toBe(5.5);
-    expect(maxMargin(DEFAULT_PAGE_SETUP, 'left')).toBeCloseTo(4.3, 1);
+    expect(maxMargin(letter, 'top')).toBe(5.5);
+    expect(maxMargin(letter, 'left')).toBeCloseTo(4.3, 1);
   });
 
   it('caption lines: paper · orientation / margins summary', () => {
-    expect(captionLines(DEFAULT_PAGE_SETUP)).toEqual(['Letter · Portrait', '1.0" margins']);
+    expect(captionLines(DEFAULT_PAGE_SETUP)).toEqual(['A4 · Portrait', '1.0" margins']);
     expect(captionLines({ ...DEFAULT_PAGE_SETUP, margins: MARGIN_PRESETS.moderate })[1]).toBe('Custom margins');
-    expect(captionLines({ ...DEFAULT_PAGE_SETUP, orientation: 'landscape', paperSize: 'a4' })[0]).toBe('A4 · Landscape');
+    expect(captionLines({ ...DEFAULT_PAGE_SETUP, orientation: 'landscape', paperSize: 'letter' })[0]).toBe('Letter · Landscape');
   });
 
   it('resolveGeometry bundles format + margins for the engine', () => {
-    expect(resolveGeometry(DEFAULT_PAGE_SETUP)).toEqual({
+    expect(resolveGeometry(letter)).toEqual({
       pageFormat: { width: 816, height: 1056 },
       margins: { top: 96, right: 96, bottom: 96, left: 96 },
     });

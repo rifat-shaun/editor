@@ -1,7 +1,8 @@
-import { useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { EditorContent } from '@tiptap/react';
 import { EditorProvider, useEditorState } from './editor/context';
-import type { BrandLogo, DocsEditorProps } from './types';
+import type { BrandLogo, DocsEditorHandle, DocsEditorProps, VariableDef, VariableValues } from './types';
+import { VariablesProvider, useVariables } from './editor/variablesContext';
 import { TopBar } from './components/TopBar';
 import { FormattingToolbar } from './components/FormattingToolbar';
 import { OutlinePanel } from './components/OutlinePanel';
@@ -10,6 +11,10 @@ import { ToolRail } from './components/ToolRail';
 import { StatusBar } from './components/StatusBar';
 import { TableMenu } from './components/TableMenu';
 import { LinkLayer } from './components/LinkLayer';
+import { VariablePicker } from './components/VariablePicker';
+
+const EMPTY_CATALOG: VariableDef[] = [];
+const EMPTY_VALUES: VariableValues = {};
 
 function DocsEditorShell({ className, brandLogo }: { className?: string; brandLogo?: BrandLogo }) {
   const { editor } = useEditorState();
@@ -56,26 +61,63 @@ function DocsEditorShell({ className, brandLogo }: { className?: string; brandLo
       <StatusBar />
       <TableMenu />
       <LinkLayer />
+      <VariablePicker />
       </div>
     </div>
   );
 }
 
 /**
- * Google-Docs-style document editor. Wrap-and-render: the provider owns the
- * Tiptap editor; the shell renders the full chrome.
+ * Sibling of the shell (inside both providers): mirrors the consumer's values
+ * onto editor storage for the non-React paths (clipboard/export), and exposes
+ * the imperative handle so a consumer button can insert a variable.
  */
-export function DocsEditor(props: DocsEditorProps) {
-  return (
-    <EditorProvider
-      initialContent={props.initialContent}
-      initialMode={props.mode}
-      onSave={props.onSave}
-      title={props.title ?? 'Untitled document'}
-      onTitleChange={props.onTitleChange}
-      theme={props.theme}
-    >
-      <DocsEditorShell className={props.className} brandLogo={props.brandLogo} />
-    </EditorProvider>
+function VariablesBridge({ handleRef }: { handleRef: React.Ref<DocsEditorHandle> }) {
+  const { editor } = useEditorState();
+  const { values } = useVariables();
+
+  useEffect(() => {
+    editor?.commands.setVariableValues(values);
+  }, [editor, values]);
+
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      // Inserts at the current (persisted) selection and refocuses — same
+      // command the picker/menu use. Falls back to the caret at doc end.
+      insertVariable: (name: string) => {
+        editor?.chain().focus().insertVariable(name).run();
+      },
+      focus: () => editor?.commands.focus(),
+    }),
+    [editor],
   );
+
+  return null;
 }
+
+/**
+ * Google-Docs-style document editor. Wrap-and-render: the provider owns the
+ * Tiptap editor; the shell renders the full chrome. Ref exposes a
+ * {@link DocsEditorHandle} (e.g. `insertVariable`) for consumer-driven actions.
+ */
+export const DocsEditor = forwardRef<DocsEditorHandle, DocsEditorProps>(function DocsEditor(props, ref) {
+  return (
+    <VariablesProvider
+      catalog={props.variableList ?? EMPTY_CATALOG}
+      values={props.variableValues ?? EMPTY_VALUES}
+    >
+      <EditorProvider
+        initialContent={props.initialContent}
+        initialMode={props.mode}
+        onSave={props.onSave}
+        title={props.title ?? 'Untitled document'}
+        onTitleChange={props.onTitleChange}
+        theme={props.theme}
+      >
+        <DocsEditorShell className={props.className} brandLogo={props.brandLogo} />
+        <VariablesBridge handleRef={ref} />
+      </EditorProvider>
+    </VariablesProvider>
+  );
+});

@@ -11,11 +11,16 @@
  */
 import { MarkdownSerializer, type MarkdownSerializerState } from '@tiptap/pm/markdown';
 import { DOMSerializer, type Node as PMNode, type Schema } from '@tiptap/pm/model';
+import { variableBakedText, type VariableValues } from '../extensions/variable';
 
 export interface MarkdownOptions {
   /** Embed raw HTML for content Markdown can't represent (merged tables, page
    *  breaks, colors…). Off → those are flattened/dropped. */
   htmlFallback?: boolean;
+  /** Variable values, so tokens bake to their resolved value on export. */
+  variableValues?: Record<string, string | null>;
+  /** Unset variables → `{{name}}` placeholder (default) or omitted (false). */
+  includeUnsetVariables?: boolean;
 }
 
 /** Render one node's subtree to an HTML string (for the raw-HTML fallback). */
@@ -76,6 +81,14 @@ export function buildMarkdownSerializer(schema: Schema, opts: MarkdownOptions): 
     },
     text(state, node) {
       state.text(node.text ?? '');
+    },
+    // Variables bake to their resolved value (or the {{name}} placeholder when
+    // unset, unless unset variables are omitted).
+    variable(state, node) {
+      const text = variableBakedText((opts.variableValues ?? {}) as VariableValues, (node.attrs.name as string) ?? '', {
+        includeUnset: opts.includeUnsetVariables ?? true,
+      });
+      if (text) state.text(text, false);
     },
     paragraph(state, node) {
       state.renderInline(node);

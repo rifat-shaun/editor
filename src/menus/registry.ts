@@ -14,6 +14,8 @@ import type { EditorStateValue } from '../editor/context';
 import { lineHeightAtSelection } from '../components/lineHeightSelection';
 import { downloadAs } from '../editor/serialize';
 import { isNonPrintingEnabled } from '../editor/extensions/nonPrinting';
+import { isVariableHighlightEnabled } from '../editor/extensions/variableHighlight';
+import { OPEN_VARIABLE_PICKER } from '../editor/extensions/variableSuggest';
 
 /** Host-provided UI actions that live outside the editor/context. */
 export interface CmdServices {
@@ -111,6 +113,10 @@ export const COMMANDS: Record<string, Command> = {
     run: ({ editor }) => editor.commands.toggleNonPrinting(),
     isChecked: ({ editor }) => isNonPrintingEnabled(editor),
   },
+  'view.highlightVariables': {
+    run: ({ editor }) => editor.commands.toggleVariableHighlight(),
+    isChecked: ({ editor }) => isVariableHighlightEnabled(editor),
+  },
   'view.darkMode': {
     run: ({ ui }) => ui.toggleTheme(),
     isChecked: ({ ui }) => ui.theme === 'dark',
@@ -140,7 +146,12 @@ export const COMMANDS: Record<string, Command> = {
     run: ({ editor }) => editor.view.dom.dispatchEvent(new CustomEvent('docs:open-link', { bubbles: true })),
   },
   'insert.hr': { run: ({ editor }) => chain(editor).setHorizontalRule().run() },
-  'insert.variable': {}, 'insert.comment': {}, // unbuilt
+  'insert.variable': {
+    // Opens the same @ picker at the caret (insertion goes through insertVariable).
+    run: ({ editor }) =>
+      editor.view.dispatch(editor.state.tr.scrollIntoView().setMeta(OPEN_VARIABLE_PICKER, true)),
+  },
+  'insert.comment': {}, // unbuilt
   'insert.pageBreak': { run: ({ editor }) => chain(editor).insertPageBreak().run() },
   'insert.headersFooters': {}, 'insert.pageNumbers': {}, 'insert.toc': {}, 'insert.specialChars': {}, // unbuilt
 

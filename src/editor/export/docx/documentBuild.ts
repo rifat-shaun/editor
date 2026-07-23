@@ -27,16 +27,17 @@ export interface PageSetup {
 export interface BuildOptions extends ExportOptions {
   title?: string;
   includeHeaderFooter?: boolean;
-  /** Real page geometry from the pagination engine (twips). Defaults to Letter. */
+  /** Real page geometry from the pagination engine (twips). Defaults to A4. */
   page?: PageSetup;
   /** A resolved Word font name to use for body (e.g. the editor's font choice). */
   bodyFontOverride?: string;
 }
 
-// US Letter, 1" margins — the fallback when no pagination settings are supplied.
+// A4 (210×297 mm), 1" margins — the fallback when no pagination settings are
+// supplied (e.g. a headless JSON→DOCX conversion with no live editor).
 const DEFAULT_PAGE: PageSetup = {
-  widthTwip: 12240,
-  heightTwip: 15840,
+  widthTwip: 11906, // 210mm
+  heightTwip: 16838, // 297mm
   margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
 };
 

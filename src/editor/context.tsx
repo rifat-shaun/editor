@@ -153,7 +153,7 @@ export function EditorProvider(props: {
       // added only to the live editor — buildExtensions() stays clean for
       // headless position-finding and unit tests.
       Pagination.configure({
-        pageFormat: 'Letter', // 816×1056 — matches the editor's page width
+        pageFormat: 'A4', // 794×1123 — matches the editor's page width
         margins: { top: 96, right: 96, bottom: 96, left: 96 },
         header: { text: props.title, align: 'left' },
         showPageNumbers: true, // footer renders "n / N" centered

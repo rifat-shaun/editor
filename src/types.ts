@@ -28,9 +28,44 @@ export interface DocsEditorProps {
    * editor own the theme (persisted, initialized from the system preference).
    */
   theme?: EditorTheme;
+  /**
+   * The variables (merge fields) the `@` picker and Insert→Variable menu can
+   * insert. Each needs a technical `name` and a human `label`.
+   */
+  variableList?: VariableDef[];
+  /**
+   * Current values for variables, keyed by technical name. Passed reactively:
+   * when this object changes, every variable token re-renders with the new
+   * value. A `null`/absent entry renders the token as an unset chip.
+   */
+  variableValues?: VariableValues;
 }
 
 export type EditorTheme = 'light' | 'dark';
+
+export interface VariableDef {
+  /** Technical name stored in the document (e.g. `client_name`). */
+  name: string;
+  /** Human-readable label shown in the picker. */
+  label: string;
+  /** Optional grouping label for the picker. */
+  group?: string;
+}
+
+/** Variable values keyed by technical name; `null`/absent = unset. */
+export type VariableValues = Record<string, string | null>;
+
+/**
+ * Imperative handle exposed via `ref` on `<DocsEditor>`. Lets a consumer button
+ * insert a variable at the current caret (the same command the `@` picker and
+ * menu use) and focus the editor.
+ */
+export interface DocsEditorHandle {
+  /** Insert a variable token at the current selection and focus the editor. */
+  insertVariable(name: string): void;
+  /** Focus the editor. */
+  focus(): void;
+}
 
 export interface BrandLogo {
   /** Logo source for the light theme. */

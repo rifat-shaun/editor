@@ -50,9 +50,25 @@ export function groupBlocksIntoPages(
 export function pageSizeStyleElement(dims: Dimensions): HTMLStyleElement {
   const el = document.createElement('style');
   el.id = 'pgn-print-page-size';
-  // px in `size` is valid (816px = 8.5in). margin:0 — our page element owns the
-  // margins, so the sheet matches the editor's geometry exactly.
-  el.textContent = `@page { size: ${dims.pageWidth}px ${dims.pageHeight}px; margin: 0; }`;
+  // Injected into <head> at print time (removed afterprint). These rules are
+  // deliberately GLOBAL — they target the host page's <body> and top-level
+  // elements — so they must NOT go through the scoped stylesheet (which prefixes
+  // every rule with [data-docs-editor-root]); a scoped `body > *` never matches.
+  // That is exactly why print is injected here rather than shipped in styles.css.
+  //
+  //  - @page: px `size` is valid (816px = 8.5in); margin:0 — our page element
+  //    owns the margins so the sheet matches the editor geometry exactly.
+  //  - hide EVERYTHING in <body> except the print root (covers the host app's
+  //    chrome, the editor mount, portals — generically), show the print root,
+  //    and force one computed page per physical sheet.
+  el.textContent = `
+@page { size: ${dims.pageWidth}px ${dims.pageHeight}px; margin: 0; }
+@media print {
+  body > *:not(.pgn-print-root) { display: none !important; }
+  .pgn-print-root { display: block !important; }
+  .pgn-print-root .print-page { break-after: page; page-break-after: always; }
+  .pgn-print-root .print-page:last-child { break-after: auto; page-break-after: auto; }
+}`;
   return el;
 }
 
@@ -221,6 +237,14 @@ export function buildPrintRoot(view: EditorView, opts: PaginationOptions): HTMLE
 
   const root = document.createElement('div');
   root.className = 'pgn-print-root';
+  // Off-screen until the print media query flips it to block (see the runtime
+  // print style). It's only in the DOM during beforeprint→afterprint anyway.
+  root.style.display = 'none';
+  // The shipped stylesheet scopes every rule under `[data-docs-editor-root]`, so
+  // the print clone — which is appended to <body>, outside the editor tree —
+  // must carry the scope attribute to receive typography, page, and variable
+  // styling (and the light design tokens defined on that scope).
+  root.setAttribute('data-docs-editor-root', '');
 
   for (let i = 0; i < boundaries.length - 1; i++) {
     const from = boundaries[i]!;

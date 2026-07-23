@@ -380,6 +380,67 @@ button:disabled {
   background: #f2fcfd;
 }
 
+/* ------------------------------------------------------------------ *
+ * Variables (merge fields) — 27a/27b. An atomic inline token. All state
+ * is driven by CSS: the `.docs-highlight-variables` root class (View →
+ * Highlight variables), the `data-var-unset` attribute, and the
+ * `.is-selected` / ProseMirror-selectednode class. Colors are literal
+ * teal (content is always the light paper island, so no dark variants). */
+.docs-var {
+  cursor: default;
+  /* inline-block + non-editable content makes the token a single atomic unit:
+     the caret lands before/after it, never inside, and one step selects it. */
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  border-radius: 3px;
+  /* No box in the resting/print-faithful state (highlight off, 27b). */
+  padding: 0 1px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Highlight ON (27a): resolved tokens get a light-teal tint + a DOTTED
+   underline — dotted to stay distinct from the link's solid underline. */
+.docs-highlight-variables .docs-var {
+  background: #eaf7fa;
+  border-bottom: 1px dotted #0e7490;
+}
+/* Highlight OFF (27b): reveal on hover or caret-select so the user can
+   still tell it's a variable. */
+.docs-var:hover,
+.docs-var.is-selected,
+.docs-var.ProseMirror-selectednode {
+  background: #eaf7fa;
+}
+/* Selected token — darker teal, in both modes (27a row 3). */
+.docs-var.is-selected,
+.docs-var.ProseMirror-selectednode {
+  background: #bfe6ee;
+}
+/* Unset token — ALWAYS a teal dashed technical-name chip, regardless of
+   the highlight toggle (27a row 4 / 27b), so it can't read as real text. */
+.docs-var[data-var-unset] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  color: #0e7490;
+  background: #f2fcfd;
+  border: 1px dashed #7ecfdd;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+/* Print / PDF is the highlight-off, print-faithful view: no tint/underline
+   on resolved tokens. Unset chips still show (they're never real text). */
+@media print {
+  .docs-var {
+    background: none !important;
+    border-bottom: none !important;
+  }
+  .docs-var[data-var-unset] {
+    background: none !important;
+    border: 1px dashed #7ecfdd !important;
+  }
+}
+
 
 /* ------------------------------------------------------------------ *
  * Tables (adapted from prosemirror-tables/style/tables.css, themed to
@@ -1067,34 +1128,13 @@ body.pgn-row-dragging {
  * Print: use a dedicated, ENGINE-MATCHED layout (`.pgn-print-root`, built on
  * beforeprint — see plugin.ts). Printed pages then match the editor's page
  * breaks and carry the running header/footer, instead of the browser
- * re-flowing the content on its own. The whole live editor is hidden; only the
- * print root reaches paper. The `@page { size … }` rule is injected per-print
- * so the sheet matches the chosen page format exactly.
+ * re-flowing the content on its own.
+ *
+ * The print-isolation rules (hide the host page's <body> children, show the
+ * print root, one sheet per page) + the `@page` size are injected at print time
+ * as a GLOBAL <style> — see `pageSizeStyleElement` in printLayout.ts. They must
+ * stay unscoped (they target the host <body>), so they cannot live in this
+ * stylesheet, which scopes every rule under `[data-docs-editor-root]`. The print
+ * root carries that attribute, so the typography/page/variable rules below still
+ * reach its cloned content.
  * ------------------------------------------------------------------ */
-.pgn-print-root {
-  display: none; /* off-screen; only rendered for print */
-}
-
-@media print {
-  /* Hide EVERYTHING in <body> except the print root (which is appended there).
-     Hiding only the editor left its still-100%-tall mount (#root) occupying a
-     blank leading sheet — this covers the mount, menus/portals, etc. generically. */
-  body > *:not(.pgn-print-root) {
-    display: none !important;
-  }
-  .pgn-print-root {
-    display: block !important;
-  }
-  /* One computed page == one physical sheet. NOTE: do NOT use
-     `break-inside: avoid` here — on a full-sheet-height element it makes the
-     browser think the page can't fit and pushes it to the next sheet, leaving
-     a blank leading page. `break-after` alone gives exactly one sheet per page. */
-  .pgn-print-root .print-page {
-    break-after: page;
-    page-break-after: always;
-  }
-  .pgn-print-root .print-page:last-child {
-    break-after: auto;
-    page-break-after: auto;
-  }
-}

@@ -6,5 +6,14 @@ export { useEditorState } from './editor/context';
 // lean: `const { downloadDocx } = await import('@acme/docs-editor/dist/…/export/docx')`
 // or, within the app, `await import('./editor/export/docx')`.
 
-export type { BrandLogo, DocsEditorProps, EditorMode, EditorTheme, JSONContent } from './types';
+export type {
+  BrandLogo,
+  DocsEditorHandle,
+  DocsEditorProps,
+  EditorMode,
+  EditorTheme,
+  JSONContent,
+  VariableDef,
+  VariableValues,
+} from './types';
 export type { EditorStateValue, OutlineItem } from './editor/context';

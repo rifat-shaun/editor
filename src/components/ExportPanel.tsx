@@ -5,16 +5,19 @@
  * fixed footer with the download button. Mounts fresh each time the panel opens.
  *
  * Formats → PDF (browser print dialog → Save as PDF), DOCX (docx-js), Markdown
- * (serializer), Plain text (getText). The unset-variables preview from the spec
- * is omitted (variables aren't implemented).
+ * (serializer), Plain text (baked), JSON (canonical, re-importable). Variables
+ * bake to their resolved value on export (except JSON, which keeps references);
+ * the unset-variables toggle governs whether unset ones are included.
  */
-import { useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { useEditorState } from '../editor/context';
+import { useVariables } from '../editor/variablesContext';
+import { resolveVariable, variableBakedText } from '../editor/extensions/variable';
 import { Icon } from './icons';
 import { serialize, downloadFile } from '../editor/serialize';
 import { TextField } from './TextField';
 
-type FormatId = 'pdf' | 'docx' | 'md' | 'txt';
+type FormatId = 'pdf' | 'docx' | 'md' | 'txt' | 'json';
 
 interface FormatDef {
   id: FormatId;
@@ -31,6 +34,7 @@ const FORMATS: FormatDef[] = [
   { id: 'docx', name: 'Microsoft Word', desc: 'Editable, preserves formatting', abbr: 'DOCX', ext: 'docx', badgeFg: '#2b5797', badgeBg: '#eef4fb' },
   { id: 'md', name: 'Markdown', desc: 'Plain text with formatting', abbr: 'MD', ext: 'md', badgeFg: '#5f6b74', badgeBg: '#eef1f3' },
   { id: 'txt', name: 'Plain text', desc: 'No formatting', abbr: 'TXT', ext: 'txt', badgeFg: '#5f6b74', badgeBg: '#eef1f3' },
+  { id: 'json', name: 'JSON', desc: 'Structured data, re-importable', abbr: 'JSON', ext: 'json', badgeFg: '#2f7d5b', badgeBg: '#edf6f0' },
 ];
 
 const LABEL: CSSProperties = {
@@ -53,10 +57,10 @@ function formatBytes(n: number): string {
 
 export function ExportPanelBody() {
   const { editor, title } = useEditorState();
+  const { values } = useVariables();
   const [format, setFormat] = useState<FormatId>('pdf');
   const [filename, setFilename] = useState(title || 'Untitled');
-  const [done, setDone] = useState(false);
-  const doneTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [includeUnset, setIncludeUnset] = useState(true);
 
   const def = FORMATS.find((f) => f.id === format)!;
 
@@ -75,36 +79,83 @@ export function ExportPanelBody() {
         return 12 * 1024 + bytes(text) * 2;
       case 'pdf':
         return 28 * 1024 + bytes(text) * 3;
+      case 'json':
+        return bytes(serialize(editor, 'json'));
     }
   }, [editor, format]);
 
   if (!editor) return null;
 
-  const flashDone = () => {
-    setDone(true);
-    if (doneTimer.current) clearTimeout(doneTimer.current);
-    doneTimer.current = setTimeout(() => setDone(false), 2200);
-  };
+  // Distinct unset variables actually present in the document.
+  const unsetNames: string[] = [];
+  {
+    const seen = new Set<string>();
+    editor.state.doc.descendants((n) => {
+      if (n.type.name !== 'variable') return;
+      const nm = n.attrs.name as string;
+      if (!seen.has(nm) && resolveVariable(values, nm).unset) {
+        seen.add(nm);
+        unsetNames.push(nm);
+      }
+    });
+  }
+
+  // Plain text with variables baked (respecting the include-unset toggle).
+  const bakedPlainText = () =>
+    editor.state.doc.textBetween(0, editor.state.doc.content.size, '\n\n', (leaf) =>
+      leaf.type.name === 'variable'
+        ? variableBakedText(values, leaf.attrs.name as string, { includeUnset })
+        : (leaf.type.spec.leafText?.(leaf) ?? ''),
+    );
 
   const download = () => {
     const name = stripIllegal(filename) || title || 'Untitled';
     switch (format) {
-      case 'pdf':
+      case 'pdf': {
+        // PDF = window.print(), which prints a clone of the LIVE document — so
+        // the toggle can't bake text. Honor "omit unset" by hiding the unset
+        // chips in the print clone via a temporary print-only rule (removed
+        // after printing). With the toggle on, they print as the {{name}} chip.
+        let hideStyle: HTMLStyleElement | null = null;
+        if (!includeUnset && unsetNames.length > 0) {
+          hideStyle = document.createElement('style');
+          hideStyle.textContent =
+            '@media print{.pgn-print-root .docs-var[data-var-unset]{display:none !important}}';
+          document.head.appendChild(hideStyle);
+          const cleanup = () => {
+            hideStyle?.remove();
+            hideStyle = null;
+            window.removeEventListener('afterprint', cleanup);
+          };
+          window.addEventListener('afterprint', cleanup);
+          setTimeout(cleanup, 2000); // fallback if afterprint never fires
+        }
         window.print(); // browser "Save as PDF"
         break;
+      }
       case 'docx':
         void import('../editor/export/docx')
-          .then(({ downloadDocx }) => downloadDocx(editor, name, { includeHeaderFooter: true }))
+          .then(({ downloadDocx }) =>
+            downloadDocx(editor, name, { includeHeaderFooter: true, includeUnsetVariables: includeUnset }),
+          )
           .catch((err) => console.error('DOCX export failed', err));
         break;
       case 'md':
-        downloadFile(`${name}.md`, 'text/markdown', serialize(editor, 'markdown', { htmlFallback: true }));
+        downloadFile(
+          `${name}.md`,
+          'text/markdown',
+          serialize(editor, 'markdown', { htmlFallback: true, includeUnsetVariables: includeUnset }),
+        );
         break;
       case 'txt':
-        downloadFile(`${name}.txt`, 'text/plain', editor.getText());
+        downloadFile(`${name}.txt`, 'text/plain', bakedPlainText());
+        break;
+      case 'json':
+        // Canonical, lossless, re-importable. Keeps variable references (the
+        // unset toggle intentionally doesn't apply here).
+        downloadFile(`${name}.json`, 'application/json', serialize(editor, 'json'));
         break;
     }
-    flashDone();
   };
 
   const moveFormat = (dir: 1 | -1) => {
@@ -186,6 +237,74 @@ export function ExportPanelBody() {
 
       {/* Footer */}
       <div style={{ padding: '12px 14px', borderTop: '1px solid var(--ui-divider)', background: 'var(--color-chrome)' }}>
+        {unsetNames.length > 0 && format !== 'json' && (
+          <div
+            style={{
+              marginBottom: 10,
+              padding: 10,
+              borderRadius: 8,
+              background: 'var(--ui-amber-bg)',
+              border: '1px solid color-mix(in srgb, var(--ui-amber) 35%, transparent)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 600, color: 'var(--ui-amber)' }}>
+              <span aria-hidden="true">⚠</span>
+              {unsetNames.length} variable{unsetNames.length === 1 ? '' : 's'} {unsetNames.length === 1 ? 'is' : 'are'} unset
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={includeUnset}
+              onClick={() => setIncludeUnset((v) => !v)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                cursor: 'pointer',
+                fontSize: 12,
+                color: 'var(--ui-text)',
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  position: 'relative',
+                  width: 34,
+                  height: 18,
+                  flexShrink: 0,
+                  borderRadius: 9,
+                  background: includeUnset ? 'var(--color-primary)' : 'var(--ui-border-strong)',
+                  transition: 'background .15s',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 2,
+                    left: includeUnset ? 18 : 2,
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50%',
+                    background: '#fff',
+                    transition: 'left .15s',
+                  }}
+                />
+              </span>
+              Include unset variables
+            </button>
+            <span style={{ fontSize: 10.5, color: 'var(--ui-amber)', opacity: 0.85 }}>
+              {includeUnset
+                ? 'Unset variables export as {{technical_name}}.'
+                : 'Unset variables are omitted from the export.'}
+            </span>
+          </div>
+        )}
         <button
           type="button"
           onClick={download}
@@ -194,11 +313,6 @@ export function ExportPanelBody() {
           <Icon.download size={15} />
           Download {def.abbr}
         </button>
-        {done && (
-          <div role="status" style={{ marginTop: 8, textAlign: 'center', fontSize: 11, color: 'var(--ui-teal-muted)' }}>
-            ✓ {format === 'pdf' ? 'Opened print dialog' : 'Downloaded'}
-          </div>
-        )}
       </div>
     </div>
   );

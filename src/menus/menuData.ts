@@ -81,6 +81,7 @@ const VIEW: MenuSpec = {
     { id: 'view.showOutline', label: 'Show outline', role: 'checkbox' },
     { id: 'view.showRuler', label: 'Show ruler', role: 'checkbox' },
     { id: 'view.showNonPrinting', label: 'Show non-printing characters', role: 'checkbox' },
+    { id: 'view.highlightVariables', label: 'Highlight variables', role: 'checkbox' },
     { id: 'view.darkMode', label: 'Dark mode', role: 'checkbox' },
     { divider: true },
     {

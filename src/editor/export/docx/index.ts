@@ -24,8 +24,13 @@ export { buildDocument } from './documentBuild';
 export function readEditorExportSettings(editor: Editor): {
   page?: PageSetup;
   bodyFontOverride?: string;
+  variableValues?: Record<string, string | null>;
 } {
-  const out: { page?: PageSetup; bodyFontOverride?: string } = {};
+  const out: { page?: PageSetup; bodyFontOverride?: string; variableValues?: Record<string, string | null> } = {};
+
+  // Variable values live on editor storage (mirrored from the consumer prop) so
+  // export can bake resolved values — they aren't in the document JSON.
+  out.variableValues = (editor.storage.variable as { values?: Record<string, string | null> } | undefined)?.values;
 
   // Page size + margins from the pagination engine's (mutable) options.
   const pag = editor.extensionManager.extensions.find((e) => e.name === 'pagination');

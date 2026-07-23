@@ -24,6 +24,11 @@ export interface DocsEditorProps {
    */
   onCloseClick?(): void;
   /**
+   * When true, render ONLY the document pages — the top bar, formatting
+   * toolbar, outline, ruler, tool rail, and status bar are all hidden.
+   */
+  showOnlyContent?: boolean;
+  /**
    * Optional brand logo shown at the top-left in place of the app-grid icon.
    * Provide image sources (URLs, data URIs, or bundler-imported asset paths);
    * the editor renders the variant matching the active theme and falls back to

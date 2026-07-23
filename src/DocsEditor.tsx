@@ -21,11 +21,13 @@ function DocsEditorShell({
   brandLogo,
   onFullScreenClick,
   onCloseClick,
+  showOnlyContent = false,
 }: {
   className?: string;
   brandLogo?: BrandLogo;
   onFullScreenClick?: () => void;
   onCloseClick?: () => void;
+  showOnlyContent?: boolean;
 }) {
   const { editor } = useEditorState();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -42,14 +44,18 @@ function DocsEditorShell({
         ref={rootRef}
         className={['flex h-full min-h-0 w-full flex-col bg-white text-ink', className ?? ''].join(' ')}
       >
-        <TopBar brandLogo={brandLogo} onFullScreenClick={onFullScreenClick} onCloseClick={onCloseClick} />
-      <FormattingToolbar />
+        {/* Content-only mode hides all chrome (top bar, toolbar, outline, ruler,
+            tool rail, status bar) — just the paginated pages remain. */}
+        {!showOnlyContent && (
+          <TopBar brandLogo={brandLogo} onFullScreenClick={onFullScreenClick} onCloseClick={onCloseClick} />
+        )}
+        {!showOnlyContent && <FormattingToolbar />}
 
       <div data-docs-body className="relative flex min-h-0 flex-1 overflow-hidden bg-desk">
-        <OutlinePanel />
+        {!showOnlyContent && <OutlinePanel />}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <Ruler scrollerRef={scrollerRef} />
+          {!showOnlyContent && <Ruler scrollerRef={scrollerRef} />}
           <div ref={scrollerRef} data-docs-scroll className="relative flex-1 overflow-auto docs-scroll">
             {/* w-max + mx-auto centers the page yet still lets the user scroll
                 to its left edge when the viewport is narrower than the content.
@@ -65,13 +71,15 @@ function DocsEditorShell({
           </div>
         </div>
 
-        <ToolRail />
+        {!showOnlyContent && <ToolRail />}
       </div>
 
-      <StatusBar />
-      <TableMenu />
+      {!showOnlyContent && <StatusBar />}
+      {/* Contextual overlays only appear on interaction; keep them so editing
+          still works, but drop them entirely in content-only mode. */}
+      {!showOnlyContent && <TableMenu />}
       <LinkLayer />
-      <VariablePicker />
+      {!showOnlyContent && <VariablePicker />}
       </div>
     </div>
   );
@@ -130,6 +138,7 @@ export const DocsEditor = forwardRef<DocsEditorHandle, DocsEditorProps>(function
           brandLogo={props.brandLogo}
           onFullScreenClick={props.onFullScreenClick}
           onCloseClick={props.onCloseClick}
+          showOnlyContent={props.showOnlyContent}
         />
         <VariablesBridge handleRef={ref} />
       </EditorProvider>

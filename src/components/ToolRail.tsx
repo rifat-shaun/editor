@@ -62,7 +62,9 @@ export function ToolRail() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'f') {
         e.preventDefault();
-        openFind();
+        // Go through the event so an already-open panel also re-prefills the
+        // current selection (FindPanel listens for `docs:open-find`).
+        document.dispatchEvent(new CustomEvent('docs:open-find'));
       }
     };
     document.addEventListener('keydown', onKey, true);

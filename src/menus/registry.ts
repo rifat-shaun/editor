@@ -189,7 +189,7 @@ export const COMMANDS: Record<string, Command> = {
     run: ({ editor }) => { chain(editor).toggleBulletList().run(); editor.commands.applyBulletPreset('classic'); },
     isChecked: ({ editor }) => editor.isActive('bulletList'),
   },
-  'format.columns': {}, 'format.pageColor': {}, // unbuilt
+  'format.columns': {}, // unbuilt
   'table.insert': { run: ({ editor }) => chain(editor).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
   'table.addRow': { run: ({ editor }) => chain(editor).addRowAfter().run(), isEnabled: ({ editor }) => editor.isActive('table') },
   'table.deleteRow': { run: ({ editor }) => chain(editor).deleteRow().run(), isEnabled: ({ editor }) => editor.isActive('table') },

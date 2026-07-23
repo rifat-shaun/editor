@@ -60,7 +60,7 @@ These have **no `run`** until the feature exists:
 - **View** — Show ruler, Show non-printing characters, Show suggested edits, Present.
 - **Insert** — Image (Upload / By URL), Variable, Comment, Headers & footers,
   Page numbers, Table of contents, Special characters.
-- **Format** — Subscript, Superscript, Increase/Decrease indent, Columns, Page color.
+- **Format** — Subscript, Superscript, Increase/Decrease indent, Columns.
 - **Tools** — Spelling & grammar, Variables (amber badge stays hidden at 0),
   Compare documents, Citations, Preferences.
 - **Help** — Help center, Keyboard shortcuts, What's new, Report a problem,

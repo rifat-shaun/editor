@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEditorState } from '../editor/context';
 import { getFindState } from '../editor/find/findPlugin';
 import type { FindMatch } from '../editor/find/findMatches';
@@ -42,21 +42,40 @@ export function FindPanel({ onClose }: { onClose: () => void }) {
     };
   }, [editor]);
 
-  // Focus + prefill from the current selection when the panel opens.
-  useEffect(() => {
+  // Fill the query from the current selection (single-line, non-empty).
+  const prefillFromSelection = useCallback(() => {
     if (!editor) return;
     const { from, to, empty } = editor.state.selection;
-    if (!empty) {
-      const sel = editor.state.doc.textBetween(from, to, ' ').trim();
-      if (sel && !sel.includes('\n')) setQuery(sel);
-    }
+    if (empty) return;
+    const sel = editor.state.doc.textBetween(from, to, ' ').trim();
+    if (sel && !sel.includes('\n')) setQuery(sel);
+  }, [editor]);
+
+  // On open: prefill from the selection + focus. On close (unmount): clear the
+  // highlights AND collapse the selection — so reopening starts empty (the query
+  // is truly cleared) rather than re-prefilling the same lingering selection.
+  useEffect(() => {
+    if (!editor) return;
+    prefillFromSelection();
     findRef.current?.focus();
     findRef.current?.select();
-    // Clear highlights when the panel closes.
     return () => {
       editor.commands.clearFind();
+      const { from, empty } = editor.state.selection;
+      if (!empty) editor.commands.setTextSelection(from);
     };
-  }, [editor]);
+  }, [editor, prefillFromSelection]);
+
+  // ⌘F while the panel is already open re-prefills from the new selection.
+  useEffect(() => {
+    const onOpen = () => {
+      prefillFromSelection();
+      findRef.current?.focus();
+      findRef.current?.select();
+    };
+    document.addEventListener('docs:open-find', onOpen);
+    return () => document.removeEventListener('docs:open-find', onOpen);
+  }, [prefillFromSelection]);
 
   // Debounced live search on query / option changes; resets to the first match.
   useEffect(() => {
@@ -97,6 +116,15 @@ export function FindPanel({ onClose }: { onClose: () => void }) {
   const jumpTo = (i: number) => {
     editor.commands.setFind({ index: i });
     scrollToMatch(fs.matches[i]!);
+  };
+
+  const clearQuery = () => {
+    setQuery('');
+    editor.commands.clearFind();
+    // Collapse any selection so reopening the panel doesn't re-prefill it.
+    const { from, empty } = editor.state.selection;
+    if (!empty) editor.commands.setTextSelection(from);
+    findRef.current?.focus();
   };
 
   const replaceCurrent = () => {
@@ -160,7 +188,7 @@ export function FindPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col" style={{ color: 'var(--ui-text)' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '12px 14px' }}>
-        {/* Find field + X of N */}
+        {/* Find field + X-of-N count + clear */}
         <div style={{ position: 'relative' }}>
           <TextField
             ref={findRef}
@@ -169,21 +197,44 @@ export function FindPanel({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onFindKeyDown}
+            style={{ paddingRight: 72 }}
           />
           {query && (
-            <span
+            <div
               style={{
                 position: 'absolute',
-                right: 10,
+                right: 6,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                fontSize: 11,
-                color: 'var(--ui-faint)',
-                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
               }}
             >
-              {total ? `${fs.index + 1} of ${total}` : 'No results'}
-            </span>
+              <span style={{ fontSize: 11, color: 'var(--ui-faint)' }}>
+                {total ? `${fs.index + 1} of ${total}` : 'No results'}
+              </span>
+              <button
+                type="button"
+                aria-label="Clear search"
+                title="Clear search"
+                onClick={clearQuery}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 20,
+                  width: 20,
+                  border: 'none',
+                  borderRadius: 4,
+                  background: 'transparent',
+                  color: 'var(--ui-faint)',
+                  cursor: 'pointer',
+                }}
+              >
+                <Icon.x size={13} />
+              </button>
+            </div>
           )}
         </div>
 

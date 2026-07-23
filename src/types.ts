@@ -13,6 +13,17 @@ export interface DocsEditorProps {
   onTitleChange?(title: string): void;
   className?: string;
   /**
+   * Top-bar full-screen (⛶) button handler. When provided, it OVERRIDES the
+   * built-in behavior (the package does nothing itself). When omitted, the
+   * built-in full-screen toggle (native fullscreen on the editor root) is used.
+   */
+  onFullScreenClick?(): void;
+  /**
+   * Top-bar close (✕) button handler. When provided, the button renders and
+   * calls this on click. When omitted, the close button is HIDDEN.
+   */
+  onCloseClick?(): void;
+  /**
    * Optional brand logo shown at the top-left in place of the app-grid icon.
    * Provide image sources (URLs, data URIs, or bundler-imported asset paths);
    * the editor renders the variant matching the active theme and falls back to
@@ -74,4 +85,6 @@ export interface BrandLogo {
   dark?: string;
   /** Accessible label / alt text. Defaults to "Home". */
   alt?: string;
+  /** Click handler for the brand logo button (e.g. navigate home). */
+  onBrandLogoClick?(): void;
 }

@@ -16,7 +16,17 @@ import { VariablePicker } from './components/VariablePicker';
 const EMPTY_CATALOG: VariableDef[] = [];
 const EMPTY_VALUES: VariableValues = {};
 
-function DocsEditorShell({ className, brandLogo }: { className?: string; brandLogo?: BrandLogo }) {
+function DocsEditorShell({
+  className,
+  brandLogo,
+  onFullScreenClick,
+  onCloseClick,
+}: {
+  className?: string;
+  brandLogo?: BrandLogo;
+  onFullScreenClick?: () => void;
+  onCloseClick?: () => void;
+}) {
   const { editor } = useEditorState();
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +42,7 @@ function DocsEditorShell({ className, brandLogo }: { className?: string; brandLo
         ref={rootRef}
         className={['flex h-full min-h-0 w-full flex-col bg-white text-ink', className ?? ''].join(' ')}
       >
-        <TopBar brandLogo={brandLogo} />
+        <TopBar brandLogo={brandLogo} onFullScreenClick={onFullScreenClick} onCloseClick={onCloseClick} />
       <FormattingToolbar />
 
       <div data-docs-body className="relative flex min-h-0 flex-1 overflow-hidden bg-desk">
@@ -115,7 +125,12 @@ export const DocsEditor = forwardRef<DocsEditorHandle, DocsEditorProps>(function
         onTitleChange={props.onTitleChange}
         theme={props.theme}
       >
-        <DocsEditorShell className={props.className} brandLogo={props.brandLogo} />
+        <DocsEditorShell
+          className={props.className}
+          brandLogo={props.brandLogo}
+          onFullScreenClick={props.onFullScreenClick}
+          onCloseClick={props.onCloseClick}
+        />
         <VariablesBridge handleRef={ref} />
       </EditorProvider>
     </VariablesProvider>

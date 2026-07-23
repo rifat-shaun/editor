@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { useEditorState } from '../editor/context';
 import type { BrandLogo, EditorMode } from '../types';
 import { Icon } from './icons';
@@ -11,12 +11,6 @@ const MODE_LABEL: Record<EditorMode, string> = {
   editing: '✎ Editing',
   viewing: '👁 Viewing',
 };
-
-const COLLABORATORS = [
-  { name: 'Dana Ruiz', color: 'var(--color-primary)' },
-  { name: 'Amir Shah', color: '#b5651d' },
-  { name: 'Lee Park', color: '#7a4fd6' },
-];
 
 function relativeTime(ts: number | null): string {
   if (!ts) return 'All changes saved';
@@ -63,7 +57,21 @@ function ModePill() {
   );
 }
 
-export function TopBar({ brandLogo }: { brandLogo?: BrandLogo }) {
+function toggleFullscreen(e: ReactMouseEvent<HTMLElement>) {
+  const root = e.currentTarget.closest('[data-docs-editor-root]') as HTMLElement | null;
+  if (document.fullscreenElement) void document.exitFullscreen();
+  else void root?.requestFullscreen?.();
+}
+
+export function TopBar({
+  brandLogo,
+  onFullScreenClick,
+  onCloseClick,
+}: {
+  brandLogo?: BrandLogo;
+  onFullScreenClick?: () => void;
+  onCloseClick?: () => void;
+}) {
   const { title, setTitle, savedAt, mode, theme } = useEditorState();
   const viewing = mode === 'viewing';
   const [editing, setEditing] = useState(false);
@@ -92,7 +100,11 @@ export function TopBar({ brandLogo }: { brandLogo?: BrandLogo }) {
 
   return (
     <header className="print-hide flex h-14 shrink-0 items-center gap-3 border-b border-(--ui-divider) bg-(--ui-surface) px-3">
-      <ToolButton label={brandLogo?.alt ?? 'Home'} className="text-primary">
+      <ToolButton
+        label={brandLogo?.alt ?? 'Home'}
+        className="text-primary"
+        onClick={brandLogo?.onBrandLogoClick}
+      >
         {brandLogo ? (
           <img
             // Theme-aware: fall back to the light source when no dark variant
@@ -147,23 +159,31 @@ export function TopBar({ brandLogo }: { brandLogo?: BrandLogo }) {
         <MenuBar menus={MENUS} onRename={() => setEditing(true)} />
       </div>
 
-      <div className="ml-auto flex items-center gap-2.5">
+      <div className="ml-auto flex items-center gap-1.5">
         <ModePill />
-        <div className="flex items-center pl-1">
-          {COLLABORATORS.map((c, i) => (
-            <span
-              key={c.name}
-              title={c.name}
-              style={{ background: c.color, marginLeft: i === 0 ? 0 : -8, zIndex: 10 - i }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold text-white ring-2 ring-white"
-            >
-              {c.name
-                .split(' ')
-                .map((p) => p[0])
-                .join('')}
-            </span>
-          ))}
-        </div>
+        <div className="mr-1 ml-2 h-4 w-[2px] bg-(--ui-divider)" />
+        <button
+          type="button"
+          // A consumer handler overrides the built-in native-fullscreen toggle.
+          onClick={(e) => (onFullScreenClick ? onFullScreenClick() : toggleFullscreen(e))}
+          aria-label="Toggle full screen"
+          title="Full screen"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-[var(--ui-hover)] hover:text-ui"
+        >
+          <Icon.fullscreen size={16} />
+        </button>
+        {/* Close is shown only when the consumer wires it. */}
+        {onCloseClick && (
+          <button
+            type="button"
+            onClick={() => onCloseClick()}
+            aria-label="Close"
+            title="Close"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-[var(--ui-hover)] hover:text-ui"
+          >
+            <Icon.x size={17} />
+          </button>
+        )}
       </div>
     </header>
   );

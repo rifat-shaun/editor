@@ -208,7 +208,6 @@ const FORMAT: MenuSpec = {
         { id: 'table.delete', label: 'Delete table', destructive: true },
       ],
     },
-    { id: 'format.pageColor', label: 'Page color' },
     { divider: true },
     { id: 'format.clearFormatting', label: 'Clear formatting', shortcut: 'Mod-\\' },
   ],
